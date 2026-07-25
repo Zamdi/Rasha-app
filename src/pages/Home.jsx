@@ -1,15 +1,9 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
 
 export default function Home() {
   const { t } = useApp()
-  const navigate = useNavigate()
-  const [heroService, setHeroService] = useState('full')
-
-  const [heroPhone, setHeroPhone] = useState('')
-  const handleHeroBook = () => navigate('/book', { state: { service: heroService, phone: heroPhone } })
 
   return (
     <div className="pt-14 pb-16 md:pb-0">

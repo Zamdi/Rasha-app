@@ -5,7 +5,7 @@ import { useApp, API } from '../context/AppContext'
 const QUICK_AMOUNTS = [5000, 10000, 20000]
 
 export default function Wallet() {
-  const { t, customer, token, lang } = useApp()
+  const { t, customer } = useApp()
   const [customAmount, setCustomAmount] = useState('')
   const [selected, setSelected] = useState(10000)
   const [topUpLoading, setTopUpLoading] = useState(false)
