@@ -13,14 +13,8 @@ export default function Wallet() {
   if (!customer) return null
 
   const balance = customer.wallet_balance || 0
-  const transactions = [
-    { date: '2024-10-24', time: '14:22', icon: 'add_circle', iconColor: '#22c55e', title: t('Wallet Top-up', 'شحن المحفظة'), sub: t('Via MBOK Bank', 'عبر بنك MBOK'), status: 'completed', amount: '+15,000', positive: true },
-    { date: '2024-10-21', time: '09:10', icon: 'local_car_wash', iconColor: '#0056b3', title: t('Full Wash Payment', 'دفع غسيل كامل'), sub: '', status: 'completed', amount: '-8,500', positive: false },
-    { date: '2024-10-19', time: '18:45', icon: 'auto_detailing', iconColor: '#f59e0b', title: t('Exterior Wash', 'غسيل خارجي'), sub: '', status: 'pending', amount: '-5,000', positive: false },
-  ]
+  const transactions = []
 
-  const spendingDays = ['MON','TUE','WED','THU','FRI','SAT','SUN']
-  const spendingData = [30, 60, 20, 45, 15, 80, 55]
 
   const navItems = [
     { id: 'profile', icon: 'person', label: t('Profile', 'الملف الشخصي'), href: '/settings' },
@@ -31,7 +25,7 @@ export default function Wallet() {
   const card = { background: 'var(--color-surface-container-low)', border: '1px solid var(--color-outline-variant)', boxShadow: '0 4px 24px rgba(0,86,179,0.06)', borderRadius: '1rem' }
 
   return (
-    <div className="pt-14 min-h-screen" style={{ background: 'var(--color-background)' }}>
+    <div className="pt-14 min-h-screen pb-24 md:pb-0" style={{ background: 'var(--color-background)' }}>
       <div className="flex max-w-7xl mx-auto">
 
         {/* Sidebar */}
@@ -135,50 +129,14 @@ export default function Wallet() {
 
               {/* Transaction History */}
               <div style={card} className="overflow-hidden">
-                <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
-                  <div>
-                    <h3 className="text-lg font-bold text-on-surface font-display">{t('Transaction History', 'سجل المعاملات')}</h3>
-                    <p className="text-xs text-on-surface-variant">{t('Track your recent top ups and wash payments', 'تتبع شحناتك الأخيرة ومدفوعات الغسيل')}</p>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
-                    <span className="material-symbols-outlined text-on-surface-variant text-base">search</span>
-                    <input className="text-sm bg-transparent outline-none text-on-surface placeholder:text-on-surface-variant" placeholder={t('Search transactions...', 'بحث في المعاملات...')} />
-                  </div>
+                <div className="px-6 py-5" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                  <h3 className="text-lg font-bold text-on-surface font-display">{t('Transaction History', 'سجل المعاملات')}</h3>
+                  <p className="text-xs text-on-surface-variant">{t('Track your recent top ups and wash payments', 'تتبع شحناتك الأخيرة ومدفوعات الغسيل')}</p>
                 </div>
-                <div className="px-6 py-2">
-                  <div className="grid grid-cols-4 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
-                    <span>{t('DATE', 'التاريخ')}</span>
-                    <span className="col-span-2">{t('DESCRIPTION', 'الوصف')}</span>
-                    <span className="text-end">{t('AMOUNT', 'المبلغ')}</span>
-                  </div>
-                  {transactions.map((tx, i) => (
-                    <div key={i} className="grid grid-cols-4 py-4 items-center" style={i < transactions.length - 1 ? { borderBottom: '1px solid var(--color-outline-variant)' } : {}}>
-                      <div dir="ltr" style={{ unicodeBidi: 'embed' }}>
-                        <p className="text-sm font-semibold text-on-surface">{tx.date}</p>
-                        <p className="text-xs text-on-surface-variant">{tx.time}</p>
-                      </div>
-                      <div className="col-span-2 flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: tx.positive ? 'rgba(34,197,94,0.1)' : 'rgba(0,86,179,0.08)' }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: tx.iconColor }}>{tx.icon}</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-on-surface">{tx.title}</p>
-                          <p className="text-xs text-on-surface-variant">{tx.sub}</p>
-                        </div>
-                      </div>
-                      <div className="text-end">
-                        <p className={`text-sm font-bold ${tx.positive ? 'text-green-500' : 'text-on-surface'}`}
-                          dir="ltr" style={{ unicodeBidi: 'embed' }}>{tx.amount} SDG</p>
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${tx.status === 'completed' ? 'text-green-600' : 'text-amber-500'}`}
-                          style={{ background: tx.status === 'completed' ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)' }}>
-                          • {tx.status === 'completed' ? t('Completed', 'مكتمل') : t('Pending', 'معلق')}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="px-6 py-4 text-center" style={{ borderTop: '1px solid var(--color-outline-variant)' }}>
-                  <button className="text-sm font-semibold text-secondary-fixed hover:underline">{t('View All Transactions', 'عرض جميع المعاملات')}</button>
+                <div className="px-6 py-12 flex flex-col items-center justify-center gap-3 text-center">
+                  <span className="material-symbols-outlined text-on-surface-variant text-5xl">receipt_long</span>
+                  <p className="font-semibold text-on-surface">{t('No transactions yet', 'لا توجد معاملات بعد')}</p>
+                  <p className="text-xs text-on-surface-variant max-w-xs">{t('Your top ups and wash payments will appear here once you start using your wallet.', 'ستظهر هنا شحناتك ومدفوعات الغسيل بمجرد بدء استخدام محفظتك.')}</p>
                 </div>
               </div>
             </div>
@@ -186,60 +144,32 @@ export default function Wallet() {
             {/* Right column */}
             <div className="space-y-5">
 
-              {/* Saved Payment Methods */}
-              <div style={card} className="overflow-hidden">
-                <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
-                  <p className="text-sm font-bold text-on-surface">{t('Saved Payment Methods', 'طرق الدفع المحفوظة')}</p>
-                  <button className="text-xs font-bold text-secondary-fixed flex items-center gap-1 hover:underline">
-                    <span className="material-symbols-outlined text-sm">add</span>
-                    {t('Add New', 'إضافة')}
-                  </button>
-                </div>
-                <div className="p-4 space-y-3">
-                  {[
-                    { icon: 'account_balance', name: t('Bank of Khartoum (MBOK)', 'بنك الخرطوم (MBOK)'), sub: '**** 9021 • Primary', primary: true },
-                    { icon: 'credit_card', name: 'Visa Card', sub: '**** 4432 • Expires 08/26', primary: false },
-                  ].map((pm, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
-                      <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(0,86,179,0.08)' }}>
-                        <span className="material-symbols-outlined text-secondary-fixed" style={{ fontSize: '18px' }}>{pm.icon}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-on-surface truncate">{pm.name}</p>
-                        <p className="text-xs text-on-surface-variant">{pm.sub}</p>
-                      </div>
-                      {pm.primary && <span className="material-symbols-outlined fill-icon text-secondary-fixed" style={{ fontSize: '18px' }}>check_circle</span>}
-                    </div>
-                  ))}
-                </div>
-                {/* Member Perk */}
-                <div className="mx-4 mb-4 p-3 rounded-xl flex items-start gap-3" style={{ background: 'rgba(var(--color-secondary-fixed-rgb),0.06)', border: '1px solid rgba(var(--color-secondary-fixed-rgb),0.15)' }}>
-                  <span className="material-symbols-outlined text-secondary-fixed text-xl shrink-0">star</span>
+              {/* Member Perk */}
+              <div style={card} className="p-5">
+                <div className="flex items-start gap-3">
+                  <span className="material-symbols-outlined text-secondary-fixed text-2xl shrink-0">star</span>
                   <div>
-                    <p className="text-xs font-bold text-secondary-fixed">{t('Member Perk!', 'مزايا العضو!')}</p>
-                    <p className="text-xs text-on-surface-variant mt-0.5">{t('Save 5% on every wash when you pay with your Rasha Wallet balance.', 'وفّر 5% على كل غسيل عند الدفع برصيد محفظة رشة.')}</p>
+                    <p className="text-sm font-bold text-secondary-fixed">{t('Member Perk!', 'مزايا العضو!')}</p>
+                    <p className="text-sm text-on-surface-variant mt-1">{t('Pay from your Rasha Wallet when booking to save 5% on every wash.', 'ادفع من محفظة رشة عند الحجز لتوفير 5% على كل غسيل.')}</p>
                   </div>
                 </div>
               </div>
 
-              {/* Spending Insights */}
-              <div style={card} className="p-5">
-                <p className="text-sm font-bold text-on-surface mb-4">{t('Spending Insights', 'تحليل الإنفاق')}</p>
-                <div className="flex items-end gap-1.5 h-20">
-                  {spendingData.map((val, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                      <div className="w-full rounded-t-sm transition-all"
-                        style={{ height: `${val}%`, background: i === 5 ? '#0056b3' : i === 6 ? 'rgba(var(--color-secondary-fixed-rgb),0.4)' : 'rgba(0,86,179,0.15)', minHeight: '4px' }} />
+              {/* How to top up */}
+              <div style={card} className="p-5 space-y-3">
+                <p className="text-sm font-bold text-on-surface">{t('How to Top Up', 'كيفية الشحن')}</p>
+                {[
+                  ['bolt', t('Choose an amount above', 'اختر مبلغاً أعلاه')],
+                  ['payments', t('Pay via your preferred method', 'ادفع بالطريقة المفضلة لديك')],
+                  ['account_balance_wallet', t('Balance added instantly', 'يُضاف الرصيد فوراً')],
+                ].map(([icon, label], i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{background:'rgba(var(--color-secondary-fixed-rgb),0.08)'}}>
+                      <span className="material-symbols-outlined text-secondary-fixed" style={{fontSize:'16px'}}>{icon}</span>
                     </div>
-                  ))}
-                </div>
-                <div className="flex gap-1.5 mt-2">
-                  {spendingDays.map(d => (
-                    <div key={d} className="flex-1 text-center">
-                      <p className="text-xs text-on-surface-variant" style={{ fontSize: '9px' }}>{d}</p>
-                    </div>
-                  ))}
-                </div>
+                    <p className="text-sm text-on-surface-variant">{label}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

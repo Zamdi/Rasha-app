@@ -75,7 +75,7 @@ export default function Settings() {
   const secRow = { borderBottom: '1px solid var(--color-outline-variant)' }
 
   return (
-    <div className="pt-14 min-h-screen" style={{ background: 'var(--color-background)' }}>
+    <div className="pt-14 min-h-screen pb-24 md:pb-0" style={{ background: 'var(--color-background)' }}>
       {/* Hidden file input */}
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
 
@@ -108,7 +108,22 @@ export default function Settings() {
 
         {/* Main */}
         <main className="flex-1 px-4 md:px-10 py-8 pb-28 md:pb-10">
-          {/* Breadcrumb */}
+          {/* Mobile top nav — sidebar is hidden on mobile */}
+        <div className="md:hidden flex gap-2 px-4 pt-4 pb-2">
+          {[
+            { to: '/loyalty', icon: 'loyalty', label: t('Membership', 'العضوية') },
+            { to: '/wallet', icon: 'account_balance_wallet', label: t('Wallet', 'المحفظة') },
+          ].map(item => (
+            <Link key={item.to} to={item.to}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-on-surface-variant transition-all"
+              style={{background:'var(--color-surface-container)', border:'1px solid var(--color-outline-variant)'}}>
+              <span className="material-symbols-outlined text-base">{item.icon}</span>
+              {item.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 text-xs text-on-surface-variant mb-2">
             <Link to="/loyalty" className="hover:text-secondary-fixed transition-colors">{t('Profile', 'الملف الشخصي')}</Link>
             <span className="material-symbols-outlined text-sm">chevron_right</span>

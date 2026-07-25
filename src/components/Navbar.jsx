@@ -50,6 +50,9 @@ export default function Navbar() {
           {customer && location.pathname !== '/loyalty' && (
             <Link to="/loyalty" className="text-on-surface-variant hover:text-secondary-fixed transition-colors">{t('My Card', 'بطاقتي')}</Link>
           )}
+          {customer && location.pathname !== '/wallet' && (
+            <Link to="/wallet" className="text-on-surface-variant hover:text-secondary-fixed transition-colors">{t('Wallet', 'المحفظة')}</Link>
+          )}
           {location.pathname !== '/contact' && (
             <Link to="/contact" className="text-on-surface-variant hover:text-secondary-fixed transition-colors">{t('Support', 'الدعم')}</Link>
           )}
