@@ -41,7 +41,7 @@ export default function Navbar() {
 
         {/* Desktop nav — hide link for current page */}
         <div className="hidden md:flex items-center gap-6 text-sm font-semibold">
-          {location.pathname !== '/' && (
+          {!customer && location.pathname !== '/' && (
             <Link to="/" className="text-on-surface-variant hover:text-secondary-fixed transition-colors">{t('Home', 'الرئيسية')}</Link>
           )}
           {location.pathname !== '/book' && (

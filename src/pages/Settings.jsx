@@ -15,6 +15,7 @@ export default function Settings() {
   const [avatar, setAvatar] = useState(customer?.avatar_url || null)
   const [avatarFile, setAvatarFile] = useState(null)
   const [profileSuccess, setProfileSuccess] = useState(false)
+  const [profileLoading, setProfileLoading] = useState(false)
   const [resetSent, setResetSent] = useState(false)
   const [showDeletePopup, setShowDeletePopup] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)

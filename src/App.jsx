@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
 import Navbar from './components/Navbar'
 import MobileNav from './components/MobileNav'
@@ -19,7 +19,7 @@ import Settings from './pages/Settings'
 import Wallet from './pages/Wallet'
 
 function AppShell() {
-  const { theme } = useApp()
+  const { theme, customer } = useApp()
   return (
     <div style={{
       minHeight: '100vh',
@@ -32,7 +32,7 @@ function AppShell() {
         <Navbar />
         <Toast />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={customer ? <Navigate to="/loyalty" replace /> : <Home />} />
           <Route path="/book" element={<Booking />} />
           <Route path="/confirmation" element={<Confirmation />} />
           <Route path="/register" element={<Register />} />
