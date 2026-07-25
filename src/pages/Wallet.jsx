@@ -15,8 +15,8 @@ export default function Wallet() {
   const balance = customer.wallet_balance || 0
   const transactions = [
     { date: '2024-10-24', time: '14:22', icon: 'add_circle', iconColor: '#22c55e', title: t('Wallet Top-up', 'شحن المحفظة'), sub: t('Via MBOK Bank', 'عبر بنك MBOK'), status: 'completed', amount: '+15,000', positive: true },
-    { date: '2024-10-21', time: '09:10', icon: 'local_car_wash', iconColor: '#0056b3', title: t('Full Wash Payment', 'دفع غسيل كامل'), sub: 'Order #RS-88219', status: 'completed', amount: '-8,500', positive: false },
-    { date: '2024-10-19', time: '18:45', icon: 'auto_detailing', iconColor: '#f59e0b', title: t('Exterior Wash', 'غسيل خارجي'), sub: 'Order #RS-87902', status: 'pending', amount: '-5,000', positive: false },
+    { date: '2024-10-21', time: '09:10', icon: 'local_car_wash', iconColor: '#0056b3', title: t('Full Wash Payment', 'دفع غسيل كامل'), sub: '', status: 'completed', amount: '-8,500', positive: false },
+    { date: '2024-10-19', time: '18:45', icon: 'auto_detailing', iconColor: '#f59e0b', title: t('Exterior Wash', 'غسيل خارجي'), sub: '', status: 'pending', amount: '-5,000', positive: false },
   ]
 
   const spendingDays = ['MON','TUE','WED','THU','FRI','SAT','SUN']
@@ -90,13 +90,10 @@ export default function Wallet() {
                   {balance.toLocaleString('en')}<span className="text-xl font-semibold text-white/70 ms-2">SDG</span>
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white" style={{ background: 'rgba(255,255,255,0.15)' }}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
-                    {t('Auto-refill Active', 'الشحن التلقائي نشط')}
-                  </span>
+
                   <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white" style={{ background: 'rgba(255,255,255,0.15)' }}>
                     <span className="material-symbols-outlined text-white/70" style={{ fontSize: '14px' }}>schedule</span>
-                    {t('Last refill: Oct 24', 'آخر شحن: 24 أكتوبر')}
+                    {t('Last top up: Oct 24', 'آخر شحن: 24 أكتوبر')}
                   </span>
                 </div>
               </div>
@@ -106,7 +103,7 @@ export default function Wallet() {
                 <div className="flex items-center justify-between mb-1">
                   <div>
                     <h3 className="text-lg font-bold text-on-surface font-display">{t('Add Funds', 'إضافة رصيد')}</h3>
-                    <p className="text-xs text-on-surface-variant">{t('Instantly refill your Rasha wallet', 'اشحن محفظة رشة فوراً')}</p>
+                    <p className="text-xs text-on-surface-variant">{t('Instantly top up your Rasha wallet', 'اشحن محفظة رشة فوراً')}</p>
                   </div>
                   <span className="material-symbols-outlined text-secondary-fixed text-2xl">credit_card</span>
                 </div>
@@ -141,7 +138,7 @@ export default function Wallet() {
                 <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
                   <div>
                     <h3 className="text-lg font-bold text-on-surface font-display">{t('Transaction History', 'سجل المعاملات')}</h3>
-                    <p className="text-xs text-on-surface-variant">{t('Track your recent refills and wash payments', 'تتبع شحناتك الأخيرة ومدفوعات الغسيل')}</p>
+                    <p className="text-xs text-on-surface-variant">{t('Track your recent top ups and wash payments', 'تتبع شحناتك الأخيرة ومدفوعات الغسيل')}</p>
                   </div>
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
                     <span className="material-symbols-outlined text-on-surface-variant text-base">search</span>

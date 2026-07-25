@@ -67,7 +67,6 @@ export default function Settings() {
 
   const navItems = [
     { id: 'profile', icon: 'person', label: t('Profile', 'الملف الشخصي'), href: '/settings' },
-    { id: 'membership', icon: 'loyalty', label: t('Membership', 'العضوية'), href: '/loyalty' },
     { id: 'wallet', icon: 'account_balance_wallet', label: t('Wallet', 'المحفظة'), href: '/wallet' },
   ]
 
@@ -85,10 +84,7 @@ export default function Settings() {
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-56 shrink-0 min-h-[calc(100vh-56px)] py-8 px-4"
           style={{ borderRight: '1px solid var(--color-outline-variant)' }}>
-          <div className="mb-8 px-4">
-            <p className="text-base font-bold text-secondary-fixed font-display">{t('Rasha Member Portal', 'بوابة رشة')}</p>
-            <p className="text-xs text-on-surface-variant mt-0.5">{t('Premium Hydro Care', 'رعاية هيدرو متميزة')}</p>
-          </div>
+
           <nav className="space-y-1 flex-1">
             {navItems.map(item => {
               const active = item.id === 'profile'
@@ -102,11 +98,7 @@ export default function Settings() {
               )
             })}
           </nav>
-          <Link to="/book"
-            className="flex items-center gap-2 mx-4 mb-4 py-3 px-4 rounded-xl text-sm font-bold text-white justify-center hydro-gradient hover:opacity-90 transition-opacity">
-            <span className="material-symbols-outlined text-base">local_car_wash</span>
-            {t('Book Wash', 'احجز غسيل')}
-          </Link>
+
           <Link to="/contact"
             className="flex items-center gap-2 px-4 py-3 text-on-surface-variant hover:text-secondary-fixed transition-colors text-sm font-semibold">
             <span className="material-symbols-outlined text-xl">help</span>
