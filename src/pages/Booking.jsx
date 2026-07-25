@@ -14,7 +14,7 @@ const today = () => {
 }
 
 export default function Booking() {
-  const { t, lang, customer, token, showToast } = useApp()
+  const { t, lang, customer, token, showToast, login } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -31,6 +31,10 @@ export default function Booking() {
   const [selectedSlot, setSelectedSlot] = useState('')
   const [slots, setSlots] = useState({ available: [], booked: [] })
   const [slotsLoading, setSlotsLoading] = useState(false)
+  const [payFromWallet, setPayFromWallet] = useState(false)
+  const walletBalance = customer?.wallet_balance || 0
+  const SERVICE_PRICES = { full: 8500, outside: 5000 }
+  const price = SERVICE_PRICES[form.service] || 0
   const [loading, setLoading] = useState(false)
 
   useEffect(() => { if (form.date) loadSlots(form.date) }, [form.date])
@@ -59,6 +63,10 @@ export default function Booking() {
   }
 
   const submitBooking = async () => {
+    if (payFromWallet && walletBalance < price) {
+      showToast(t(`Wallet balance insufficient. You have ${walletBalance.toLocaleString()} SDG, need ${price.toLocaleString()} SDG.`, `رصيد المحفظة غير كافٍ. لديك ${walletBalance.toLocaleString()} SDG، تحتاج ${price.toLocaleString()} SDG.`), 'error')
+      return
+    }
     setLoading(true)
     const headers = { 'Content-Type': 'application/json' }
     if (token) headers['Authorization'] = 'Bearer ' + token
@@ -73,12 +81,24 @@ export default function Booking() {
           service: form.service,
           date: form.date,
           time: selectedSlot,
+          payFromWallet: !!payFromWallet,
         }),
       })
       const data = await res.json()
-      if (!res.ok) { showToast(data.error || t('Booking failed', 'فشل الحجز'), 'error'); return }
+      if (!res.ok) {
+        if (data.code === 'INSUFFICIENT_WALLET') {
+          showToast(t('Wallet balance insufficient', 'رصيد المحفظة غير كافٍ'), 'error')
+        } else {
+          showToast(data.error || t('Booking failed', 'فشل الحجز'), 'error')
+        }
+        return
+      }
+      // Update wallet balance in context if paid from wallet
+      if (payFromWallet && data.walletBalance !== null && customer) {
+        login(token, { ...customer, wallet_balance: data.walletBalance })
+      }
       const ref = '#RSH-' + data.booking.booking_uid.replace('BK-', '')
-      navigate('/confirmation', { state: { ref, service: form.service, date: form.date, time: selectedSlot, name: `${form.firstName} ${form.lastName}` } })
+      navigate('/confirmation', { state: { ref, service: form.service, date: form.date, time: selectedSlot, name: `${form.firstName} ${form.lastName}`, paidFromWallet: payFromWallet, amount: price } })
     } catch { showToast(t('Connection error', 'خطأ في الاتصال'), 'error') }
     finally { setLoading(false) }
   }
@@ -225,9 +245,55 @@ export default function Booking() {
                 ))}
               </div>
             </div>
+
+            {/* Payment Method — only for logged-in customers */}
+            {customer && (
+              <div className="glass p-5 rounded-2xl space-y-3">
+                <h3 className="font-bold text-on-surface text-sm">{t('Payment Method', 'طريقة الدفع')}</h3>
+                <div className="space-y-2">
+                  {/* Pay at location */}
+                  <button onClick={() => setPayFromWallet(false)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${!payFromWallet ? 'text-secondary-fixed' : 'text-on-surface-variant'}`}
+                    style={!payFromWallet
+                      ? {background:'rgba(var(--color-secondary-fixed-rgb),0.08)', border:'1px solid rgba(var(--color-secondary-fixed-rgb),0.3)'}
+                      : {background:'var(--input-bg)', border:'1px solid var(--color-outline-variant)'}}>
+                    <span className="material-symbols-outlined text-xl">payments</span>
+                    <div className="text-start">
+                      <p>{t('Pay at Location', 'الدفع عند الموقع')}</p>
+                      <p className="text-xs opacity-60 font-normal">{t('Cash or card on arrival', 'نقداً أو بطاقة عند الوصول')}</p>
+                    </div>
+                    {!payFromWallet && <span className="material-symbols-outlined fill-icon ms-auto">check_circle</span>}
+                  </button>
+
+                  {/* Pay from wallet */}
+                  <button onClick={() => setPayFromWallet(true)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${payFromWallet ? 'text-secondary-fixed' : 'text-on-surface-variant'}`}
+                    style={payFromWallet
+                      ? {background:'rgba(var(--color-secondary-fixed-rgb),0.08)', border:'1px solid rgba(var(--color-secondary-fixed-rgb),0.3)'}
+                      : {background:'var(--input-bg)', border:'1px solid var(--color-outline-variant)'}}>
+                    <span className="material-symbols-outlined text-xl">account_balance_wallet</span>
+                    <div className="text-start flex-1">
+                      <p>{t('Pay from Wallet', 'الدفع من المحفظة')}</p>
+                      <p className={`text-xs font-normal mt-0.5 ${walletBalance < price ? 'text-error' : 'opacity-60'}`} dir="ltr" style={{unicodeBidi:'embed'}}>
+                        {t('Balance:', 'الرصيد:')} {walletBalance.toLocaleString()} SDG
+                        {walletBalance < price && <span className="ms-2 font-bold">{t('• Insufficient', '• غير كافٍ')}</span>}
+                      </p>
+                    </div>
+                    {payFromWallet && <span className="material-symbols-outlined fill-icon">check_circle</span>}
+                  </button>
+                </div>
+
+                {/* Price summary */}
+                <div className="flex justify-between items-center pt-2 text-sm" style={{borderTop:'1px solid var(--color-outline-variant)'}}>
+                  <span className="text-on-surface-variant">{t('Service Price', 'سعر الخدمة')}</span>
+                  <span className="font-bold text-on-surface" dir="ltr">{price.toLocaleString()} SDG</span>
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <button onClick={() => setStep(2)} className="btn-glass flex-1 py-4 rounded-xl">{t('Back', 'رجوع')}</button>
-              <button onClick={submitBooking} disabled={loading} className="btn-primary flex-1 py-4 rounded-xl">
+              <button onClick={submitBooking} disabled={loading || (payFromWallet && walletBalance < price)} className="btn-primary flex-1 py-4 rounded-xl disabled:opacity-50">
                 {loading ? <div className="loader" /> : t('Confirm Booking', 'تأكيد الحجز')}
               </button>
             </div>
