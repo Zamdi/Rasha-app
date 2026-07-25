@@ -13,6 +13,9 @@ import Loyalty from './pages/Loyalty'
 import Contact from './pages/Contact'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import Settings from './pages/Settings'
 
 function AppShell() {
   const { theme } = useApp()
@@ -37,6 +40,9 @@ function AppShell() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
         <MobileNav />
       </BrowserRouter>

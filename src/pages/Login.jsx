@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import OtpInput from '../components/OtpInput'
+
+const OTP_SECONDS = 60
 
 export default function Login() {
   const { t, login, showToast } = useApp()
@@ -14,6 +16,18 @@ export default function Login() {
   const [loginEmail, setLoginEmail] = useState('')
   const [maskedEmail, setMaskedEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [timer, setTimer] = useState(0)
+  const timerRef = useRef(null)
+
+  const startTimer = () => {
+    setTimer(OTP_SECONDS)
+    clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => {
+      setTimer(t => { if (t <= 1) { clearInterval(timerRef.current); return 0 } return t - 1 })
+    }, 1000)
+  }
+
+  useEffect(() => () => clearInterval(timerRef.current), [])
 
   const submit = async () => {
     if (!identifier||!password) { showToast(t('Please fill all fields','يرجى ملء جميع الحقول'),'error'); return }
@@ -25,6 +39,7 @@ export default function Login() {
       setLoginEmail(data.email)
       setMaskedEmail(data.maskedEmail)
       setStep('otp')
+      startTimer()
     } catch { showToast(t('Connection error','خطأ في الاتصال'),'error') }
     finally { setLoading(false) }
   }
@@ -36,7 +51,7 @@ export default function Login() {
     try {
       const res = await fetch(`${API}/api/auth/verify-login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:loginEmail, otp: code})})
       const data = await res.json()
-      if (!res.ok) { showToast(data.error || data.message || t('Invalid or expired code','رمز غير صحيح أو منتهي الصلاحية'),'error'); setLoading(false); return }
+      if (!res.ok) { showToast(data.error||t('Invalid or expired code','رمز غير صحيح أو منتهي الصلاحية'),'error'); setLoading(false); return }
       login(data.token, data.customer)
       showToast(t('Welcome back!','مرحباً بك!'))
       navigate('/loyalty')
@@ -47,6 +62,8 @@ export default function Login() {
   const resend = async () => {
     await fetch(`${API}/api/auth/resend-otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:loginEmail,purpose:'login'})})
     showToast(t('Code resent','تم إعادة إرسال الرمز'))
+    setOtp('')
+    startTimer()
   }
 
   return (
@@ -61,13 +78,16 @@ export default function Login() {
           <div className="glass p-6 rounded-2xl space-y-4 animate-fade-in">
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Email or Phone','البريد أو الهاتف')}</label>
-              <input className="rasha-input" placeholder="email@example.com" value={identifier} onChange={e=>setIdentifier(e.target.value)}/>
+              <input className="rasha-input" placeholder="email@example.com" value={identifier} onChange={e=>setIdentifier(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
             </div>
             <div>
-              <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Password','كلمة المرور')}</label>
+              <div className="flex justify-between mb-2">
+                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('Password','كلمة المرور')}</label>
+                <Link to="/forgot-password" className="text-xs text-secondary-fixed hover:underline">{t('Forgot password?','نسيت كلمة المرور؟')}</Link>
+              </div>
               <div className="relative">
                 <input type={showPw?'text':'password'} className="rasha-input pe-12" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
-                <button type="button" onClick={()=>setShowPw(p=>!p)} className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary-fixed transition-colors">
+                <button type="button" onClick={()=>setShowPw(p=>!p)} className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary-fixed">
                   <span className="material-symbols-outlined text-xl">{showPw?'visibility_off':'visibility'}</span>
                 </button>
               </div>
@@ -84,13 +104,25 @@ export default function Login() {
           <div className="glass p-6 rounded-2xl space-y-6 animate-fade-in">
             <div>
               <h3 className="font-bold text-on-surface mb-1">{t('Enter Verification Code','أدخل رمز التحقق')}</h3>
-              <p className="text-on-surface-variant text-sm">{t(`Code sent to ${maskedEmail}`,`تم الإرسال إلى ${maskedEmail}`)}</p>
+              <p className="text-on-surface-variant text-sm">{t('Code sent to','تم الإرسال إلى')} <span className="text-secondary-fixed font-semibold">{maskedEmail}</span></p>
             </div>
             <OtpInput value={otp} onChange={setOtp}/>
-            <button onClick={verify} disabled={loading} className="btn-primary w-full py-4 rounded-xl">
+            <div className="text-center">
+              {timer > 0 ? (
+                <p className="text-sm text-on-surface-variant">
+                  {t('Code expires in','ينتهي الرمز خلال')} <span className="font-bold text-secondary-fixed">{timer}s</span>
+                </p>
+              ) : (
+                <p className="text-sm text-error">{t('Code expired','انتهت صلاحية الرمز')}</p>
+              )}
+            </div>
+            <button onClick={verify} disabled={loading || timer === 0} className="btn-primary w-full py-4 rounded-xl disabled:opacity-50">
               {loading ? <div className="loader"/> : t('Verify & Sign In','تحقق وسجل الدخول')}
             </button>
-            <button onClick={resend} className="w-full text-secondary-fixed text-sm hover:underline">{t('Resend Code','إعادة إرسال الرمز')}</button>
+            <button onClick={resend} disabled={timer > 0}
+              className={`w-full text-sm py-2 rounded-xl transition-all ${timer > 0 ? 'text-on-surface-variant opacity-40 cursor-not-allowed' : 'text-secondary-fixed hover:underline'}`}>
+              {timer > 0 ? `${t('Resend in','إعادة الإرسال خلال')} ${timer}s` : t('Resend Code','إعادة إرسال الرمز')}
+            </button>
           </div>
         )}
       </div>
