@@ -11,7 +11,7 @@ const items = [
 ]
 
 // Pages where mobile nav should be completely hidden
-const HIDDEN_PAGES = ['/staff', '/confirmation']
+const HIDDEN_PAGES = ['/staff', '/confirmation', '/reset-password', '/forgot-password', '/settings']
 
 export default function MobileNav() {
   const { pathname } = useLocation()
