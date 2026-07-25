@@ -55,8 +55,9 @@ export default function MobileNav() {
       <div className="flex justify-around items-center px-2 py-2">
         {filtered.map(item => (
           <Link key={item.to} to={item.to}
-            className="flex flex-col items-center gap-0.5 p-3 transition-colors text-on-surface-variant hover:text-secondary-fixed">
-            <span className="material-symbols-outlined text-2xl">{item.icon}</span>
+            className="flex flex-col items-center gap-0.5 p-2 transition-colors text-on-surface-variant hover:text-secondary-fixed">
+            <span className="material-symbols-outlined text-xl">{item.icon}</span>
+            <span className="text-xs font-semibold">{item.en === 'Book' ? t('Book', 'احجز') : item.en === 'Card' ? t('Card', 'بطاقتي') : item.en === 'Wallet' ? t('Wallet', 'محفظتي') : item.en === 'Profile' ? t('Profile', 'حسابي') : item.en === 'Home' ? t('Home', 'الرئيسية') : item.en === 'Sign In' ? t('Sign In', 'دخول') : item.en}</span>
           </Link>
         ))}
       </div>
