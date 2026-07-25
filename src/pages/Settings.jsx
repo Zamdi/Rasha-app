@@ -14,7 +14,6 @@ export default function Settings() {
   })
   const [avatar, setAvatar] = useState(customer?.avatar_url || null)
   const [avatarFile, setAvatarFile] = useState(null)
-  const [profileLoading, setProfileLoading] = useState(false)
   const [profileSuccess, setProfileSuccess] = useState(false)
   const [resetSent, setResetSent] = useState(false)
   const [showDeletePopup, setShowDeletePopup] = useState(false)
@@ -30,8 +29,35 @@ export default function Settings() {
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setAvatarFile(file)
-    setAvatar(URL.createObjectURL(file))
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const size = Math.min(img.width, img.height, 400)
+        canvas.width = size; canvas.height = size
+        const ctx = canvas.getContext('2d')
+        const sx = (img.width - size) / 2
+        const sy = (img.height - size) / 2
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, size, size)
+        const base64 = canvas.toDataURL('image/jpeg', 0.8)
+        setAvatar(base64)
+        setAvatarFile(base64)
+      }
+      img.src = ev.target.result
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const removeAvatar = async () => {
+    setAvatar(null); setAvatarFile(null)
+    try {
+      await fetch(`${API}/api/auth/me`, {
+        method: 'PATCH', headers: hdrs,
+        body: JSON.stringify({ avatar: null })
+      })
+      login(token, { ...customer, avatar_url: null })
+    } catch {}
   }
 
   const saveProfile = async () => {
@@ -39,10 +65,16 @@ export default function Settings() {
     try {
       const res = await fetch(`${API}/api/auth/me`, {
         method: 'PATCH', headers: hdrs,
-        body: JSON.stringify({ firstName: form.firstName, lastName: form.lastName, phone: '+249' + form.phone })
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          phone: '+249' + form.phone,
+          ...(avatarFile !== null ? { avatar: avatarFile } : {})
+        })
       })
       if (!res.ok) return
-      login(token, { ...customer, first_name: form.firstName, last_name: form.lastName, phone: '+249' + form.phone })
+      login(token, { ...customer, first_name: form.firstName, last_name: form.lastName, phone: '+249' + form.phone, avatar_url: avatarFile !== null ? avatarFile : customer.avatar_url })
+      setAvatarFile(null)
       setProfileSuccess(true)
       setTimeout(() => setProfileSuccess(false), 3000)
     } catch {} finally { setProfileLoading(false) }
@@ -155,6 +187,17 @@ export default function Settings() {
                 </div>
                 {avatarFile && (
                   <p className="text-xs text-secondary-fixed">{t('Photo selected — save to apply', 'تم اختيار الصورة — احفظ للتطبيق')}</p>
+                )}
+                {avatar && !avatarFile && (
+                  <button onClick={removeAvatar} className="text-xs font-semibold hover:underline transition-colors" style={{color:'var(--color-error)'}}>
+                    {t('Remove photo', 'إزالة الصورة')}
+                  </button>
+                )}
+                {avatar && avatarFile && (
+                  <button onClick={() => { setAvatar(customer?.avatar_url || null); setAvatarFile(null) }}
+                    className="text-xs font-semibold hover:underline transition-colors" style={{color:'var(--color-error)'}}>
+                    {t('Cancel', 'إلغاء')}
+                  </button>
                 )}
                 <div>
                   <p className="text-lg font-bold text-on-surface font-display">{customer.first_name} {customer.last_name}</p>
