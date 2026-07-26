@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 
@@ -14,6 +14,13 @@ export default function Settings() {
   })
   const [avatar, setAvatar] = useState(customer?.avatar_url || null)
   const [avatarFile, setAvatarFile] = useState(null)
+  const [showCrop, setShowCrop] = useState(false)
+  const [cropSrc, setCropSrc] = useState(null)
+  const [cropScale, setCropScale] = useState(1)
+  const [cropOffset, setCropOffset] = useState({ x: 0, y: 0 })
+  const dragging = useRef(false)
+  const dragStart = useRef(null)
+  const cropImgRef = useRef(null)
   const [profileSuccess, setProfileSuccess] = useState(false)
   const [profileLoading, setProfileLoading] = useState(false)
   const [resetSent, setResetSent] = useState(false)
@@ -32,31 +39,40 @@ export default function Settings() {
     if (!file) return
     const reader = new FileReader()
     reader.onload = (ev) => {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const size = Math.min(img.width, img.height, 400)
-        canvas.width = size; canvas.height = size
-        const ctx = canvas.getContext('2d')
-        const sx = (img.width - size) / 2
-        const sy = (img.height - size) / 2
-        ctx.drawImage(img, sx, sy, size, size, 0, 0, size, size)
-        const base64 = canvas.toDataURL('image/jpeg', 0.8)
-        setAvatar(base64)
-        setAvatarFile(base64)
-      }
-      img.src = ev.target.result
+      setCropSrc(ev.target.result)
+      setCropScale(1)
+      setCropOffset({ x: 0, y: 0 })
+      setShowCrop(true)
     }
     reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
+  const applyCrop = () => {
+    const img = cropImgRef.current
+    if (!img) return
+    const CROP_SIZE = 300
+    const canvas = document.createElement('canvas')
+    canvas.width = CROP_SIZE; canvas.height = CROP_SIZE
+    const ctx = canvas.getContext('2d')
+    ctx.beginPath()
+    ctx.arc(CROP_SIZE/2, CROP_SIZE/2, CROP_SIZE/2, 0, Math.PI*2)
+    ctx.clip()
+    const scaledW = img.naturalWidth * cropScale
+    const scaledH = img.naturalHeight * cropScale
+    const dx = (CROP_SIZE - scaledW) / 2 + cropOffset.x
+    const dy = (CROP_SIZE - scaledH) / 2 + cropOffset.y
+    ctx.drawImage(img, dx, dy, scaledW, scaledH)
+    const base64 = canvas.toDataURL('image/jpeg', 0.85)
+    setAvatar(base64)
+    setAvatarFile(base64)
+    setShowCrop(false)
   }
 
   const removeAvatar = async () => {
     setAvatar(null); setAvatarFile(null)
     try {
-      await fetch(`${API}/api/auth/me`, {
-        method: 'PATCH', headers: hdrs,
-        body: JSON.stringify({ avatar: null })
-      })
+      await fetch(`${API}/api/auth/me`, { method: 'PATCH', headers: hdrs, body: JSON.stringify({ avatar: null }) })
       login(token, { ...customer, avatar_url: null })
     } catch {}
   }
@@ -186,18 +202,9 @@ export default function Settings() {
                     <span className="material-symbols-outlined text-white fill-icon" style={{ fontSize: '14px' }}>photo_camera</span>
                   </div>
                 </div>
-                {avatarFile && (
-                  <p className="text-xs text-secondary-fixed">{t('Photo selected — save to apply', 'تم اختيار الصورة — احفظ للتطبيق')}</p>
-                )}
-                {avatar && !avatarFile && (
+                {avatar && (
                   <button onClick={removeAvatar} className="text-xs font-semibold hover:underline transition-colors" style={{color:'var(--color-error)'}}>
                     {t('Remove photo', 'إزالة الصورة')}
-                  </button>
-                )}
-                {avatar && avatarFile && (
-                  <button onClick={() => { setAvatar(customer?.avatar_url || null); setAvatarFile(null) }}
-                    className="text-xs font-semibold hover:underline transition-colors" style={{color:'var(--color-error)'}}>
-                    {t('Cancel', 'إلغاء')}
                   </button>
                 )}
                 <div>
@@ -313,6 +320,66 @@ export default function Settings() {
           </div>
         </main>
       </div>
+
+      {/* Crop Avatar Popup */}
+      {showCrop && cropSrc && (
+        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.85)', backdropFilter:'blur(6px)'}}>
+          <div className="w-full max-w-sm rounded-2xl overflow-hidden animate-fade-in" style={{background:'var(--color-surface-container)', border:'1px solid var(--color-outline-variant)'}}>
+            <div className="px-5 py-4 flex items-center justify-between" style={{borderBottom:'1px solid var(--color-outline-variant)'}}>
+              <h3 className="font-bold text-on-surface">{t('Adjust Photo', 'ضبط الصورة')}</h3>
+              <button onClick={() => setShowCrop(false)}>
+                <span className="material-symbols-outlined text-on-surface-variant">close</span>
+              </button>
+            </div>
+            {/* Crop preview area */}
+            <div className="p-5 flex flex-col items-center gap-4">
+              <div className="relative overflow-hidden rounded-full"
+                style={{width:'220px', height:'220px', border:'3px solid var(--color-secondary-fixed)', cursor:'grab', touchAction:'none'}}
+                onMouseDown={e => { dragging.current = true; dragStart.current = { x: e.clientX - cropOffset.x, y: e.clientY - cropOffset.y } }}
+                onMouseMove={e => { if (!dragging.current) return; setCropOffset({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y }) }}
+                onMouseUp={() => { dragging.current = false }}
+                onMouseLeave={() => { dragging.current = false }}
+                onTouchStart={e => { dragging.current = true; const t2 = e.touches[0]; dragStart.current = { x: t2.clientX - cropOffset.x, y: t2.clientY - cropOffset.y } }}
+                onTouchMove={e => { if (!dragging.current) return; const t2 = e.touches[0]; setCropOffset({ x: t2.clientX - dragStart.current.x, y: t2.clientY - dragStart.current.y }) }}
+                onTouchEnd={() => { dragging.current = false }}>
+                <img ref={cropImgRef} src={cropSrc} alt="crop"
+                  style={{
+                    position:'absolute',
+                    left:'50%', top:'50%',
+                    transform:`translate(calc(-50% + ${cropOffset.x}px), calc(-50% + ${cropOffset.y}px)) scale(${cropScale})`,
+                    transformOrigin:'center',
+                    maxWidth:'none',
+                    userSelect:'none',
+                    pointerEvents:'none',
+                    width:'220px',
+                  }}
+                  draggable={false}
+                />
+              </div>
+              <p className="text-xs text-on-surface-variant text-center">{t('Drag to reposition', 'اسحب لإعادة التموضع')}</p>
+              {/* Zoom slider */}
+              <div className="w-full flex items-center gap-3">
+                <span className="material-symbols-outlined text-on-surface-variant text-base">zoom_out</span>
+                <input type="range" min="0.5" max="3" step="0.05" value={cropScale}
+                  onChange={e => setCropScale(parseFloat(e.target.value))}
+                  className="flex-1" style={{accentColor:'var(--color-primary-container)'}} />
+                <span className="material-symbols-outlined text-on-surface-variant text-base">zoom_in</span>
+              </div>
+            </div>
+            <div className="px-5 pb-5 flex gap-3">
+              <button onClick={() => setShowCrop(false)}
+                className="flex-1 py-3 rounded-xl text-sm font-bold text-on-surface-variant"
+                style={{background:'var(--input-bg)', border:'1px solid var(--input-border)'}}>
+                {t('Cancel', 'إلغاء')}
+              </button>
+              <button onClick={applyCrop}
+                className="flex-1 py-3 rounded-xl text-sm font-bold hydro-gradient text-white hover:opacity-90">
+                {t('Apply', 'تطبيق')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Account Popup */}
       {showDeletePopup && (

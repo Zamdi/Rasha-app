@@ -10,6 +10,9 @@ export default function MobileNav() {
   const [expanded, setExpanded] = useState(true)
   const lastY = useRef(0)
   const ticking = useRef(false)
+  const navRef = useRef(null)
+  const tabRefs = useRef([])
+  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 })
 
   useEffect(() => {
     const onScroll = () => {
@@ -17,13 +20,9 @@ export default function MobileNav() {
       ticking.current = true
       requestAnimationFrame(() => {
         const currentY = window.scrollY
-        if (currentY < 50) {
-          setExpanded(true)
-        } else if (currentY > lastY.current + 8) {
-          setExpanded(false) // scrolling down → shrink
-        } else if (currentY < lastY.current - 8) {
-          setExpanded(true)  // scrolling up → expand
-        }
+        if (currentY < 50) setExpanded(true)
+        else if (currentY > lastY.current + 8) setExpanded(false)
+        else if (currentY < lastY.current - 8) setExpanded(true)
         lastY.current = currentY
         ticking.current = false
       })
@@ -32,81 +31,119 @@ export default function MobileNav() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Always expand on page change
   useEffect(() => { setExpanded(true) }, [pathname])
 
-  if (HIDDEN_PAGES.some(p => pathname.startsWith(p))) return null
-
   const guestItems = [
-    { to: '/',      icon: 'home',           label: t('Home', 'الرئيسية') },
-    { to: '/book',  icon: 'local_car_wash', label: t('Book', 'احجز')     },
-    { to: '/login', icon: 'person',         label: t('Profile', 'حسابي') },
+    { to: '/',      icon: 'home',                   label: t('Home',    'الرئيسية') },
+    { to: '/book',  icon: 'local_car_wash',          label: t('Book',    'احجز')     },
+    { to: '/login', icon: 'person',                  label: t('Profile', 'حسابي')    },
   ]
-
   const loggedInItems = [
-    { to: '/book',    icon: 'local_car_wash',         label: t('Book', 'احجز')      },
+    { to: '/book',    icon: 'local_car_wash',         label: t('Book',    'احجز')    },
     { to: '/loyalty', icon: 'person',                 label: t('Profile', 'حسابي'), avatar: customer?.avatar_url },
-    { to: '/wallet',  icon: 'account_balance_wallet', label: t('Wallet', 'محفظتي')  },
+    { to: '/wallet',  icon: 'account_balance_wallet', label: t('Wallet',  'محفظتي') },
   ]
-
   const items = customer ? loggedInItems : guestItems
+  const activeIdx = items.findIndex(item => item.to === pathname)
 
-  const bg = 'rgba(20,22,24,0.75)'
-  const bgLight = 'rgba(244,241,236,0.80)'
+  // Measure tab position for sliding pill
+  useEffect(() => {
+    const updatePill = () => {
+      const nav = navRef.current
+      const tab = tabRefs.current[activeIdx]
+      if (!nav || !tab) return
+      const navRect = nav.getBoundingClientRect()
+      const tabRect = tab.getBoundingClientRect()
+      setPillStyle({
+        left: tabRect.left - navRect.left,
+        width: tabRect.width,
+        height: tabRect.height,
+      })
+    }
+    // Small delay to let layout settle
+    const t = setTimeout(updatePill, 30)
+    window.addEventListener('resize', updatePill)
+    return () => { clearTimeout(t); window.removeEventListener('resize', updatePill) }
+  }, [activeIdx, expanded, pathname])
+
+  if (HIDDEN_PAGES.some(p => pathname.startsWith(p))) return null
 
   return (
     <div className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none">
       <nav
-        className="pointer-events-auto flex items-center transition-all duration-300 ease-in-out"
+        ref={navRef}
+        className="pointer-events-auto relative flex items-center"
         style={{
-          background: 'var(--mobile-nav-bg, rgba(20,22,24,0.78))',
+          background: 'rgba(20,22,24,0.82)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: '9999px',
-          padding: expanded ? '8px 12px' : '6px 10px',
-          gap: expanded ? '4px' : '2px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-          transition: 'padding 0.3s ease, gap 0.3s ease',
+          padding: expanded ? '6px 8px' : '4px 6px',
+          gap: '2px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+          transition: 'padding 0.3s ease',
         }}
       >
-        {items.map(item => {
+        {/* Sliding pill */}
+        {activeIdx >= 0 && pillStyle.width > 0 && (
+          <div style={{
+            position: 'absolute',
+            top: '6px',
+            left: pillStyle.left,
+            width: pillStyle.width,
+            height: pillStyle.height || 56,
+            borderRadius: '9999px',
+            background: 'rgba(255,255,255,0.15)',
+            transition: 'left 0.35s cubic-bezier(0.34,1.2,0.64,1), width 0.35s cubic-bezier(0.34,1.2,0.64,1)',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }} />
+        )}
+
+        {items.map((item, idx) => {
           const isActive = pathname === item.to
           return (
-            <Link key={item.to} to={item.to}
-              className="flex flex-col items-center justify-center transition-all duration-300"
+            <Link
+              key={item.to}
+              to={item.to}
+              ref={el => tabRefs.current[idx] = el}
+              className="relative flex flex-col items-center justify-center z-10"
               style={{
-                padding: expanded ? '8px 18px' : '6px 14px',
+                padding: expanded ? '8px 20px' : '6px 16px',
                 borderRadius: '9999px',
-                background: isActive ? 'rgba(255,255,255,0.15)' : 'transparent',
-                minWidth: expanded ? '64px' : '48px',
+                minWidth: expanded ? '72px' : '56px',
+                transition: 'padding 0.3s ease, min-width 0.3s ease',
               }}>
-              {/* Avatar or icon */}
               {item.avatar ? (
-                <div className="rounded-full overflow-hidden shrink-0 transition-all duration-300"
+                <div className="rounded-full overflow-hidden shrink-0"
                   style={{
                     width: expanded ? '26px' : '22px',
                     height: expanded ? '26px' : '22px',
-                    border: isActive ? '2px solid rgba(var(--color-secondary-fixed-rgb),0.8)' : '2px solid transparent',
+                    border: isActive ? '2px solid rgba(116,245,255,0.8)' : '2px solid transparent',
+                    transition: 'all 0.3s ease',
                   }}>
                   <img src={item.avatar} alt="avatar" className="w-full h-full object-cover" />
                 </div>
               ) : (
-                <span className="material-symbols-outlined transition-all duration-300 text-white"
+                <span className="material-symbols-outlined text-white"
                   style={{
                     fontSize: expanded ? '24px' : '20px',
-                    opacity: isActive ? 1 : 0.75,
+                    opacity: isActive ? 1 : 0.65,
+                    transition: 'all 0.3s ease',
+                    fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0",
                   }}>
                   {item.icon}
                 </span>
               )}
-              {/* Label — only when expanded */}
-              <span className="transition-all duration-300 overflow-hidden text-white font-semibold"
+              <span className="text-white font-semibold overflow-hidden"
                 style={{
                   fontSize: '10px',
-                  maxHeight: expanded ? '16px' : '0px',
-                  opacity: expanded ? (isActive ? 1 : 0.7) : 0,
+                  maxHeight: expanded ? '14px' : '0px',
+                  opacity: expanded ? (isActive ? 1 : 0.65) : 0,
                   marginTop: expanded ? '2px' : '0px',
+                  transition: 'max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease',
+                  whiteSpace: 'nowrap',
                 }}>
                 {item.label}
               </span>
@@ -114,11 +151,6 @@ export default function MobileNav() {
           )
         })}
       </nav>
-      <style>{`
-        html.light .pointer-events-auto {
-          --mobile-nav-bg: rgba(30,30,30,0.82);
-        }
-      `}</style>
     </div>
   )
 }

@@ -3,8 +3,72 @@ import { useApp } from '../context/AppContext'
 import ThemeToggle from './ThemeToggle'
 import { useEffect, useState, useRef } from 'react'
 
+function DesktopNavPill({ pathname, customer, t }) {
+  const tabRefs = useRef([])
+  const containerRef = useRef(null)
+  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 })
+
+  const navItems = [
+    ...(!customer ? [{ to: '/', label: t('Home', 'الرئيسية') }] : []),
+    { to: '/book', label: t('Book a Wash', 'احجز غسيل') },
+    ...(customer ? [
+      { to: '/loyalty', label: t('My Card', 'بطاقتي') },
+      { to: '/wallet', label: t('Wallet', 'المحفظة') },
+    ] : []),
+    { to: '/contact', label: t('Support', 'الدعم') },
+  ]
+
+  const activeIdx = navItems.findIndex(item => item.to === pathname)
+
+  useEffect(() => {
+    const update = () => {
+      const container = containerRef.current
+      const tab = tabRefs.current[activeIdx]
+      if (!container || !tab) { setPillStyle(p => ({...p, opacity: 0})); return }
+      const cRect = container.getBoundingClientRect()
+      const tRect = tab.getBoundingClientRect()
+      setPillStyle({ left: tRect.left - cRect.left, width: tRect.width, height: tRect.height, opacity: 1 })
+    }
+    const timer = setTimeout(update, 20)
+    window.addEventListener('resize', update)
+    return () => { clearTimeout(timer); window.removeEventListener('resize', update) }
+  }, [activeIdx, pathname])
+
+  return (
+    <div ref={containerRef} className="relative flex items-center gap-0.5">
+      {/* Sliding pill */}
+      {activeIdx >= 0 && (
+        <div style={{
+          position: 'absolute',
+          left: pillStyle.left,
+          width: pillStyle.width,
+          height: pillStyle.height || 36,
+          borderRadius: '9999px',
+          background: 'rgba(var(--color-secondary-fixed-rgb), 0.12)',
+          border: '1px solid rgba(var(--color-secondary-fixed-rgb), 0.2)',
+          opacity: pillStyle.opacity,
+          transition: 'left 0.4s cubic-bezier(0.34,1.2,0.64,1), width 0.4s cubic-bezier(0.34,1.2,0.64,1), opacity 0.2s ease',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }} />
+      )}
+      {navItems.map((item, idx) => {
+        const isActive = pathname === item.to
+        return (
+          <Link key={item.to} to={item.to}
+            ref={el => tabRefs.current[idx] = el}
+            className="relative z-10 px-4 py-2 rounded-full text-sm font-semibold transition-colors duration-200"
+            style={{ color: isActive ? 'var(--color-secondary-fixed)' : 'var(--color-on-surface-variant)', whiteSpace: 'nowrap' }}>
+            {item.label}
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function Navbar() {
-  const { lang, toggleLang, t, customer, logout } = useApp()
+  const { lang, toggleLang, t, customer, logout, isDark } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
@@ -30,32 +94,33 @@ export default function Navbar() {
   const handleLogout = () => { logout(); navigate('/'); setMenuOpen(false) }
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-      scrolled ? 'backdrop-blur-xl shadow-md' : 'bg-transparent'
-    }`} style={scrolled ? {background:'var(--navbar-bg)'} : {}}>
+    <nav className="fixed top-0 w-full z-50 transition-all duration-300"
+      style={{
+        background: scrolled
+          ? isDark
+            ? 'var(--navbar-bg)'
+            : 'rgba(244,241,236,0.6)'
+          : 'transparent',
+        backdropFilter: scrolled ? 'blur(20px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
+        borderBottom: scrolled
+          ? isDark
+            ? '1px solid rgba(66,71,82,0.3)'
+            : '1px solid rgba(203,199,193,0.6)'
+          : 'none',
+        boxShadow: scrolled && !isDark ? '0 4px 24px rgba(0,86,179,0.06)' : 'none',
+      }}>
       <div className="max-w-7xl mx-auto flex justify-between items-center h-14 px-4 md:px-6">
         {/* Logo */}
         <Link to="/" className="font-display font-extrabold text-xl tracking-tight text-secondary-fixed">
           Rasha
         </Link>
 
-        {/* Desktop nav — hide link for current page */}
-        <div className="hidden md:flex items-center gap-6 text-sm font-semibold">
-          {!customer && location.pathname !== '/' && (
-            <Link to="/" className="text-on-surface-variant hover:text-secondary-fixed transition-colors">{t('Home', 'الرئيسية')}</Link>
-          )}
-          {location.pathname !== '/book' && (
-            <Link to="/book" className="text-on-surface-variant hover:text-secondary-fixed transition-colors">{t('Book a Wash', 'احجز غسيل')}</Link>
-          )}
-          {customer && location.pathname !== '/loyalty' && (
-            <Link to="/loyalty" className="text-on-surface-variant hover:text-secondary-fixed transition-colors">{t('My Card', 'بطاقتي')}</Link>
-          )}
-          {customer && location.pathname !== '/wallet' && (
-            <Link to="/wallet" className="text-on-surface-variant hover:text-secondary-fixed transition-colors">{t('Wallet', 'المحفظة')}</Link>
-          )}
-          {location.pathname !== '/contact' && (
-            <Link to="/contact" className="text-on-surface-variant hover:text-secondary-fixed transition-colors">{t('Support', 'الدعم')}</Link>
-          )}
+        {/* Desktop nav — sliding pill */}
+        <div className="hidden md:flex items-center relative p-1 rounded-full gap-0.5"
+          style={{background: scrolled ? 'rgba(128,128,128,0.08)' : 'transparent', transition: 'background 0.3s'}}>
+          {/* Sliding pill background */}
+          <DesktopNavPill pathname={location.pathname} customer={customer} t={t} />
         </div>
 
         {/* Right actions */}
@@ -75,7 +140,10 @@ export default function Navbar() {
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(var(--color-secondary-fixed-rgb), 0.08)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
-                <span className="material-symbols-outlined fill-icon text-sm">account_circle</span>
+                {customer.avatar_url
+                  ? <img src={customer.avatar_url} alt="avatar" className="w-6 h-6 rounded-full object-cover" />
+                  : <span className="material-symbols-outlined fill-icon text-sm">account_circle</span>
+                }
                 <span>{customer.first_name}</span>
                 <span className="material-symbols-outlined" style={{fontSize:'14px', transition:'transform 0.2s', transform: menuOpen ? 'rotate(180deg)' : 'rotate(0deg)'}}>expand_more</span>
               </button>
