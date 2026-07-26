@@ -236,3 +236,8 @@ canvas { color: #000000 !important; }
   .rasha-input, .rasha-select { padding: 0.625rem 0.875rem; font-size: 0.8125rem; }
   .otp-input { width: 2.5rem; height: 3rem; font-size: 1.1rem; }
 }
+
+/* Floating pill nav — extra bottom space on mobile */
+@media (max-width: 768px) {
+  body { padding-bottom: env(safe-area-inset-bottom, 0px); }
+}
