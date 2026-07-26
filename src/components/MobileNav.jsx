@@ -6,24 +6,25 @@ const HIDDEN_PAGES = ['/staff', '/confirmation', '/reset-password', '/forgot-pas
 
 export default function MobileNav() {
   const { pathname } = useLocation()
-  const { t, customer, isDark } = useApp()
+  const { t, customer, theme } = useApp()
+  const isDark = theme === 'dark'
   const [expanded, setExpanded] = useState(true)
   const lastY = useRef(0)
   const ticking = useRef(false)
   const navRef = useRef(null)
   const tabRefs = useRef([])
-  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 })
+  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, height: 0 })
 
   useEffect(() => {
     const onScroll = () => {
       if (ticking.current) return
       ticking.current = true
       requestAnimationFrame(() => {
-        const currentY = window.scrollY
-        if (currentY < 50) setExpanded(true)
-        else if (currentY > lastY.current + 8) setExpanded(false)
-        else if (currentY < lastY.current - 8) setExpanded(true)
-        lastY.current = currentY
+        const y = window.scrollY
+        if (y < 50) setExpanded(true)
+        else if (y > lastY.current + 8) setExpanded(false)
+        else if (y < lastY.current - 8) setExpanded(true)
+        lastY.current = y
         ticking.current = false
       })
     }
@@ -33,58 +34,62 @@ export default function MobileNav() {
 
   useEffect(() => { setExpanded(true) }, [pathname])
 
+  if (HIDDEN_PAGES.some(p => pathname.startsWith(p))) return null
+
+  const avatarUrl = customer?.avatar_url || null
+
   const guestItems = [
-    { to: '/',      icon: 'home',                   label: t('Home',    'الرئيسية') },
-    { to: '/book',  icon: 'local_car_wash',          label: t('Book',    'احجز')     },
-    { to: '/login', icon: 'person',                  label: t('Profile', 'حسابي')    },
+    { to: '/',      icon: 'home',                   label: t('Home', 'الرئيسية') },
+    { to: '/book',  icon: 'local_car_wash',          label: t('Book', 'احجز') },
+    { to: '/login', icon: 'person',                  label: t('Profile', 'حسابي') },
   ]
   const loggedInItems = [
-    { to: '/book',    icon: 'local_car_wash',         label: t('Book',    'احجز')    },
-    { to: '/loyalty', icon: 'person',                 label: t('Profile', 'حسابي'), avatar: customer?.avatar_url },
-    { to: '/wallet',  icon: 'account_balance_wallet', label: t('Wallet',  'محفظتي') },
+    { to: '/book',    icon: 'local_car_wash',         label: t('Book', 'احجز') },
+    { to: '/loyalty', icon: 'person',                 label: t('Profile', 'حسابي'), avatar: avatarUrl },
+    { to: '/wallet',  icon: 'account_balance_wallet', label: t('Wallet', 'محفظتي') },
   ]
   const items = customer ? loggedInItems : guestItems
-  const activeIdx = items.findIndex(item => item.to === pathname)
+  const activeIdx = items.findIndex(i => i.to === pathname)
 
-  // Measure tab position for sliding pill
+  // Measure pill
   useEffect(() => {
-    const updatePill = () => {
+    const measure = () => {
       const nav = navRef.current
       const tab = tabRefs.current[activeIdx]
       if (!nav || !tab) return
-      const navRect = nav.getBoundingClientRect()
-      const tabRect = tab.getBoundingClientRect()
-      setPillStyle({
-        left: tabRect.left - navRect.left,
-        width: tabRect.width,
-        height: tabRect.height,
-      })
+      const nr = nav.getBoundingClientRect()
+      const tr = tab.getBoundingClientRect()
+      setPillStyle({ left: tr.left - nr.left, width: tr.width, height: tr.height })
     }
-    // Small delay to let layout settle
-    const t = setTimeout(updatePill, 30)
-    window.addEventListener('resize', updatePill)
-    return () => { clearTimeout(t); window.removeEventListener('resize', updatePill) }
-  }, [activeIdx, expanded, pathname])
+    const timer = setTimeout(measure, 40)
+    window.addEventListener('resize', measure)
+    return () => { clearTimeout(timer); window.removeEventListener('resize', measure) }
+  }, [activeIdx, expanded])
 
-  if (HIDDEN_PAGES.some(p => pathname.startsWith(p))) return null
+  // Theme-aware colors — derived from theme string not isDark bool
+  // so it always re-renders when theme changes
+  const navBg    = isDark ? 'rgba(20,22,24,0.88)'       : 'rgba(255,255,255,0.72)'
+  const navBorder= isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,86,179,0.18)'
+  const navShadow= isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 8px 32px rgba(0,86,179,0.14)'
+  const pillBg   = isDark ? 'rgba(255,255,255,0.16)'    : 'rgba(0,86,179,0.12)'
+  const iconColor= (active) => isDark ? 'white' : (active ? '#0056b3' : '#555')
+  const labelColor=(active) => isDark ? 'white' : (active ? '#0056b3' : '#555')
 
   return (
     <div className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none">
-      <nav
-        ref={navRef}
-        className="pointer-events-auto relative flex items-center"
+      <nav ref={navRef} className="pointer-events-auto relative flex items-center"
         style={{
-          background: isDark ? 'rgba(20,22,24,0.82)' : 'rgba(255,255,255,0.65)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,86,179,0.15)',
+          background: navBg,
+          backdropFilter: 'blur(28px)',
+          WebkitBackdropFilter: 'blur(28px)',
+          border: navBorder,
           borderRadius: '9999px',
           padding: expanded ? '6px 8px' : '4px 6px',
           gap: '2px',
-          boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.35)' : '0 8px 32px rgba(0,86,179,0.12)',
-          transition: 'padding 0.3s ease, background 0.3s ease',
-        }}
-      >
+          boxShadow: navShadow,
+          transition: 'padding 0.3s ease',
+        }}>
+
         {/* Sliding pill */}
         {activeIdx >= 0 && pillStyle.width > 0 && (
           <div style={{
@@ -92,10 +97,10 @@ export default function MobileNav() {
             top: '6px',
             left: pillStyle.left,
             width: pillStyle.width,
-            height: pillStyle.height || 56,
+            height: pillStyle.height,
             borderRadius: '9999px',
-            background: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,86,179,0.1)',
-            transition: 'left 0.35s cubic-bezier(0.34,1.2,0.64,1), width 0.35s cubic-bezier(0.34,1.2,0.64,1)',
+            background: pillBg,
+            transition: 'left 0.38s cubic-bezier(0.34,1.2,0.64,1), width 0.38s cubic-bezier(0.34,1.2,0.64,1)',
             pointerEvents: 'none',
             zIndex: 0,
           }} />
@@ -104,9 +109,7 @@ export default function MobileNav() {
         {items.map((item, idx) => {
           const isActive = pathname === item.to
           return (
-            <Link
-              key={item.to}
-              to={item.to}
+            <Link key={item.to} to={item.to}
               ref={el => tabRefs.current[idx] = el}
               className="relative flex flex-col items-center justify-center z-10"
               style={{
@@ -116,39 +119,37 @@ export default function MobileNav() {
                 transition: 'padding 0.3s ease, min-width 0.3s ease',
               }}>
               {item.avatar ? (
-                <div className="rounded-full overflow-hidden shrink-0"
-                  style={{
-                    width: expanded ? '26px' : '22px',
-                    height: expanded ? '26px' : '22px',
-                    border: isActive ? '2px solid rgba(116,245,255,0.8)' : '2px solid transparent',
-                    transition: 'all 0.3s ease',
-                  }}>
-                  <img src={item.avatar} alt="avatar" className="w-full h-full object-cover" />
+                <div style={{
+                  width: expanded ? '26px' : '22px',
+                  height: expanded ? '26px' : '22px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  border: isActive ? '2px solid #0056b3' : '2px solid transparent',
+                  transition: 'all 0.3s ease',
+                  flexShrink: 0,
+                }}>
+                  <img src={item.avatar} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}} />
                 </div>
               ) : (
-                <span className="material-symbols-outlined"
-                  style={{
-                    fontSize: expanded ? '24px' : '20px',
-                    opacity: isActive ? 1 : 0.65,
-                    transition: 'all 0.3s ease',
-                    fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0",
-                    color: isDark ? 'white' : (isActive ? 'var(--color-primary-container)' : '#333'),
-                  }}>
-                  {item.icon}
-                </span>
+                <span className="material-symbols-outlined" style={{
+                  fontSize: expanded ? '24px' : '20px',
+                  color: iconColor(isActive),
+                  opacity: isActive ? 1 : 0.6,
+                  fontVariationSettings: isActive ? "'FILL' 1, 'wght' 400" : "'FILL' 0, 'wght' 400",
+                  transition: 'all 0.3s ease',
+                }}>{item.icon}</span>
               )}
               <span style={{
                 fontSize: '10px',
-                maxHeight: expanded ? '14px' : '0px',
-                opacity: expanded ? (isActive ? 1 : 0.65) : 0,
-                marginTop: expanded ? '2px' : '0px',
-                transition: 'max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease',
-                whiteSpace: 'nowrap',
-                color: isDark ? 'white' : (isActive ? 'var(--color-primary-container)' : '#333'),
                 fontWeight: 600,
-              }}>
-                {item.label}
-              </span>
+                color: labelColor(isActive),
+                opacity: expanded ? (isActive ? 1 : 0.6) : 0,
+                maxHeight: expanded ? '14px' : '0',
+                marginTop: expanded ? '2px' : '0',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                transition: 'opacity 0.3s, max-height 0.3s, margin-top 0.3s',
+              }}>{item.label}</span>
             </Link>
           )
         })}

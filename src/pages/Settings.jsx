@@ -51,32 +51,29 @@ export default function Settings() {
   const applyCrop = () => {
     const img = cropImgRef.current
     if (!img) return
-    const DISPLAY_SIZE = 220 // CSS px size of the crop circle
-    const OUTPUT_SIZE = 400  // output resolution
+    const C = 220   // container/display size in px
+    const OUT = 400 // output canvas size
     const canvas = document.createElement('canvas')
-    canvas.width = OUTPUT_SIZE; canvas.height = OUTPUT_SIZE
+    canvas.width = OUT; canvas.height = OUT
     const ctx = canvas.getContext('2d')
     // Clip to circle
     ctx.beginPath()
-    ctx.arc(OUTPUT_SIZE/2, OUTPUT_SIZE/2, OUTPUT_SIZE/2, 0, Math.PI*2)
+    ctx.arc(OUT/2, OUT/2, OUT/2, 0, Math.PI*2)
     ctx.clip()
-    // Scale from display space to natural image space
-    const displayScale = (img.naturalWidth / DISPLAY_SIZE) // natural px per display px
-    // How the image is rendered at current cropScale in display space
-    const renderedDisplayW = DISPLAY_SIZE * cropScale  // displayed width in px
-    const renderedDisplayH = (img.naturalHeight / img.naturalWidth) * DISPLAY_SIZE * cropScale
-    // Center offset in display px, adjusted by drag
-    const dispDx = (DISPLAY_SIZE - renderedDisplayW) / 2 + cropOffset.x
-    const dispDy = (DISPLAY_SIZE - renderedDisplayH) / 2 + cropOffset.y
-    // Convert to output canvas coordinates
-    const ratio = OUTPUT_SIZE / DISPLAY_SIZE
-    ctx.drawImage(img,
-      dispDx * ratio,
-      dispDy * ratio,
-      renderedDisplayW * ratio,
-      renderedDisplayH * ratio
-    )
-    const base64 = canvas.toDataURL('image/jpeg', 0.88)
+    // The image CSS: centered at (C/2 + offsetX, C/2 + offsetY), scaled by cropScale
+    // Image display size before scale: 220 × (naturalH/naturalW * 220)
+    const imgDisplayW = C
+    const imgDisplayH = (img.naturalHeight / img.naturalWidth) * C
+    // After CSS scale:
+    const scaledW = imgDisplayW * cropScale
+    const scaledH = imgDisplayH * cropScale
+    // Top-left corner of scaled image in container coords:
+    const imgLeft = (C / 2 + cropOffset.x) - scaledW / 2
+    const imgTop  = (C / 2 + cropOffset.y) - scaledH / 2
+    // Map to output canvas (OUT/C ratio)
+    const r = OUT / C
+    ctx.drawImage(img, imgLeft * r, imgTop * r, scaledW * r, scaledH * r)
+    const base64 = canvas.toDataURL('image/jpeg', 0.9)
     setAvatar(base64)
     setAvatarFile(base64)
     setShowCrop(false)
@@ -102,20 +99,20 @@ export default function Settings() {
           ...(avatarFile !== null ? { avatar: avatarFile } : {})
         })
       })
-      if (!res.ok) return
-      // Use local avatarFile for immediate update since server may not return it in response
+      const data = await res.json()
+      if (!res.ok) { console.error('[SAVE-PROFILE]', data.error); return }
+      // Use server response + merge avatar since server strips it from response
       const updatedCustomer = {
-        ...customer,
-        first_name: form.firstName,
-        last_name: form.lastName,
-        phone: '+249' + form.phone,
-        avatar_url: avatarFile !== null ? avatarFile : customer.avatar_url
+        ...data.customer,
+        avatar_url: avatarFile !== null ? avatarFile : customer.avatar_url,
+        stamps: customer.stamps,
+        totalWashes: customer.totalWashes,
       }
       login(token, updatedCustomer)
       setAvatarFile(null)
       setProfileSuccess(true)
       setTimeout(() => setProfileSuccess(false), 3000)
-    } catch {} finally { setProfileLoading(false) }
+    } catch (e) { console.error('[SAVE-PROFILE]', e) } finally { setProfileLoading(false) }
   }
 
   const sendResetLink = async () => {
