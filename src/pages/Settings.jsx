@@ -51,19 +51,32 @@ export default function Settings() {
   const applyCrop = () => {
     const img = cropImgRef.current
     if (!img) return
-    const CROP_SIZE = 300
+    const DISPLAY_SIZE = 220 // CSS px size of the crop circle
+    const OUTPUT_SIZE = 400  // output resolution
     const canvas = document.createElement('canvas')
-    canvas.width = CROP_SIZE; canvas.height = CROP_SIZE
+    canvas.width = OUTPUT_SIZE; canvas.height = OUTPUT_SIZE
     const ctx = canvas.getContext('2d')
+    // Clip to circle
     ctx.beginPath()
-    ctx.arc(CROP_SIZE/2, CROP_SIZE/2, CROP_SIZE/2, 0, Math.PI*2)
+    ctx.arc(OUTPUT_SIZE/2, OUTPUT_SIZE/2, OUTPUT_SIZE/2, 0, Math.PI*2)
     ctx.clip()
-    const scaledW = img.naturalWidth * cropScale
-    const scaledH = img.naturalHeight * cropScale
-    const dx = (CROP_SIZE - scaledW) / 2 + cropOffset.x
-    const dy = (CROP_SIZE - scaledH) / 2 + cropOffset.y
-    ctx.drawImage(img, dx, dy, scaledW, scaledH)
-    const base64 = canvas.toDataURL('image/jpeg', 0.85)
+    // Scale from display space to natural image space
+    const displayScale = (img.naturalWidth / DISPLAY_SIZE) // natural px per display px
+    // How the image is rendered at current cropScale in display space
+    const renderedDisplayW = DISPLAY_SIZE * cropScale  // displayed width in px
+    const renderedDisplayH = (img.naturalHeight / img.naturalWidth) * DISPLAY_SIZE * cropScale
+    // Center offset in display px, adjusted by drag
+    const dispDx = (DISPLAY_SIZE - renderedDisplayW) / 2 + cropOffset.x
+    const dispDy = (DISPLAY_SIZE - renderedDisplayH) / 2 + cropOffset.y
+    // Convert to output canvas coordinates
+    const ratio = OUTPUT_SIZE / DISPLAY_SIZE
+    ctx.drawImage(img,
+      dispDx * ratio,
+      dispDy * ratio,
+      renderedDisplayW * ratio,
+      renderedDisplayH * ratio
+    )
+    const base64 = canvas.toDataURL('image/jpeg', 0.88)
     setAvatar(base64)
     setAvatarFile(base64)
     setShowCrop(false)
@@ -90,7 +103,15 @@ export default function Settings() {
         })
       })
       if (!res.ok) return
-      login(token, { ...customer, first_name: form.firstName, last_name: form.lastName, phone: '+249' + form.phone, avatar_url: avatarFile !== null ? avatarFile : customer.avatar_url })
+      // Use local avatarFile for immediate update since server may not return it in response
+      const updatedCustomer = {
+        ...customer,
+        first_name: form.firstName,
+        last_name: form.lastName,
+        phone: '+249' + form.phone,
+        avatar_url: avatarFile !== null ? avatarFile : customer.avatar_url
+      }
+      login(token, updatedCustomer)
       setAvatarFile(null)
       setProfileSuccess(true)
       setTimeout(() => setProfileSuccess(false), 3000)

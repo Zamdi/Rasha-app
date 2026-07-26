@@ -48,7 +48,11 @@ export function AppProvider({ children }) {
   const [customer, setCustomer] = useState(() => {
     const tok = localStorage.getItem('rasha_token')
     if (!tok) return null
-    try { return JSON.parse(localStorage.getItem('rasha_customer')) } catch { return null }
+    try {
+      const cust = JSON.parse(localStorage.getItem('rasha_customer'))
+      const avatar_url = localStorage.getItem('rasha_avatar') || null
+      return cust ? { ...cust, avatar_url } : null
+    } catch { return null }
   })
   const [token, setToken] = useState(() => {
     const tok = localStorage.getItem('rasha_token')
@@ -82,13 +86,23 @@ export function AppProvider({ children }) {
     setToken(tok)
     setCustomer(cust)
     localStorage.setItem('rasha_token', tok)
-    localStorage.setItem('rasha_customer', JSON.stringify(cust))
+    // Store avatar separately to avoid localStorage size limit issues
+    const { avatar_url, ...custWithoutAvatar } = cust
+    try {
+      localStorage.setItem('rasha_customer', JSON.stringify(custWithoutAvatar))
+      if (avatar_url) localStorage.setItem('rasha_avatar', avatar_url)
+      else localStorage.removeItem('rasha_avatar')
+    } catch (e) {
+      // If storage fails (quota), save without avatar
+      localStorage.setItem('rasha_customer', JSON.stringify(custWithoutAvatar))
+    }
   }
   const logout = () => {
     setToken(null)
     setCustomer(null)
     localStorage.removeItem('rasha_token')
     localStorage.removeItem('rasha_customer')
+    localStorage.removeItem('rasha_avatar')
   }
   const setStaffToken = (tok, role = 'staff', permissions = {}) => {
     setStaffTokenState(tok)
