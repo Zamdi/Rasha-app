@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 
-export default function OtpInput({ value = '', onChange, length = 4 }) {
+export default function OtpInput({ value = '', onChange, length = 6 }) {
   const refs = useRef([])
 
   useEffect(() => { refs.current[0]?.focus() }, [])
@@ -26,7 +26,7 @@ export default function OtpInput({ value = '', onChange, length = 4 }) {
   }
 
   return (
-    <div className="flex justify-center gap-3" onPaste={handlePaste}>
+    <div className="flex justify-center gap-2" onPaste={handlePaste}>
       {digits.map((d, i) => (
         <input
           key={i}

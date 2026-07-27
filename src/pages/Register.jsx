@@ -56,7 +56,7 @@ export default function Register() {
 
   const verify = async () => {
     const code = otp.trim()
-    if (code.length < 4) { showToast(t('Enter the full code','أدخل الرمز كاملاً'),'error'); return }
+    if (code.length < 6) { showToast(t('Enter the full code','أدخل الرمز كاملاً'),'error'); return }
     setLoading(true)
     try {
       const res = await fetch(`${API}/api/auth/verify-register`, {
@@ -132,7 +132,7 @@ export default function Register() {
           <div className="glass p-6 rounded-2xl space-y-6 animate-fade-in">
             <div>
               <h3 className="font-bold text-on-surface mb-1">{t('Verify Your Email','تحقق من بريدك الإلكتروني')}</h3>
-              <p className="text-on-surface-variant text-sm">{t(`We sent a 4-digit code to`,'أرسلنا رمزاً إلى')} <span className="text-secondary-fixed font-semibold">{maskedEmail}</span></p>
+              <p className="text-on-surface-variant text-sm">{t(`We sent a 6-digit code to`,'أرسلنا رمزاً إلى')} <span className="text-secondary-fixed font-semibold">{maskedEmail}</span></p>
             </div>
             <OtpInput value={otp} onChange={setOtp} />
             {/* Timer */}

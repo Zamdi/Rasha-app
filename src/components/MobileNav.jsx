@@ -13,7 +13,7 @@ export default function MobileNav() {
   const ticking = useRef(false)
   const navRef = useRef(null)
   const tabRefs = useRef([])
-  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, height: 0 })
+  const [pillStyle, setPillStyle] = useState({ left: 0, top: 6, width: 0, height: 0, opacity: 0 })
 
   useEffect(() => {
     const onScroll = () => {
@@ -51,20 +51,40 @@ export default function MobileNav() {
   const items = customer ? loggedInItems : guestItems
   const activeIdx = items.findIndex(i => i.to === pathname)
 
-  // Measure pill
+  // Keep the pill locked to the active tab.
+  // The tabs animate their padding/width for 0.3s on every expand/shrink, so a
+  // single delayed measurement reads mid-animation values and never corrects.
+  // A ResizeObserver re-measures on each layout change instead.
   useEffect(() => {
+    const nav = navRef.current
+    if (!nav) return
+
     const measure = () => {
-      const nav = navRef.current
       const tab = tabRefs.current[activeIdx]
-      if (!nav || !tab) return
+      if (!tab) { setPillStyle(p => ({ ...p, opacity: 0 })); return }
       const nr = nav.getBoundingClientRect()
       const tr = tab.getBoundingClientRect()
-      setPillStyle({ left: tr.left - nr.left, width: tr.width, height: tr.height })
+      setPillStyle({
+        left: tr.left - nr.left,
+        top: tr.top - nr.top,
+        width: tr.width,
+        height: tr.height,
+        opacity: 1,
+      })
     }
-    const timer = setTimeout(measure, 40)
+
+    measure()
+
+    const ro = new ResizeObserver(measure)
+    ro.observe(nav)
+    tabRefs.current.forEach(el => el && ro.observe(el))
+
+    // Label widths shift once the icon/text fonts finish loading.
+    if (document.fonts?.ready) document.fonts.ready.then(measure).catch(() => {})
+
     window.addEventListener('resize', measure)
-    return () => { clearTimeout(timer); window.removeEventListener('resize', measure) }
-  }, [activeIdx, expanded])
+    return () => { ro.disconnect(); window.removeEventListener('resize', measure) }
+  }, [activeIdx, expanded, items.length])
 
   // Theme-aware colors — derived from theme string not isDark bool
   // so it always re-renders when theme changes
@@ -94,13 +114,14 @@ export default function MobileNav() {
         {activeIdx >= 0 && pillStyle.width > 0 && (
           <div style={{
             position: 'absolute',
-            top: '6px',
+            top: pillStyle.top ?? 6,
             left: pillStyle.left,
             width: pillStyle.width,
             height: pillStyle.height,
             borderRadius: '9999px',
             background: pillBg,
-            transition: 'left 0.38s cubic-bezier(0.34,1.2,0.64,1), width 0.38s cubic-bezier(0.34,1.2,0.64,1)',
+            opacity: pillStyle.opacity ?? 1,
+            transition: 'left 0.38s cubic-bezier(0.34,1.2,0.64,1), width 0.38s cubic-bezier(0.34,1.2,0.64,1), height 0.3s ease, top 0.3s ease, opacity 0.2s ease',
             pointerEvents: 'none',
             zIndex: 0,
           }} />
