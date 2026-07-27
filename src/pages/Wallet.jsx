@@ -1,24 +1,18 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useApp, API } from '../context/AppContext'
-
-const QUICK_AMOUNTS = [5000, 10000, 20000]
+import { useApp } from '../context/AppContext'
 
 export default function Wallet() {
   const { t, customer } = useApp()
-  const [customAmount, setCustomAmount] = useState('')
-  const [selected, setSelected] = useState(10000)
-  const [topUpLoading, setTopUpLoading] = useState(false)
   const [showAddCard, setShowAddCard] = useState(false)
 
-  // One-time cleanup: purge card data saved by earlier builds (never store PANs client-side).
+  // One-time cleanup: purge card data saved by earlier builds
+  // (raw card details must never be stored client-side).
   useEffect(() => { try { localStorage.removeItem('rasha_saved_card') } catch {} }, [])
-  // One-time cleanup: remove any card data stored by earlier builds.
 
   if (!customer) return null
 
   const balance = customer.wallet_balance || 0
-  const transactions = []
 
 
   const navItems = [
@@ -89,51 +83,10 @@ export default function Wallet() {
                   {balance.toLocaleString('en')}<span className="text-xl font-semibold text-white/70 ms-2">SDG</span>
                 </p>
                 <div className="flex flex-wrap gap-3">
-
                   <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white" style={{ background: 'rgba(255,255,255,0.15)' }}>
-                    <span className="material-symbols-outlined text-white/70" style={{ fontSize: '14px' }}>schedule</span>
-                    {t('Last top up: Oct 24', 'آخر شحن: 24 أكتوبر')}
+                    <span className="material-symbols-outlined text-white/70" style={{ fontSize: '14px' }}>badge</span>
+                    <span dir="ltr">{customer.customer_uid}</span>
                   </span>
-                </div>
-              </div>
-
-              {/* Add Funds Card */}
-              <div style={card} className="p-6">
-                <div className="flex items-center justify-between mb-1">
-                  <div>
-                    <h3 className="text-lg font-bold text-on-surface font-display">{t('Add Funds', 'إضافة رصيد')}</h3>
-                    <p className="text-xs text-on-surface-variant">{t('Instantly top up your Rasha wallet', 'اشحن محفظة رشة فوراً')}</p>
-                  </div>
-                  <button onClick={() => setShowAddCard(true)}
-                    title={t('Payment methods', 'طرق الدفع')}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:opacity-80"
-                    style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
-                    <span className="material-symbols-outlined text-secondary-fixed text-2xl">credit_card</span>
-                  </button>
-                </div>
-                <div className="flex gap-3 mt-5 flex-wrap">
-                  {QUICK_AMOUNTS.map(amt => (
-                    <button key={amt} onClick={() => { setSelected(amt); setCustomAmount('') }}
-                      className={`flex-1 min-w-[90px] py-3 rounded-xl text-sm font-bold transition-all ${selected === amt && !customAmount ? 'text-white hydro-gradient' : 'text-on-surface'}`}
-                      style={selected === amt && !customAmount ? {} : { border: '1px solid var(--color-outline-variant)', background: 'var(--color-surface-container)' }}>
-                      {amt.toLocaleString('en')} SDG
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-4">
-                  <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">{t('Custom Amount', 'مبلغ مخصص')}</p>
-                  <div className="flex gap-3">
-                    <div className="flex-1 relative">
-                      <input type="number" placeholder={t('Enter amount...', 'أدخل المبلغ...')} className="rasha-input text-sm pe-14"
-                        value={customAmount} onChange={e => { setCustomAmount(e.target.value); setSelected(0) }} />
-                      <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant font-bold">SDG</span>
-                    </div>
-                    <button disabled={topUpLoading || (!selected && !customAmount)}
-                      className="hydro-gradient text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50 shrink-0">
-                      <span className="material-symbols-outlined text-base">bolt</span>
-                      {t('Top Up Now', 'اشحن الآن')}
-                    </button>
-                  </div>
                 </div>
               </div>
 
@@ -165,21 +118,39 @@ export default function Wallet() {
                 </div>
               </div>
 
-              {/* How to top up */}
-              <div style={card} className="p-5 space-y-3">
-                <p className="text-sm font-bold text-on-surface">{t('How to Top Up', 'كيفية الشحن')}</p>
-                {[
-                  ['bolt', t('Choose an amount above', 'اختر مبلغاً أعلاه')],
-                  ['payments', t('Pay via your preferred method', 'ادفع بالطريقة المفضلة لديك')],
-                  ['account_balance_wallet', t('Balance added instantly', 'يُضاف الرصيد فوراً')],
-                ].map(([icon, label], i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{background:'rgba(var(--color-secondary-fixed-rgb),0.08)'}}>
-                      <span className="material-symbols-outlined text-secondary-fixed" style={{fontSize:'16px'}}>{icon}</span>
+              {/* How to Top Up — mirrors the in-branch instructions shown in the
+                  Top Up Methods dialog. Online payments are not live yet. */}
+              <div style={card} className="p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-secondary-fixed text-xl">lock</span>
+                  <p className="text-sm font-bold text-on-surface">{t('How to Top Up', 'كيفية الشحن')}</p>
+                </div>
+
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  {t('Online payments are being connected to a licensed payment provider. Until then, you can top up in person and our staff will credit your wallet instantly.',
+                     'يتم حالياً ربط المدفوعات الإلكترونية بمزود دفع مرخص. حتى ذلك الحين يمكنك الشحن في الفرع وسيقوم الموظف بإضافة الرصيد فوراً.')}
+                </p>
+
+                <div className="space-y-2">
+                  {[
+                    t('Visit Rasha Car Wash, Khartoum', 'قم بزيارة رشة لغسيل السيارات، الخرطوم'),
+                    t('Give the staff your Member ID', 'أعطِ الموظف رقم العضوية الخاص بك'),
+                    t('Your balance updates immediately', 'يتم تحديث رصيدك فوراً'),
+                  ].map((line, i) => (
+                    <div key={i} className="flex items-start gap-2.5">
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-xs font-bold text-secondary-fixed"
+                        style={{ background: 'rgba(var(--color-secondary-fixed-rgb),0.1)' }}>{i + 1}</span>
+                      <span className="text-xs text-on-surface-variant">{line}</span>
                     </div>
-                    <p className="text-sm text-on-surface-variant">{label}</p>
+                  ))}
+                </div>
+
+                {customer?.customer_uid && (
+                  <div className="pt-3" style={{ borderTop: '1px solid var(--color-outline-variant)' }}>
+                    <p className="text-xs text-on-surface-variant">{t('Your Member ID', 'رقم عضويتك')}</p>
+                    <p className="text-sm font-bold text-secondary-fixed mt-0.5" dir="ltr">{customer.customer_uid}</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>

@@ -39,7 +39,12 @@ export default function MobileNav() {
 
   useEffect(() => { setExpanded(true) }, [pathname])
 
-  if (HIDDEN_PAGES.some(p => pathname.startsWith(p))) return null
+  // NOTE: no early return above this point. Every hook below must run on every
+  // render, otherwise React sees a different hook count when this component
+  // hides itself on /forgot-password, /confirmation etc. and throws, blanking
+  // the whole tree until a refresh. The visibility check happens at render time
+  // (see `hidden` below), never by bailing out early.
+  const hidden = HIDDEN_PAGES.some(p => pathname.startsWith(p))
 
   const avatarUrl = customer?.avatar_url || null
 
@@ -64,6 +69,7 @@ export default function MobileNav() {
   // sitting between two tabs. So: sample every frame until the transition has
   // settled, and re-sample whenever layout changes afterwards.
   useEffect(() => {
+    if (hidden) return
     const nav = navRef.current
     if (!nav) return
 
@@ -119,7 +125,7 @@ export default function MobileNav() {
       ro.disconnect()
       window.removeEventListener('resize', onResize)
     }
-  }, [activeIdx, expanded, items.length])
+  }, [activeIdx, expanded, items.length, hidden])
 
   // Theme-aware colors — derived from theme string not isDark bool
   // so it always re-renders when theme changes
@@ -129,6 +135,8 @@ export default function MobileNav() {
   const pillBg   = isDark ? 'rgba(255,255,255,0.16)'    : 'rgba(0,86,179,0.12)'
   const iconColor= (active) => isDark ? 'white' : (active ? '#0056b3' : '#555')
   const labelColor=(active) => isDark ? 'white' : (active ? '#0056b3' : '#555')
+
+  if (hidden) return null
 
   return (
     <div className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none">
