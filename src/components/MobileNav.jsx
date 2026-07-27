@@ -14,6 +14,11 @@ export default function MobileNav() {
   const navRef = useRef(null)
   const tabRefs = useRef([])
   const [pillStyle, setPillStyle] = useState({ left: 0, top: 6, width: 0, height: 0, opacity: 0 })
+  const prevExpanded = useRef(expanded)
+  useEffect(() => {
+    const id = setTimeout(() => { prevExpanded.current = expanded }, 500)
+    return () => clearTimeout(id)
+  }, [expanded])
 
   useEffect(() => {
     const onScroll = () => {
@@ -52,38 +57,68 @@ export default function MobileNav() {
   const activeIdx = items.findIndex(i => i.to === pathname)
 
   // Keep the pill locked to the active tab.
-  // The tabs animate their padding/width for 0.3s on every expand/shrink, so a
-  // single delayed measurement reads mid-animation values and never corrects.
-  // A ResizeObserver re-measures on each layout change instead.
+  //
+  // The tabs animate padding/min-width/height for 0.3s on every expand/shrink.
+  // Any single measurement taken during that window captures mid-animation
+  // geometry and freezes there — which is why the pill ended up narrow and
+  // sitting between two tabs. So: sample every frame until the transition has
+  // settled, and re-sample whenever layout changes afterwards.
   useEffect(() => {
     const nav = navRef.current
     if (!nav) return
 
+    let rafId = 0
+    let stopAt = 0
+
     const measure = () => {
       const tab = tabRefs.current[activeIdx]
-      if (!tab) { setPillStyle(p => ({ ...p, opacity: 0 })); return }
+      if (!tab) { setPillStyle(p => (p.opacity === 0 ? p : { ...p, opacity: 0 })); return }
       const nr = nav.getBoundingClientRect()
       const tr = tab.getBoundingClientRect()
-      setPillStyle({
+      const next = {
         left: tr.left - nr.left,
         top: tr.top - nr.top,
         width: tr.width,
         height: tr.height,
         opacity: 1,
-      })
+      }
+      // Skip no-op state updates so the rAF loop stays cheap.
+      setPillStyle(p =>
+        (Math.abs(p.left - next.left) < 0.5 &&
+         Math.abs(p.top - next.top) < 0.5 &&
+         Math.abs(p.width - next.width) < 0.5 &&
+         Math.abs(p.height - next.height) < 0.5 &&
+         p.opacity === next.opacity) ? p : next
+      )
     }
 
-    measure()
+    const loop = () => {
+      measure()
+      if (performance.now() < stopAt) rafId = requestAnimationFrame(loop)
+    }
+    const track = (ms = 450) => {
+      stopAt = performance.now() + ms
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(loop)
+    }
 
-    const ro = new ResizeObserver(measure)
+    track()  // follow the expand/shrink transition to completion
+
+    const ro = new ResizeObserver(() => track(200))
     ro.observe(nav)
     tabRefs.current.forEach(el => el && ro.observe(el))
 
     // Label widths shift once the icon/text fonts finish loading.
-    if (document.fonts?.ready) document.fonts.ready.then(measure).catch(() => {})
+    if (document.fonts?.ready) document.fonts.ready.then(() => track(200)).catch(() => {})
 
-    window.addEventListener('resize', measure)
-    return () => { ro.disconnect(); window.removeEventListener('resize', measure) }
+    const onResize = () => track(200)
+    window.addEventListener('resize', onResize)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      ro.disconnect()
+      window.removeEventListener('resize', onResize)
+    }
   }, [activeIdx, expanded, items.length])
 
   // Theme-aware colors — derived from theme string not isDark bool
@@ -110,18 +145,21 @@ export default function MobileNav() {
           transition: 'padding 0.3s ease',
         }}>
 
-        {/* Sliding pill */}
+        {/* Sliding pill — animates between tabs, but follows the expand/shrink
+            transition instantly so it can never lag behind the tab it sits on. */}
         {activeIdx >= 0 && pillStyle.width > 0 && (
           <div style={{
             position: 'absolute',
-            top: pillStyle.top ?? 6,
+            top: pillStyle.top,
             left: pillStyle.left,
             width: pillStyle.width,
             height: pillStyle.height,
             borderRadius: '9999px',
             background: pillBg,
-            opacity: pillStyle.opacity ?? 1,
-            transition: 'left 0.38s cubic-bezier(0.34,1.2,0.64,1), width 0.38s cubic-bezier(0.34,1.2,0.64,1), height 0.3s ease, top 0.3s ease, opacity 0.2s ease',
+            opacity: pillStyle.opacity,
+            transition: expanded === prevExpanded.current
+              ? 'left 0.38s cubic-bezier(0.34,1.2,0.64,1), width 0.38s cubic-bezier(0.34,1.2,0.64,1), opacity 0.2s ease'
+              : 'opacity 0.2s ease',
             pointerEvents: 'none',
             zIndex: 0,
           }} />
