@@ -31,7 +31,13 @@ export default function StaffDashboard() {
   const [inventoryLoading, setInventoryLoading] = useState(false)
   const [showAddInventory, setShowAddInventory] = useState(false)
   const [newItem, setNewItem] = useState({ name: '', unit: 'liters', quantity: 0, min_quantity: 10 })
-  const [inventorySubTab, setInventorySubTab] = useState('items') // 'items' | 'requests'
+  const [inventorySubTab, setInventorySubTab] = useState('items')
+  // Message reply
+  const [expandedThread, setExpandedThread] = useState(null)
+  const [replyTarget, setReplyTarget] = useState(null)
+  const [replyBody, setReplyBody] = useState('')
+  const [replyLoading, setReplyLoading] = useState(false)
+  const [replyError, setReplyError] = useState('') // 'items' | 'requests'
   const [refillTarget, setRefillTarget] = useState(null)
   const [refillQty, setRefillQty] = useState(10)
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -609,35 +615,135 @@ export default function StaffDashboard() {
               </div>
             ) : (
               <div className="">
-                {messages.map((msg) => (
-                  <div key={msg.id}
-                    className={`p-5 transition-colors ${msg.is_read ? 'hover:bg-surface-variant/5' : 'bg-secondary-fixed/5 hover:bg-secondary-fixed/8'}`}
-                    onClick={async () => {
-                      if (!msg.is_read) {
-                        await fetch(`${API}/api/messages/${msg.id}/read`, { method: 'PATCH', headers: hdrs })
-                        setMessages(msgs => msgs.map(m => m.id === msg.id ? {...m, is_read: 1} : m))
-                        setUnreadCount(c => Math.max(0, c - 1))
-                      }
-                    }}
-                    style={{ cursor: msg.is_read ? 'default' : 'pointer' }}
-                  >
-                    <div className="flex justify-between items-start gap-4 mb-2">
-                      <div className="flex items-center gap-2">
-                        {!msg.is_read && <span className="w-2 h-2 rounded-full bg-secondary-fixed shrink-0" />}
-                        <div>
-                          <p className={`font-semibold text-sm ${msg.is_read ? 'text-on-surface' : 'text-secondary-fixed'}`}>{msg.name}</p>
-                          <p className="text-xs text-on-surface-variant">{msg.email}</p>
+                {messages.map((msg) => {
+                  const isOpen = expandedThread === msg.id
+                  const thread = msg.thread || []
+                  const unread = !msg.is_read || (msg.unreadInbound || 0) > 0
+                  const awaitingReply = msg.lastDirection === 'inbound' || (!msg.is_read && thread.length === 0)
+
+                  return (
+                    <div key={msg.id}
+                      className={`transition-colors ${unread ? 'bg-secondary-fixed/5' : ''}`}
+                      style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+
+                      {/* Header — click toggles the thread open/closed */}
+                      <div
+                        className="p-5 cursor-pointer hover:bg-surface-variant/5 transition-colors"
+                        onClick={async () => {
+                          const opening = !isOpen
+                          setExpandedThread(opening ? msg.id : null)
+                          if (opening && unread) {
+                            await fetch(`${API}/api/messages/${msg.id}/thread-read`, { method: 'PATCH', headers: hdrs })
+                            setMessages(msgs => msgs.map(m => m.id === msg.id
+                              ? { ...m, is_read: 1, unreadInbound: 0,
+                                  thread: (m.thread || []).map(i => ({ ...i, is_read: 1 })) }
+                              : m))
+                            setUnreadCount(cnt => Math.max(0, cnt - 1))
+                          }
+                        }}>
+                        <div className="flex justify-between items-start gap-4 mb-2">
+                          <div className="flex items-center gap-2">
+                            {unread && <span className="w-2 h-2 rounded-full bg-secondary-fixed shrink-0" />}
+                            <div>
+                              <p className={`font-semibold text-sm ${unread ? 'text-secondary-fixed' : 'text-on-surface'}`}>{msg.name}</p>
+                              <p className="text-xs text-on-surface-variant">{msg.email}</p>
+                            </div>
+                          </div>
+                          <div className="text-end shrink-0 flex flex-col items-end gap-1">
+                            <span className="text-xs font-bold px-2 py-1 rounded-full bg-surface-container-high text-on-surface-variant">{msg.subject}</span>
+                            <p className="text-xs text-on-surface-variant">{msg.created_at ? new Date(msg.created_at).toLocaleDateString('en-GB') : ''}</p>
+                          </div>
+                        </div>
+
+                        {/* Collapsed preview */}
+                        {!isOpen && (
+                          <p className="text-on-surface-variant text-sm leading-relaxed line-clamp-2">{msg.message}</p>
+                        )}
+
+                        <div className="flex items-center gap-3 mt-2 flex-wrap">
+                          {thread.length > 0 && (
+                            <span className="text-xs text-on-surface-variant flex items-center gap-1">
+                              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>forum</span>
+                              {thread.length} {thread.length === 1 ? t('reply', 'رد') : t('replies', 'ردود')}
+                            </span>
+                          )}
+                          {awaitingReply && (
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                              style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b' }}>
+                              {t('Awaiting reply', 'بانتظار الرد')}
+                            </span>
+                          )}
+                          {!awaitingReply && thread.length > 0 && (
+                            <span className="text-xs flex items-center gap-1" style={{ color: '#22c55e' }}>
+                              <span className="material-symbols-outlined fill-icon" style={{ fontSize: '14px' }}>check_circle</span>
+                              {t('Replied', 'تم الرد')}
+                            </span>
+                          )}
+                          <span className="text-xs text-on-surface-variant ms-auto flex items-center gap-1">
+                            {isOpen ? t('Hide', 'إخفاء') : t('View thread', 'عرض المحادثة')}
+                            <span className="material-symbols-outlined"
+                              style={{ fontSize: '16px', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>expand_more</span>
+                          </span>
                         </div>
                       </div>
-                      <div className="text-end shrink-0">
-                        <span className="text-xs font-bold px-2 py-1 rounded-full bg-surface-container-high text-on-surface-variant">{msg.subject}</span>
-                        <p className="text-xs text-on-surface-variant mt-1">{msg.created_at ? new Date(msg.created_at).toLocaleDateString() : ''}</p>
-                      </div>
+
+                      {/* Expanded thread */}
+                      {isOpen && (
+                        <div className="px-5 pb-5 space-y-3 animate-fade-in">
+                          {/* Original message */}
+                          <div className="rounded-xl p-3" style={{ background: 'var(--input-bg)', border: '1px solid var(--color-outline-variant)' }}>
+                            <div className="flex justify-between items-center mb-1">
+                              <p className="text-xs font-bold text-on-surface">{msg.name}</p>
+                              <p className="text-xs text-on-surface-variant" dir="ltr">
+                                {msg.created_at ? new Date(msg.created_at).toLocaleString('en-GB') : ''}
+                              </p>
+                            </div>
+                            <p className="text-sm text-on-surface-variant whitespace-pre-wrap">{msg.message}</p>
+                          </div>
+
+                          {/* Thread items */}
+                          {thread.map(item => {
+                            const outbound = item.direction === 'outbound'
+                            return (
+                              <div key={item.id}
+                                className={`rounded-xl p-3 ${outbound ? 'ms-6' : 'me-6'}`}
+                                style={{
+                                  background: outbound ? 'rgba(0,86,179,0.06)' : 'var(--input-bg)',
+                                  border: `1px solid ${outbound ? 'rgba(0,86,179,0.2)' : 'var(--color-outline-variant)'}`
+                                }}>
+                                <div className="flex justify-between items-center mb-1 gap-2">
+                                  <p className="text-xs font-bold flex items-center gap-1"
+                                    style={{ color: outbound ? 'var(--color-secondary-fixed)' : 'var(--color-on-surface)' }}>
+                                    <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>
+                                      {outbound ? 'support_agent' : 'person'}
+                                    </span>
+                                    {outbound ? (item.author || t('Staff', 'الموظف')) : msg.name}
+                                  </p>
+                                  <p className="text-xs text-on-surface-variant shrink-0" dir="ltr">
+                                    {item.created_at ? new Date(item.created_at).toLocaleString('en-GB') : ''}
+                                  </p>
+                                </div>
+                                <p className="text-sm text-on-surface-variant whitespace-pre-wrap">{item.body}</p>
+                              </div>
+                            )
+                          })}
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setReplyTarget(msg)
+                              setReplyBody('')
+                              setReplyError('')
+                            }}
+                            className="hydro-gradient text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-90 flex items-center gap-1.5">
+                            <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>reply</span>
+                            {thread.length ? t('Reply again', 'رد مرة أخرى') : t('Reply', 'رد')}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-on-surface-variant text-sm leading-relaxed">{msg.message}</p>
-                    {!msg.is_read && <p className="text-xs text-secondary-fixed mt-2">{t('Click to mark as read', 'انقر للتعليم كمقروء')}</p>}
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -1116,6 +1222,92 @@ export default function StaffDashboard() {
         )}
       </div>
 
+
+      {/* Reply to Message Popup */}
+      {replyTarget && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-full max-w-lg rounded-2xl animate-fade-in overflow-hidden" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
+
+            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+              <div>
+                <h3 className="font-bold text-on-surface font-display">{t('Reply to Message', 'الرد على الرسالة')}</h3>
+                <p className="text-xs text-on-surface-variant mt-0.5" dir="ltr" style={{ unicodeBidi: 'embed' }}>
+                  {replyTarget.name} &lt;{replyTarget.email}&gt;
+                </p>
+              </div>
+              <button onClick={() => setReplyTarget(null)}>
+                <span className="material-symbols-outlined text-on-surface-variant">close</span>
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {/* Original message for context */}
+              <div className="rounded-xl p-3" style={{ background: 'var(--input-bg)', border: '1px solid var(--color-outline-variant)' }}>
+                <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                  {replyTarget.subject || t('Message', 'الرسالة')}
+                </p>
+                <p className="text-xs text-on-surface-variant whitespace-pre-wrap max-h-28 overflow-y-auto">{replyTarget.message}</p>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 block">
+                  {t('Your Reply', 'ردك')}
+                </label>
+                <textarea
+                  rows={6}
+                  className="w-full px-3 py-3 rounded-xl text-on-surface text-sm focus:outline-none resize-none"
+                  style={{ background: 'var(--input-bg)', border: `1px solid ${replyError ? 'var(--color-error)' : 'var(--input-border)'}` }}
+                  placeholder={t('Type your reply to the customer…', 'اكتب ردك على العميل…')}
+                  value={replyBody}
+                  onChange={e => { setReplyBody(e.target.value); setReplyError('') }}
+                />
+                {replyError && <p className="text-error text-xs mt-1">{replyError}</p>}
+                <p className="text-xs text-on-surface-variant mt-1.5 opacity-70">
+                  {t('This will be emailed to the customer from Rasha Car Wash.', 'سيتم إرسال هذا بالبريد الإلكتروني للعميل من رشة.')}
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button onClick={() => setReplyTarget(null)} disabled={replyLoading}
+                  className="flex-1 py-3 rounded-xl text-sm font-bold text-on-surface-variant"
+                  style={{ background: 'var(--input-bg)', border: '1px solid var(--input-border)' }}>
+                  {t('Cancel', 'إلغاء')}
+                </button>
+                <button
+                  disabled={replyLoading || !replyBody.trim()}
+                  onClick={async () => {
+                    const body = replyBody.trim()
+                    if (body.length < 2) { setReplyError(t('Reply cannot be empty.', 'لا يمكن أن يكون الرد فارغاً.')); return }
+                    setReplyLoading(true); setReplyError('')
+                    try {
+                      const res = await fetch(`${API}/api/messages/${replyTarget.id}/reply`, {
+                        method: 'POST', headers: hdrs, body: JSON.stringify({ body })
+                      })
+                      const data = await res.json()
+                      if (!res.ok) { setReplyError(data.error || t('Could not send reply.', 'تعذر إرسال الرد.')); return }
+                      setMessages(msgs => msgs.map(m => m.id === replyTarget.id
+                        ? { ...m, ...data.message, thread: data.message.thread || m.thread }
+                        : m))
+                      setUnreadCount(c => Math.max(0, c - (replyTarget.is_read ? 0 : 1)))
+                      setExpandedThread(replyTarget.id)   // keep the thread open to show the sent reply
+                      showToast(t('Reply sent!', 'تم إرسال الرد!'))
+                      setReplyTarget(null)
+                      setReplyBody('')
+                    } catch {
+                      setReplyError(t('Connection error.', 'خطأ في الاتصال.'))
+                    } finally { setReplyLoading(false) }
+                  }}
+                  className="flex-1 py-3 rounded-xl text-sm font-bold hydro-gradient text-white hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2">
+                  {replyLoading ? <div className="loader" /> : (<>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>send</span>
+                    {t('Send Reply', 'إرسال الرد')}
+                  </>)}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cancel Booking Popup */}
       {cancelTarget && (
