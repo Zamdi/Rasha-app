@@ -3,8 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import { formatTime } from '../utils/format'
 
-const ALL_SLOTS = ['11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM','8:00 PM','9:00 PM','10:00 PM','11:00 PM','12:00 AM']
-
 const today = () => {
   const d = new Date()
   const yyyy = d.getFullYear()
@@ -192,17 +190,17 @@ export default function Booking() {
               </div>
               {slotsLoading ? (
                 <div className="flex justify-center py-10"><div className="loader" /></div>
+              ) : slots.available.length === 0 ? (
+                <p className="text-center text-on-surface-variant text-sm py-4">{t('No slots available for this date.', 'لا توجد مواعيد متاحة.')}</p>
               ) : (
                 <div className="grid grid-cols-3 gap-2">
-                  {ALL_SLOTS.map(slot => {
-                    const booked = slots.booked.includes(slot)
+                  {slots.available.map(slot => {
                     const selected = selectedSlot === slot
                     return (
                       <button
                         key={slot}
-                        disabled={booked}
                         onClick={() => setSelectedSlot(slot)}
-                        className={`py-2 px-1 text-xs font-semibold rounded-xl transition-all ${booked ? 'slot-booked' : selected ? 'slot-selected' : 'slot-available'}`}
+                        className={`py-2 px-1 text-xs font-semibold rounded-xl transition-all ${selected ? 'slot-selected' : 'slot-available'}`}
                         dir="ltr"
                       >
                         {formatTime(slot, lang)}
@@ -210,9 +208,6 @@ export default function Booking() {
                     )
                   })}
                 </div>
-              )}
-              {!slotsLoading && slots.booked.length === ALL_SLOTS.length && (
-                <p className="text-center text-on-surface-variant text-sm py-4">{t('No slots available for this date.', 'لا توجد مواعيد متاحة.')}</p>
               )}
             </div>
             <div className="flex gap-3">
