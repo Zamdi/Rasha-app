@@ -214,11 +214,18 @@ export default function Loyalty() {
                   <div className="bg-secondary-fixed/10 p-2 rounded-lg">
                     <span className="material-symbols-outlined text-secondary-fixed text-base">calendar_month</span>
                   </div>
-                  <div>
-                    <p className="font-semibold text-on-surface text-sm">
-                      {nextBooking.service_type === 'full' ? t('Full Wash', 'غسيل كامل') : t('Exterior Only', 'خارجي فقط')}
-                    </p>
-                    <p className="text-xs text-on-surface-variant">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-semibold text-on-surface text-sm">
+                        {nextBooking.service_type === 'full' ? t('Full Wash', 'غسيل كامل') : t('Exterior Only', 'خارجي فقط')}
+                      </p>
+                      {nextBooking.booking_uid && (
+                        <span className="text-xs font-bold text-secondary-fixed shrink-0" dir="ltr">
+                          #{nextBooking.booking_uid.replace('BK-', 'RSH-')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-on-surface-variant mt-0.5">
                       <span>{new Date(nextBooking.booking_date.slice(0,10) + 'T12:00:00').toLocaleDateString(t('en-US','ar-EG'),{month:'short',day:'numeric'})}</span>
                       {' | '}
                       <span dir="ltr" style={{unicodeBidi:'embed'}}>{formatTime(nextBooking.booking_time, lang)}</span>
