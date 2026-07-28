@@ -45,7 +45,9 @@ export default function Loyalty() {
       setData(loy)
       setHistory(hist.visits || [])
       const today = new Date().toISOString().split('T')[0]
-      const upcoming = (bk.bookings || []).filter(b => b.status === 'confirmed' && b.booking_date >= today)
+      const upcoming = (bk.bookings || [])
+        .filter(b => b.status === 'confirmed' && b.booking_date >= today)
+        .sort((a, b) => a.booking_date.localeCompare(b.booking_date) || a.booking_time.localeCompare(b.booking_time))
       setNextBooking(upcoming[0] || null)
     } catch {
       setError(t('Connection error. The server may be starting up — please wait a moment and retry.', 'خطأ في الاتصال. قد يكون الخادم في وضع السكون — انتظر لحظة وحاول مجدداً.'))
