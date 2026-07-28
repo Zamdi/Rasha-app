@@ -9,6 +9,7 @@ export default function Contact() {
   const { t } = useApp()
   const [form, setForm] = useState({ name: '', email: '', subject: 'General Inquiry', message: '' })
   const [sent, setSent] = useState(false)
+  const [reference, setReference] = useState(null)
   const [loading, setLoading] = useState(false)
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
@@ -28,6 +29,7 @@ export default function Contact() {
         alert(data.error || 'Failed to send message. Please try again.')
         return
       }
+      if (data.reference) setReference(data.reference)
       setSent(true)
     } catch {
       alert('Connection error. Please check your internet and try again.')
@@ -45,7 +47,6 @@ export default function Contact() {
     t('General Inquiry', 'استفسار عام'),
     t('Booking Issue', 'مشكلة في الحجز'),
     t('Loyalty Rewards', 'مكافآت الولاء'),
-    t('Payment Issue', 'مشكلة في الدفع'),
     t('Feedback', 'ملاحظات'),
   ]
 
@@ -79,6 +80,15 @@ export default function Contact() {
                 <p className="text-on-surface-variant text-sm max-w-xs mx-auto">
                   {t("We've received your message and will get back to you as soon as possible.", 'استلمنا رسالتك وسنرد عليك في أقرب وقت ممكن.')}
                 </p>
+                {reference && (
+                  <div className="mt-5 inline-flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: 'rgba(var(--color-secondary-fixed-rgb),0.08)', border: '1px solid rgba(var(--color-secondary-fixed-rgb),0.2)' }}>
+                    <span className="material-symbols-outlined text-secondary-fixed text-base">confirmation_number</span>
+                    <div className="text-start">
+                      <p className="text-xs text-on-surface-variant">{t('Your Reference Number', 'رقم المرجع')}</p>
+                      <p className="text-sm font-bold text-secondary-fixed" dir="ltr">{reference}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-5">

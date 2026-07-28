@@ -4,11 +4,9 @@ import { useApp, API } from '../context/AppContext'
 import { formatTime } from '../utils/format'
 
 const today = () => {
-  const d = new Date()
-  const yyyy = d.getFullYear()
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  return `${yyyy}-${mm}-${dd}`
+  // Use Khartoum local time (UTC+3) so the minimum date is never yesterday
+  const d = new Date(Date.now() + 3 * 60 * 60 * 1000)
+  return d.toISOString().slice(0, 10)
 }
 
 export default function Booking() {
