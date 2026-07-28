@@ -15,6 +15,9 @@ export default function StaffDashboard() {
   const [stats, setStats] = useState(null)
   const [bookings, setBookings] = useState([])
   const [bookingFilter, setBookingFilter] = useState('all') // 'all'|'confirmed'|'cancelled'
+  const [customerBookingFilter, setCustomerBookingFilter] = useState('all')
+  const [customerBookingSearch, setCustomerBookingSearch] = useState('')
+  const [showDeleteCustomerPopup, setShowDeleteCustomerPopup] = useState(false)
   const [cancelTarget, setCancelTarget] = useState(null) // booking object for popup
   const [customerBookings, setCustomerBookings] = useState([]) // bookings for searched customer
   const [messages, setMessages] = useState([])
@@ -188,13 +191,19 @@ export default function StaffDashboard() {
   const deleteCustomer = async (cust) => {
     const c = cust || customer
     if (!c) return
-    if (!confirm(t(`Delete ${c.first_name} ${c.last_name}? This cannot be undone.`, `حذف ${c.first_name} ${c.last_name}؟ لا يمكن التراجع.`))) return
+    setShowDeleteCustomerPopup(true)
+  }
+
+  const confirmDeleteCustomer = async () => {
+    const c = customer
+    if (!c) return
+    setShowDeleteCustomerPopup(false)
     try {
       const res = await fetch(`${API}/api/admin/customers/${c.customer_uid}`, { method: 'DELETE', headers: hdrs })
       const data = await res.json()
       if (!res.ok) { showToast(data.error || t('Error', 'خطأ'), 'error'); return }
       showToast(t('Customer deleted', 'تم حذف العميل'))
-      if (customer?.customer_uid === c.customer_uid) { setCustomer(null); setUidInput('') }
+      setCustomer(null); setUidInput('')
       loadData()
       if (activeTab === 'customers') loadAllCustomers(customerSearch)
     } catch { showToast(t('Error', 'خطأ'), 'error') }
@@ -923,17 +932,45 @@ export default function StaffDashboard() {
 
                   {/* Suspend / Restore */}
                   <button onClick={toggleAccess}
-                    className={`w-full py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 ${customer.is_active ? 'glass text-error hover:bg-error/5' : 'glass text-secondary-fixed hover:bg-secondary-fixed/5'}`}>
-                    <span className="material-symbols-outlined text-base">{customer.is_active ? 'block' : 'check_circle'}</span>
-                    {customer.is_active ? t('Suspend Account', 'إيقاف الحساب') : t('Restore Account', 'تفعيل الحساب')}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 self-start ${customer.is_active ? 'text-white' : 'glass text-secondary-fixed hover:bg-secondary-fixed/5'}`}
+                    style={customer.is_active ? {background:'#b3261e'} : {}}>
+                    <span className="material-symbols-outlined text-sm">{customer.is_active ? 'block' : 'check_circle'}</span>
+                    {customer.is_active ? t('Suspend', 'إيقاف') : t('Restore', 'تفعيل')}
                   </button>
 
                   {/* Recent Bookings for this customer */}
                   {customerBookings.length > 0 && (
                     <div>
                       <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">{t('Recent Bookings', 'الحجوزات الأخيرة')}</p>
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {customerBookings.slice(0,5).map(b => (
+                      {/* Search by booking ID */}
+                      <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-xl" style={{background:'var(--input-bg)', border:'1px solid var(--color-outline-variant)'}}>
+                        <span className="material-symbols-outlined text-on-surface-variant text-base">search</span>
+                        <input className="flex-1 bg-transparent outline-none text-xs text-on-surface placeholder:text-on-surface-variant"
+                          placeholder={t('Search by booking ID…', 'بحث برقم الحجز…')}
+                          value={customerBookingSearch}
+                          onChange={e => setCustomerBookingSearch(e.target.value)} />
+                        {customerBookingSearch && <button onClick={() => setCustomerBookingSearch('')} className="text-on-surface-variant hover:text-error">
+                          <span className="material-symbols-outlined text-base">close</span>
+                        </button>}
+                      </div>
+                      {/* Filter: All / Confirmed / Cancelled */}
+                      <div className="flex gap-1 mb-2">
+                        {[['all', t('All','الكل')], ['confirmed', t('Confirmed','مؤكد')], ['cancelled', t('Cancelled','ملغى')]].map(([f, label]) => (
+                          <button key={f} onClick={() => setCustomerBookingFilter(f)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${customerBookingFilter === f ? 'hydro-gradient text-white' : 'text-on-surface-variant hover:text-on-surface'}`}>
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="space-y-2 max-h-52 overflow-y-auto">
+                        {customerBookings
+                          .filter(b => {
+                            const matchesFilter = customerBookingFilter === 'all' || b.status === customerBookingFilter
+                            const matchesSearch = !customerBookingSearch || b.booking_uid?.toLowerCase().includes(customerBookingSearch.toLowerCase()) || `#RSH-${b.booking_uid?.replace('BK-','')}`.toLowerCase().includes(customerBookingSearch.toLowerCase())
+                            return matchesFilter && matchesSearch
+                          })
+                          .slice(0, 10)
+                          .map(b => (
                           <div key={b.id} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs" style={{background:'var(--input-bg)', border:'1px solid var(--color-outline-variant)'}}>
                             <div dir="ltr">
                               <p className="font-bold text-secondary-fixed">#RSH-{b.booking_uid?.replace('BK-','')}</p>
@@ -944,6 +981,13 @@ export default function StaffDashboard() {
                             </span>
                           </div>
                         ))}
+                        {customerBookings.filter(b => {
+                          const matchesFilter = customerBookingFilter === 'all' || b.status === customerBookingFilter
+                          const matchesSearch = !customerBookingSearch || b.booking_uid?.toLowerCase().includes(customerBookingSearch.toLowerCase()) || `#RSH-${b.booking_uid?.replace('BK-','')}`.toLowerCase().includes(customerBookingSearch.toLowerCase())
+                          return matchesFilter && matchesSearch
+                        }).length === 0 && (
+                          <p className="text-xs text-on-surface-variant text-center py-3">{t('No bookings match.', 'لا توجد حجوزات مطابقة.')}</p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1304,6 +1348,34 @@ export default function StaffDashboard() {
                   </>)}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Customer Popup */}
+      {showDeleteCustomerPopup && customer && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.6)', backdropFilter:'blur(4px)'}}>
+          <div className="w-full max-w-sm rounded-2xl p-6 animate-fade-in" style={{background:'var(--color-surface-container)', border:'1px solid var(--color-outline-variant)'}}>
+            <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style={{background:'rgba(179,38,30,0.1)'}}>
+              <span className="material-symbols-outlined text-error text-3xl">person_remove</span>
+            </div>
+            <h3 className="font-bold text-on-surface text-lg text-center mb-2">{t('Delete Account?', 'حذف الحساب؟')}</h3>
+            <p className="text-on-surface-variant text-sm text-center mb-1">
+              <span className="font-bold text-on-surface">{customer.first_name} {customer.last_name}</span>
+            </p>
+            <p className="text-on-surface-variant text-xs text-center mb-6">{t('This will permanently delete the customer account, all bookings and loyalty stamps. This cannot be undone.', 'سيؤدي هذا إلى حذف حساب العميل وجميع الحجوزات وطوابع الولاء نهائياً. لا يمكن التراجع.')}</p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowDeleteCustomerPopup(false)}
+                className="flex-1 py-3 rounded-xl text-sm font-bold text-on-surface-variant"
+                style={{background:'var(--input-bg)', border:'1px solid var(--input-border)'}}>
+                {t('Cancel', 'إلغاء')}
+              </button>
+              <button onClick={confirmDeleteCustomer}
+                className="flex-1 py-3 rounded-xl text-sm font-bold text-white"
+                style={{background:'#b3261e'}}>
+                {t('Delete', 'حذف')}
+              </button>
             </div>
           </div>
         </div>
