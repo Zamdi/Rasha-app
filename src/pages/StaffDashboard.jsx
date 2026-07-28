@@ -37,6 +37,7 @@ export default function StaffDashboard() {
   const [inventorySubTab, setInventorySubTab] = useState('items')
   // Message reply
   const [expandedThread, setExpandedThread] = useState(null)
+  const [messageSearch, setMessageSearch] = useState('')
   const [replyTarget, setReplyTarget] = useState(null)
   const [replyBody, setReplyBody] = useState('')
   const [replyLoading, setReplyLoading] = useState(false)
@@ -611,11 +612,26 @@ export default function StaffDashboard() {
         {/* Messages Tab */}
         {activeTab === 'messages' && (
           <div className="glass rounded-2xl overflow-hidden animate-fade-in">
-            <div className="p-4  flex justify-between items-center">
+            <div className="p-4 flex justify-between items-center gap-3 flex-wrap">
               <h3 className="font-bold text-on-surface">{t('Customer Messages', 'رسائل العملاء')}</h3>
-              <button onClick={loadMessages} className="text-secondary-fixed text-xs hover:underline flex items-center gap-1">
-                <span className="material-symbols-outlined text-base">refresh</span>{t('Refresh', 'تحديث')}
-              </button>
+              <div className="flex items-center gap-2 flex-1 min-w-0 max-w-xs">
+                <div className="flex items-center gap-2 flex-1 px-3 py-1.5 rounded-xl" style={{ background: 'var(--input-bg)', border: '1px solid var(--color-outline-variant)' }}>
+                  <span className="material-symbols-outlined text-on-surface-variant text-base shrink-0">search</span>
+                  <input
+                    className="flex-1 bg-transparent outline-none text-xs text-on-surface placeholder:text-on-surface-variant"
+                    placeholder={t('Search by name or email…', 'بحث بالاسم أو البريد…')}
+                    value={messageSearch}
+                    onChange={e => setMessageSearch(e.target.value)} />
+                  {messageSearch && (
+                    <button onClick={() => setMessageSearch('')} className="text-on-surface-variant hover:text-error shrink-0">
+                      <span className="material-symbols-outlined text-base">close</span>
+                    </button>
+                  )}
+                </div>
+                <button onClick={loadMessages} className="text-secondary-fixed text-xs hover:underline flex items-center gap-1 shrink-0">
+                  <span className="material-symbols-outlined text-base">refresh</span>
+                </button>
+              </div>
             </div>
             {messages.length === 0 ? (
               <div className="p-12 text-center">
@@ -624,7 +640,13 @@ export default function StaffDashboard() {
               </div>
             ) : (
               <div className="">
-                {messages.map((msg) => {
+                {messages
+                  .filter(msg => {
+                    if (!messageSearch) return true
+                    const q = messageSearch.toLowerCase()
+                    return msg.name?.toLowerCase().includes(q) || msg.email?.toLowerCase().includes(q) || msg.reference?.toLowerCase().includes(q)
+                  })
+                  .map((msg) => {
                   const isOpen = expandedThread === msg.id
                   const thread = msg.thread || []
                   const unread = !msg.is_read || (msg.unreadInbound || 0) > 0
@@ -654,7 +676,15 @@ export default function StaffDashboard() {
                           <div className="flex items-center gap-2">
                             {unread && <span className="w-2 h-2 rounded-full bg-secondary-fixed shrink-0" />}
                             <div>
-                              <p className={`font-semibold text-sm ${unread ? 'text-secondary-fixed' : 'text-on-surface'}`}>{msg.name}</p>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className={`font-semibold text-sm ${unread ? 'text-secondary-fixed' : 'text-on-surface'}`}>{msg.name}</p>
+                                {msg.reference && (
+                                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" dir="ltr"
+                                    style={{ background: 'rgba(var(--color-secondary-fixed-rgb),0.1)', color: 'var(--color-secondary-fixed)', border: '1px solid rgba(var(--color-secondary-fixed-rgb),0.2)' }}>
+                                    {msg.reference}
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-xs text-on-surface-variant">{msg.email}</p>
                             </div>
                           </div>
