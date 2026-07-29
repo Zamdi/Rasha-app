@@ -6,7 +6,7 @@ const WHATSAPP_NUMBER = '249900088989'
 const WHATSAPP_DISPLAY = '+249 9000 88989'
 
 export default function Contact() {
-  const { t } = useApp()
+  const { t, token } = useApp()
   const [form, setForm] = useState({ name: '', email: '', subject: 'General Inquiry', message: '' })
   const [sent, setSent] = useState(false)
   const [reference, setReference] = useState(null)
@@ -18,9 +18,11 @@ export default function Contact() {
     if (!form.name || !form.email || !form.message) return
     setLoading(true)
     try {
+      const headers = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = 'Bearer ' + token
       const res = await fetch(`${API}/api/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(form),
       })
       const data = await res.json()
@@ -84,8 +86,9 @@ export default function Contact() {
                   <div className="mt-5 inline-flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: 'rgba(var(--color-secondary-fixed-rgb),0.08)', border: '1px solid rgba(var(--color-secondary-fixed-rgb),0.2)' }}>
                     <span className="material-symbols-outlined text-secondary-fixed text-base">confirmation_number</span>
                     <div className="text-start">
-                      <p className="text-xs text-on-surface-variant">{t('Your Reference Number', 'رقم المرجع')}</p>
+                      <p className="text-xs text-on-surface-variant">{t('Your Booking Reference', 'رقم مرجع حجزك')}</p>
                       <p className="text-sm font-bold text-secondary-fixed" dir="ltr">{reference}</p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">{t('Keep this for your records', 'احتفظ به لسجلاتك')}</p>
                     </div>
                   </div>
                 )}
