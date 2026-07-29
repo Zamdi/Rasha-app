@@ -45,9 +45,11 @@ export default function Contact() {
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank')
   }
 
+  const isLoggedIn = !!token
+
   const subjects = [
     t('General Inquiry', 'استفسار عام'),
-    t('Booking Issue', 'مشكلة في الحجز'),
+    ...(isLoggedIn ? [t('Booking Issue', 'مشكلة في الحجز')] : []),
     t('Loyalty Rewards', 'مكافآت الولاء'),
     t('Feedback', 'ملاحظات'),
   ]

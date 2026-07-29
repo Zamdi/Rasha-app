@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import OtpInput from '../components/OtpInput'
 
@@ -8,6 +8,8 @@ const OTP_SECONDS = 60
 export default function Register() {
   const { t, login, showToast } = useApp()
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnTo = location.state?.returnTo || '/loyalty'
   const [form, setForm] = useState({ firstName:'', lastName:'', email:'', phone:'', password:'' })
   const [showPw, setShowPw] = useState(false)
   const [step, setStep] = useState('form')
@@ -67,7 +69,7 @@ export default function Register() {
       if (!res.ok) { showToast(data.error||t('Invalid or expired code','رمز غير صحيح أو منتهي الصلاحية'),'error'); setLoading(false); return }
       login(data.token, data.customer)
       showToast(t('Account created!','تم إنشاء حسابك!'))
-      navigate('/loyalty')
+      navigate(returnTo)
     } catch { showToast(t('Connection error','خطأ في الاتصال'),'error') }
     finally { setLoading(false) }
   }
@@ -125,7 +127,7 @@ export default function Register() {
             </button>
             <p className="text-center text-sm text-on-surface-variant">
               {t('Already have an account?','لديك حساب بالفعل؟')}{' '}
-              <Link to="/login" className="text-secondary-fixed hover:underline">{t('Sign In','تسجيل الدخول')}</Link>
+              <Link to="/login" state={{ returnTo }} className="text-secondary-fixed hover:underline">{t('Sign In','تسجيل الدخول')}</Link>
             </p>
           </div>
         ) : (
@@ -169,7 +171,7 @@ export default function Register() {
               <button onClick={() => setDupError(null)} className="flex-1 py-3 rounded-xl text-sm font-bold text-on-surface-variant" style={{background:'var(--input-bg)', border:'1px solid var(--input-border)'}}>
                 {t('Try Again','حاول مجدداً')}
               </button>
-              <Link to="/login" onClick={() => setDupError(null)} className="flex-1 py-3 rounded-xl text-sm font-bold text-white text-center hydro-gradient">
+              <Link to="/login" state={{ returnTo }} onClick={() => setDupError(null)} className="flex-1 py-3 rounded-xl text-sm font-bold text-white text-center hydro-gradient">
                 {t('Sign In','تسجيل الدخول')}
               </Link>
             </div>

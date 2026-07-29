@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import OtpInput from '../components/OtpInput'
 
@@ -8,6 +8,8 @@ const OTP_SECONDS = 60
 export default function Login() {
   const { t, login, showToast } = useApp()
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnTo = location.state?.returnTo || '/loyalty'
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
@@ -54,7 +56,7 @@ export default function Login() {
       if (!res.ok) { showToast(data.error||t('Invalid or expired code','رمز غير صحيح أو منتهي الصلاحية'),'error'); setLoading(false); return }
       login(data.token, data.customer)
       showToast(t('Welcome back!','مرحباً بك!'))
-      navigate('/loyalty')
+      navigate(returnTo)
     } catch { showToast(t('Connection error','خطأ في الاتصال'),'error') }
     finally { setLoading(false) }
   }
@@ -97,7 +99,7 @@ export default function Login() {
             </button>
             <p className="text-center text-sm text-on-surface-variant">
               {t("Don't have an account?",'ليس لديك حساب؟')}{' '}
-              <Link to="/register" className="text-secondary-fixed hover:underline">{t('Register','إنشاء حساب')}</Link>
+              <Link to="/register" state={{ returnTo }} className="text-secondary-fixed hover:underline">{t('Register','إنشاء حساب')}</Link>
             </p>
           </div>
         ) : (

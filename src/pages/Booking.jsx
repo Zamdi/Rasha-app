@@ -14,6 +14,13 @@ export default function Booking() {
   const navigate = useNavigate()
   const location = useLocation()
 
+  // Guests must register/sign in before booking
+  useEffect(() => {
+    if (!customer) {
+      navigate('/register', { state: { returnTo: '/book' }, replace: true })
+    }
+  }, [customer, navigate])
+
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
     firstName: customer?.first_name || '',

@@ -24,13 +24,12 @@ export default function Home() {
               {t("Experience Khartoum's finest car wash. Professional care, loyalty rewards, and easy online booking.", "استمتع بأفضل خدمة غسيل سيارات في الخرطوم. عناية احترافية ومكافآت ولاء وحجز سهل.")}
             </p>
             <div className="flex flex-wrap gap-3 pt-1">
-              <Link to="/book" className="btn-primary text-sm px-6 py-3 rounded-xl">
-                {t('Book Your Wash', 'احجز الآن')}
-                <span className="material-symbols-outlined rtl-flip text-base">arrow_forward</span>
-              </Link>
-              <a href="#services" className="btn-cyan text-sm px-6 py-3 rounded-xl">
+              <a href="#services" className="btn-primary text-sm px-6 py-3 rounded-xl">
                 {t('Our Services', 'خدماتنا')}
               </a>
+              <Link to="/register" className="btn-cyan text-sm px-6 py-3 rounded-xl">
+                {t('Join Now', 'انضم الآن')}
+              </Link>
             </div>
             <div className="flex gap-6 pt-1">
               {[['500+', t('Customers', 'عميل')], ['4.9★', t('Rating', 'التقييم')], ['2', t('Services', 'خدمات')]].map(([v, l]) => (
