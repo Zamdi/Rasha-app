@@ -88,7 +88,7 @@ export default function Contact() {
                   <div className="mt-5 inline-flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: 'rgba(var(--color-secondary-fixed-rgb),0.08)', border: '1px solid rgba(var(--color-secondary-fixed-rgb),0.2)' }}>
                     <span className="material-symbols-outlined text-secondary-fixed text-base">confirmation_number</span>
                     <div className="text-start">
-                      <p className="text-xs text-on-surface-variant">{t('Your Booking Reference', 'رقم مرجع حجزك')}</p>
+                      <p className="text-xs text-on-surface-variant">{t('Reference ID:', 'رقم المرجع:')}</p>
                       <p className="text-sm font-bold text-secondary-fixed" dir="ltr">{reference}</p>
                       <p className="text-xs text-on-surface-variant mt-0.5">{t('Keep this for your records', 'احتفظ به لسجلاتك')}</p>
                     </div>
