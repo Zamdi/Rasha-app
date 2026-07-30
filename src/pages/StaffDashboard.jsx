@@ -511,19 +511,7 @@ export default function StaffDashboard() {
               {t('Add Customer', 'إضافة عميل')}
             </button>
           )}
-          {isSuperAdmin && (
-            <button onClick={() => { setActiveTab('activity'); loadActivity() }}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 hover:opacity-80 transition-all"
-              style={{
-                background: 'transparent',
-                border: '2px solid #e53935',
-                color: '#e53935',
-                backdropFilter: 'blur(10px)',
-              }}>
-              <span className="material-symbols-outlined text-base">monitoring</span>
-              {t('Reports', 'التقارير')}
-            </button>
-          )}
+
         </div>
 
         {/* Tabs */}
@@ -1387,8 +1375,8 @@ export default function StaffDashboard() {
 
       {/* Reply to Message Popup */}
       {replyTarget && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-lg rounded-2xl animate-fade-in overflow-hidden" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
+        <div className="glass-popup-backdrop fixed inset-0 z-[500] flex items-center justify-center p-4">
+          <div className="glass-popup w-full max-w-lg rounded-2xl animate-fade-in overflow-hidden">
 
             <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
               <div>
@@ -1501,8 +1489,8 @@ export default function StaffDashboard() {
 
       {/* Cancel Booking Popup */}
       {cancelTarget && (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-sm rounded-2xl p-6 animate-fade-in" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
+        <div className="glass-popup-backdrop fixed inset-0 z-[400] flex items-center justify-center p-4">
+          <div className="glass-popup w-full max-w-sm rounded-2xl p-6 animate-fade-in">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{background:'rgba(179,38,30,0.1)'}}>
                 <span className="material-symbols-outlined text-error">event_busy</span>
@@ -1537,8 +1525,8 @@ export default function StaffDashboard() {
         </div>
       )}
       {showModal && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-md rounded-2xl p-6 animate-fade-in" style={{ background: 'var(--color-surface-container)', border: '1px solid rgba(116,245,255,0.15)' }}>
+        <div className="glass-popup-backdrop fixed inset-0 z-[300] flex items-center justify-center p-4">
+          <div className="glass-popup w-full max-w-md rounded-2xl p-6 animate-fade-in">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-bold text-on-surface text-lg font-display">
                 {modalMode === 'add' ? t('Add Customer', 'إضافة عميل') : t('Edit Customer', 'تعديل العميل')}
@@ -1686,8 +1674,8 @@ export default function StaffDashboard() {
 
       {/* Add/Edit Staff Modal */}
       {showStaffModal && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 animate-fade-in overflow-y-auto max-h-[90vh]" style={{ background: 'var(--color-surface-container)', border: '1px solid rgba(116,245,255,0.15)' }}>
+        <div className="glass-popup-backdrop fixed inset-0 z-[300] flex items-center justify-center p-4">
+          <div className="glass-popup w-full max-w-lg rounded-2xl p-6 animate-fade-in overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-bold text-on-surface text-lg font-display">
                 {staffModalMode === 'add' ? t('Add Staff Member', 'إضافة موظف') : t('Edit Staff Member', 'تعديل موظف')}
@@ -1792,8 +1780,8 @@ export default function StaffDashboard() {
       )}
       {/* Delete Inventory Item Popup */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-xs rounded-2xl p-6 animate-fade-in" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
+        <div className="glass-popup-backdrop fixed inset-0 z-[400] flex items-center justify-center p-4">
+          <div className="glass-popup w-full max-w-xs rounded-2xl p-6 animate-fade-in">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{background:'rgba(179,38,30,0.1)'}}>
                 <span className="material-symbols-outlined text-error">delete</span>
@@ -1822,8 +1810,8 @@ export default function StaffDashboard() {
 
       {/* Staff: Request Refill Popup */}
       {showRefillRequest && (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-xs rounded-2xl p-6 animate-fade-in" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
+        <div className="glass-popup-backdrop fixed inset-0 z-[400] flex items-center justify-center p-4">
+          <div className="glass-popup w-full max-w-xs rounded-2xl p-6 animate-fade-in">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{background:'rgba(0,86,179,0.1)'}}>
                 <span className="material-symbols-outlined text-secondary-fixed">notification_add</span>
@@ -1870,8 +1858,8 @@ export default function StaffDashboard() {
         </div>
       )}
       {refillTarget && (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-xs rounded-2xl p-6 animate-fade-in" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
+        <div className="glass-popup-backdrop fixed inset-0 z-[400] flex items-center justify-center p-4">
+          <div className="glass-popup w-full max-w-xs rounded-2xl p-6 animate-fade-in">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{background:'rgba(0,86,179,0.1)'}}>
                 <span className="material-symbols-outlined text-secondary-fixed">add_circle</span>
@@ -1910,8 +1898,8 @@ export default function StaffDashboard() {
 
       {/* Add Inventory Item Modal */}
       {showAddInventory && (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-sm rounded-2xl p-6 animate-fade-in" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
+        <div className="glass-popup-backdrop fixed inset-0 z-[400] flex items-center justify-center p-4">
+          <div className="glass-popup w-full max-w-sm rounded-2xl p-6 animate-fade-in">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-on-surface font-display">{t('Add Inventory Item', 'إضافة عنصر')}</h3>
               <button onClick={() => { setShowAddInventory(false); setNewItem({name:'',unit:'liters',quantity:0,min_quantity:10}) }}>
@@ -1969,7 +1957,7 @@ export default function StaffDashboard() {
 
       {/* ── Activity / Reports Tab ── */}
       {activeTab === 'activity' && isSuperAdmin && (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
 
           {/* Filters + Download */}
           <div className="glass rounded-2xl p-5">

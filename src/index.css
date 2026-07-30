@@ -207,15 +207,15 @@ html::after {
   /* Gradient button */
   .hydro-gradient {
     background: linear-gradient(135deg, #0066cc 0%, #0044aa 50%, #003388 100%);
-    box-shadow: 0 4px 15px rgba(0,86,179,0.4);
+    box-shadow: 0 2px 8px rgba(0,86,179,0.2);
   }
   .hydro-gradient:hover {
     background: linear-gradient(135deg, #0077dd 0%, #0055bb 50%, #004499 100%);
-    box-shadow: 0 6px 20px rgba(0,86,179,0.5);
+    box-shadow: 0 3px 10px rgba(0,86,179,0.25);
     transform: translateY(-1px);
   }
 
-  .cyan-glow { box-shadow: 0 0 20px rgba(116,245,255,0.3), 0 4px 15px rgba(0,86,179,0.4); }
+  .cyan-glow { box-shadow: 0 2px 8px rgba(0,86,179,0.2); }
 
   /* Text input */
   .rasha-input {
@@ -338,6 +338,21 @@ html::after {
   border: 1px solid var(--glass-high-border);
   box-shadow: var(--glass-shadow-lg);
 }
+
+
+  /* Glass popup — used for all modals/popups */
+  .glass-popup {
+    background: var(--glass-high-bg);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid var(--glass-high-border);
+    box-shadow: var(--glass-shadow-lg);
+  }
+  .glass-popup-backdrop {
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
 
 /* ── Shimmer skeleton ────────────────────────────────────────── */
 .shimmer {
