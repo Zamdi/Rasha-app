@@ -342,16 +342,21 @@ html::after {
 
   /* Glass popup — used for all modals/popups */
   .glass-popup {
-    background: var(--glass-high-bg);
+    background: rgba(14,20,35,0.92);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
-    border: 1px solid var(--glass-high-border);
-    box-shadow: var(--glass-shadow-lg);
+    border: 1px solid rgba(116,245,255,0.15);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06) inset;
+  }
+  html.light .glass-popup {
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(0,86,179,0.2);
+    box-shadow: 0 24px 64px rgba(0,86,179,0.15), 0 1px 0 rgba(255,255,255,0.95) inset;
   }
   .glass-popup-backdrop {
-    background: rgba(0,0,0,0.45);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
 /* ── Shimmer skeleton ────────────────────────────────────────── */
