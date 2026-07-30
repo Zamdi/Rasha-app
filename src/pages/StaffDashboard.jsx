@@ -1957,7 +1957,7 @@ export default function StaffDashboard() {
 
       {/* ── Activity / Reports Tab ── */}
       {activeTab === 'activity' && isSuperAdmin && (
-        <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
+        <div className="space-y-6 animate-fade-in">
 
           {/* Filters + Download */}
           <div className="glass rounded-2xl p-5">
@@ -2090,7 +2090,16 @@ export default function StaffDashboard() {
               {activityLogs.length === 0 ? (
                 <div className="p-12 text-center">
                   <span className="material-symbols-outlined text-on-surface-variant text-5xl mb-3 block">history</span>
-                  <p className="text-on-surface-variant text-sm">{t('No activity found for the selected filters.', 'لا يوجد نشاط للفلاتر المحددة.')}</p>
+                  <p className="text-on-surface font-semibold mb-1">
+                    {activitySearch || activityFrom || activityTo
+                      ? t('No activity matches your filters.', 'لا يوجد نشاط يطابق الفلاتر.')
+                      : t('No activity logged yet.', 'لم يتم تسجيل أي نشاط بعد.')}
+                  </p>
+                  <p className="text-on-surface-variant text-xs">
+                    {activitySearch || activityFrom || activityTo
+                      ? t('Try clearing your filters or searching a different name.', 'جرب مسح الفلاتر أو البحث باسم آخر.')
+                      : t('Activity is recorded as staff perform actions — cancel bookings, reply to messages, manage inventory, etc.', 'يتم تسجيل النشاط عندما يقوم الموظفون بإجراءات — إلغاء الحجوزات، الرد على الرسائل، إدارة المخزون، إلخ.')}
+                  </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
