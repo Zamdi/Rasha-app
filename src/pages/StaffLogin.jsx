@@ -30,7 +30,7 @@ export default function StaffLogin() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-surface">
+    <div className="min-h-screen flex flex-col" style={{background:'transparent'}}>
       {/* Header */}
       <header className="w-full flex justify-between items-center px-6 h-14 bg-background/95 backdrop-blur-xl shadow-sm">
         <span className="font-display font-extrabold text-2xl tracking-tight text-secondary-fixed">Rasha</span>

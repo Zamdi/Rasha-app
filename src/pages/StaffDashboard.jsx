@@ -38,6 +38,14 @@ export default function StaffDashboard() {
   // Message reply
   const [expandedThread, setExpandedThread] = useState(null)
   const [messageSearch, setMessageSearch] = useState('')
+  const [activityLogs, setActivityLogs] = useState([])
+  const [activitySummary, setActivitySummary] = useState([])
+  const [activityTrend, setActivityTrend] = useState([])
+  const [activityBreakdown, setActivityBreakdown] = useState([])
+  const [activityLoading, setActivityLoading] = useState(false)
+  const [activitySearch, setActivitySearch] = useState('')
+  const [activityFrom, setActivityFrom] = useState('')
+  const [activityTo, setActivityTo] = useState('')
   const [replyTarget, setReplyTarget] = useState(null)
   const [replyBody, setReplyBody] = useState('')
   const [replyLoading, setReplyLoading] = useState(false)
@@ -298,6 +306,72 @@ export default function StaffDashboard() {
     finally { setInventoryLoading(false) }
   }
 
+  const loadActivity = async (overrides = {}) => {
+    setActivityLoading(true)
+    try {
+      const q = new URLSearchParams()
+      const u = overrides.username !== undefined ? overrides.username : activitySearch
+      const f = overrides.from !== undefined ? overrides.from : activityFrom
+      const to2 = overrides.to !== undefined ? overrides.to : activityTo
+      if (u) q.set('username', u)
+      if (f) q.set('from', f)
+      if (to2) q.set('to', to2)
+      const res = await fetch(`${API}/api/admin/activity?${q}`, { headers: hdrs })
+      const data = await res.json()
+      if (res.ok) {
+        setActivityLogs(data.logs || [])
+        setActivitySummary(data.summary || [])
+        setActivityTrend(data.trend || [])
+        setActivityBreakdown(data.actionBreakdown || [])
+      }
+    } catch (e) { console.error(e) }
+    finally { setActivityLoading(false) }
+  }
+
+  const exportActivityPDF = () => {
+    const win = window.open('', '_blank')
+    const rows = activityLogs.map(l => `
+      <tr>
+        <td>${l.display_name || l.username}</td>
+        <td>${l.username}</td>
+        <td style="text-transform:capitalize">${(l.action||'').replace(/_/g,' ')}</td>
+        <td>${l.entity || ''}</td>
+        <td>${l.detail || ''}</td>
+        <td dir="ltr">${new Date(l.created_at).toLocaleString('en-GB')}</td>
+      </tr>`).join('')
+    const summaryRows = activitySummary.map(s => `
+      <tr>
+        <td>${s.display_name || s.username}</td>
+        <td>${s.username}</td>
+        <td>${s.total}</td>
+        <td dir="ltr">${s.last_active ? new Date(s.last_active).toLocaleString('en-GB') : '-'}</td>
+      </tr>`).join('')
+    const breakdownRows = activityBreakdown.map(b => `
+      <tr><td style="text-transform:capitalize">${(b.action||'').replace(/_/g,' ')}</td><td>${b.count}</td></tr>`).join('')
+    win.document.write(`<!DOCTYPE html><html><head><title>Staff Activity Report</title>
+    <style>
+      body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:24px;margin:0}
+      h1{font-size:18px;margin-bottom:2px;color:#0056b3}
+      h2{font-size:13px;margin:22px 0 8px;color:#333;border-bottom:1px solid #e0e0e0;padding-bottom:4px}
+      .meta{color:#888;font-size:10px;margin-bottom:18px}
+      table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:10px}
+      th{background:#0056b3;color:#fff;text-align:left;padding:6px 8px}
+      td{padding:5px 8px;border-bottom:1px solid #ebebeb}
+      tr:nth-child(even)td{background:#f7f9ff}
+    </style></head><body>
+    <h1>&#128202; Staff Activity Report</h1>
+    <p class="meta">Rasha Car Wash &nbsp;|&nbsp; Generated: ${new Date().toLocaleString('en-GB')} &nbsp;|&nbsp; ${activityLogs.length} entries</p>
+    <h2>Activity Summary by Staff</h2>
+    <table><thead><tr><th>Name</th><th>Username</th><th>Total Actions</th><th>Last Active</th></tr></thead><tbody>${summaryRows||'<tr><td colspan="4">No data</td></tr>'}</tbody></table>
+    <h2>Action Breakdown</h2>
+    <table><thead><tr><th>Action</th><th>Count</th></tr></thead><tbody>${breakdownRows||'<tr><td colspan="2">No data</td></tr>'}</tbody></table>
+    <h2>Activity Log (${activityLogs.length} entries)</h2>
+    <table><thead><tr><th>Name</th><th>Username</th><th>Action</th><th>Entity</th><th>Detail</th><th>Timestamp</th></tr></thead><tbody>${rows||'<tr><td colspan="6">No entries</td></tr>'}</tbody></table>
+    </body></html>`)
+    win.document.close()
+    setTimeout(() => win.print(), 400)
+  }
+
   const handleSearch = (q) => {
     setSearchQuery(q)
     clearTimeout(searchTimeout.current)
@@ -394,9 +468,9 @@ export default function StaffDashboard() {
   const shiftInfo = `${now.toLocaleDateString(t('en-US','ar-EG'),{weekday:'long',month:'long',day:'numeric'})} | ${now.toLocaleTimeString(t('en-US','ar-EG'),{hour:'2-digit',minute:'2-digit'})}`
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{background:"transparent"}}>
       {/* Staff top bar */}
-      <header className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur-xl shadow-sm">
+      <header className="fixed top-0 w-full z-50" style={{background:"var(--navbar-bg)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",borderBottom:"1px solid var(--glass-border)"}}>
         <div className="max-w-7xl mx-auto flex justify-between items-center h-14 px-4 md:px-6">
           <div className="flex items-center gap-3">
             <span className="font-display font-extrabold text-xl tracking-tight text-secondary-fixed">Rasha</span>
@@ -437,6 +511,19 @@ export default function StaffDashboard() {
               {t('Add Customer', 'إضافة عميل')}
             </button>
           )}
+          {isSuperAdmin && (
+            <button onClick={() => { setActiveTab('activity'); loadActivity() }}
+              className="px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 hover:opacity-80 transition-all"
+              style={{
+                background: 'transparent',
+                border: '2px solid #e53935',
+                color: '#e53935',
+                backdropFilter: 'blur(10px)',
+              }}>
+              <span className="material-symbols-outlined text-base">monitoring</span>
+              {t('Reports', 'التقارير')}
+            </button>
+          )}
         </div>
 
         {/* Tabs */}
@@ -447,6 +534,7 @@ export default function StaffDashboard() {
             ['messages', 'mail', t('Messages', 'الرسائل'), unreadCount, true],
             ['staff', 'manage_accounts', t('Staff', 'الموظفون'), null, isSuperAdmin],
             ['inventory', 'inventory_2', t('Inventory', 'المخزون'), isSuperAdmin ? refillRequests.filter(r=>!r.read).length : null, isSuperAdmin],
+            ['activity', 'monitoring', t('Activity', 'النشاط'), null, isSuperAdmin],
           ].filter(([,,,,show]) => show).map(([tab, icon, label, badge]) => (
             <button key={tab}
               onClick={() => {
@@ -454,9 +542,9 @@ export default function StaffDashboard() {
                 if (tab === 'messages') { loadMessages(); setUnreadCount(0) }
                 if (tab === 'customers') loadAllCustomers('')
                 if (tab === 'staff') loadStaff()
+                if (tab === 'activity') loadActivity()
                 if (tab === 'inventory') {
                   loadInventory()
-                  // Mark all refill requests as read
                   const updated = refillRequests.map(r => ({...r, read: true}))
                   setRefillRequests(updated)
                   localStorage.setItem('rasha_refill_requests', JSON.stringify(updated))
@@ -1876,6 +1964,178 @@ export default function StaffDashboard() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Activity / Reports Tab ── */}
+      {activeTab === 'activity' && isSuperAdmin && (
+        <div className="space-y-6 animate-fade-in">
+
+          {/* Filters + Download */}
+          <div className="glass rounded-2xl p-5">
+            <div className="flex flex-wrap gap-3 items-end">
+              {/* Search by username */}
+              <div className="flex-1 min-w-[160px]">
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">{t('Staff Username', 'اسم المستخدم')}</label>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{background:'var(--input-bg)',border:'1px solid var(--color-outline-variant)'}}>
+                  <span className="material-symbols-outlined text-on-surface-variant text-base">search</span>
+                  <input className="flex-1 bg-transparent outline-none text-xs text-on-surface placeholder:text-on-surface-variant"
+                    placeholder={t('Search by username…', 'بحث باسم المستخدم…')}
+                    value={activitySearch}
+                    onChange={e => setActivitySearch(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && loadActivity()} />
+                </div>
+              </div>
+              {/* Date from */}
+              <div>
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">{t('From', 'من')}</label>
+                <input type="date" className="rasha-input text-xs" value={activityFrom}
+                  onChange={e => setActivityFrom(e.target.value)} />
+              </div>
+              {/* Date to */}
+              <div>
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">{t('To', 'إلى')}</label>
+                <input type="date" className="rasha-input text-xs" value={activityTo}
+                  onChange={e => setActivityTo(e.target.value)} />
+              </div>
+              <button onClick={() => loadActivity()}
+                className="px-5 py-2.5 rounded-xl text-xs font-bold hydro-gradient text-white hover:opacity-90 flex items-center gap-2">
+                <span className="material-symbols-outlined text-base">filter_list</span>
+                {t('Apply', 'تطبيق')}
+              </button>
+              <button onClick={() => { setActivitySearch(''); setActivityFrom(''); setActivityTo(''); loadActivity({username:'',from:'',to:''}) }}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface"
+                style={{background:'var(--input-bg)',border:'1px solid var(--color-outline-variant)'}}>
+                {t('Clear', 'مسح')}
+              </button>
+              <button onClick={exportActivityPDF} disabled={activityLogs.length === 0}
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2 hover:opacity-90 disabled:opacity-40"
+                style={{background:'#7c3aed'}}>
+                <span className="material-symbols-outlined text-base">picture_as_pdf</span>
+                {t('Download PDF', 'تحميل PDF')}
+              </button>
+            </div>
+          </div>
+
+          {activityLoading ? (
+            <div className="flex justify-center py-16"><div className="loader" /></div>
+          ) : (<>
+
+            {/* Summary cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="glass rounded-2xl p-4">
+                <p className="text-xs text-on-surface-variant mb-1">{t('Total Actions', 'إجمالي الإجراءات')}</p>
+                <p className="text-2xl font-extrabold text-secondary-fixed">{activityLogs.length}</p>
+              </div>
+              <div className="glass rounded-2xl p-4">
+                <p className="text-xs text-on-surface-variant mb-1">{t('Staff Members', 'أعضاء الفريق')}</p>
+                <p className="text-2xl font-extrabold text-secondary-fixed">{activitySummary.length}</p>
+              </div>
+              <div className="glass rounded-2xl p-4">
+                <p className="text-xs text-on-surface-variant mb-1">{t('Top Action', 'أكثر إجراء')}</p>
+                <p className="text-sm font-extrabold text-secondary-fixed capitalize">{activityBreakdown[0]?.action.replace(/_/g,' ') || '—'}</p>
+              </div>
+              <div className="glass rounded-2xl p-4">
+                <p className="text-xs text-on-surface-variant mb-1">{t('Most Active', 'الأكثر نشاطاً')}</p>
+                <p className="text-sm font-extrabold text-secondary-fixed">{activitySummary[0]?.display_name || activitySummary[0]?.username || '—'}</p>
+              </div>
+            </div>
+
+            {/* Per-staff summary table */}
+            {activitySummary.length > 0 && (
+              <div className="glass rounded-2xl overflow-hidden">
+                <div className="px-5 py-4" style={{borderBottom:'1px solid var(--color-outline-variant)'}}>
+                  <h3 className="font-bold text-on-surface">{t('Activity by Staff Member', 'النشاط لكل موظف')}</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs" dir="ltr">
+                    <thead><tr style={{background:'var(--color-surface-container)'}}>
+                      <th className="text-start px-4 py-3 font-bold text-on-surface-variant">{t('Name','الاسم')}</th>
+                      <th className="text-start px-4 py-3 font-bold text-on-surface-variant">{t('Username','اسم المستخدم')}</th>
+                      <th className="text-start px-4 py-3 font-bold text-on-surface-variant">{t('Total Actions','الإجراءات')}</th>
+                      <th className="text-start px-4 py-3 font-bold text-on-surface-variant">{t('Last Active','آخر نشاط')}</th>
+                    </tr></thead>
+                    <tbody>
+                      {activitySummary.map((s,i) => (
+                        <tr key={i} style={{borderBottom:'1px solid var(--color-outline-variant)'}}>
+                          <td className="px-4 py-3 font-semibold text-on-surface">{s.display_name || s.username}</td>
+                          <td className="px-4 py-3 text-on-surface-variant">{s.username}</td>
+                          <td className="px-4 py-3">
+                            <span className="font-bold text-secondary-fixed">{s.total}</span>
+                          </td>
+                          <td className="px-4 py-3 text-on-surface-variant">{s.last_active ? new Date(s.last_active).toLocaleString('en-GB') : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Action breakdown */}
+            {activityBreakdown.length > 0 && (
+              <div className="glass rounded-2xl p-5">
+                <h3 className="font-bold text-on-surface mb-4">{t('Action Breakdown', 'تفصيل الإجراءات')}</h3>
+                <div className="space-y-2">
+                  {activityBreakdown.map((b,i) => {
+                    const max = activityBreakdown[0].count
+                    const pct = Math.round((b.count / max) * 100)
+                    return (
+                      <div key={i} className="flex items-center gap-3">
+                        <span className="text-xs text-on-surface-variant w-32 capitalize shrink-0">{b.action.replace(/_/g,' ')}</span>
+                        <div className="flex-1 rounded-full overflow-hidden" style={{height:'6px',background:'var(--input-bg)'}}>
+                          <div style={{width:`${pct}%`,height:'100%',background:'var(--color-secondary-fixed)',borderRadius:'9999px'}} />
+                        </div>
+                        <span className="text-xs font-bold text-on-surface w-8 text-end">{b.count}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Full log table */}
+            <div className="glass rounded-2xl overflow-hidden">
+              <div className="px-5 py-4 flex items-center justify-between" style={{borderBottom:'1px solid var(--color-outline-variant)'}}>
+                <h3 className="font-bold text-on-surface">{t('Activity Log', 'سجل النشاط')} <span className="text-on-surface-variant font-normal text-xs">({activityLogs.length})</span></h3>
+              </div>
+              {activityLogs.length === 0 ? (
+                <div className="p-12 text-center">
+                  <span className="material-symbols-outlined text-on-surface-variant text-5xl mb-3 block">history</span>
+                  <p className="text-on-surface-variant text-sm">{t('No activity found for the selected filters.', 'لا يوجد نشاط للفلاتر المحددة.')}</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs" dir="ltr">
+                    <thead><tr style={{background:'var(--color-surface-container)'}}>
+                      <th className="text-start px-4 py-3 font-bold text-on-surface-variant">{t('Staff','الموظف')}</th>
+                      <th className="text-start px-4 py-3 font-bold text-on-surface-variant">{t('Action','الإجراء')}</th>
+                      <th className="text-start px-4 py-3 font-bold text-on-surface-variant">{t('Detail','التفاصيل')}</th>
+                      <th className="text-start px-4 py-3 font-bold text-on-surface-variant">{t('Time','الوقت')}</th>
+                    </tr></thead>
+                    <tbody>
+                      {activityLogs.map(l => (
+                        <tr key={l.id} style={{borderBottom:'1px solid var(--color-outline-variant)'}}>
+                          <td className="px-4 py-3">
+                            <p className="font-semibold text-on-surface">{l.display_name || l.username}</p>
+                            <p className="text-on-surface-variant text-xs">{l.username}</p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="px-2 py-1 rounded-full text-xs font-bold capitalize"
+                              style={{background:'rgba(var(--color-secondary-fixed-rgb),0.1)',color:'var(--color-secondary-fixed)'}}>
+                              {l.action.replace(/_/g,' ')}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-on-surface-variant max-w-xs" style={{wordBreak:'break-word'}}>{l.detail || '—'}</td>
+                          <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{new Date(l.created_at).toLocaleString('en-GB')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>)}
         </div>
       )}
     </div>
