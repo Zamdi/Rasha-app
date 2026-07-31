@@ -31,25 +31,25 @@
   --color-on-background:             #0d1825;
 
   /* Glass tokens */
-  --glass-bg:           rgba(255,255,255,0.22);
-  --glass-bg-hover:     rgba(255,255,255,0.32);
-  --glass-high-bg:      rgba(255,255,255,0.55);
-  --glass-border:       rgba(255,255,255,0.55);
-  --glass-high-border:  rgba(255,255,255,0.8);
-  --glass-shadow:       0 8px 32px rgba(0,80,160,0.1), 0 1px 0 rgba(255,255,255,0.8) inset;
-  --glass-shadow-lg:    0 20px 60px rgba(0,80,160,0.15), 0 1px 0 rgba(255,255,255,0.9) inset;
-  --glass-shadow-card:  0 4px 24px rgba(0,80,160,0.08), 0 1px 0 rgba(255,255,255,0.9) inset;
+  --glass-bg:           rgba(150,205,250,0.40);
+  --glass-bg-hover:     rgba(165,215,252,0.52);
+  --glass-high-bg:      rgba(185,225,252,0.70);
+  --glass-border:       rgba(255,255,255,0.65);
+  --glass-high-border:  rgba(255,255,255,0.85);
+  --glass-shadow:       0 8px 32px rgba(0,90,180,0.14), 0 1px 0 rgba(255,255,255,0.85) inset;
+  --glass-shadow-lg:    0 20px 60px rgba(0,90,180,0.2),  0 1px 0 rgba(255,255,255,0.9) inset;
+  --glass-shadow-card:  0 4px 24px rgba(0,90,180,0.11), 0 1px 0 rgba(255,255,255,0.9) inset;
 
   /* Inputs */
-  --input-bg:           rgba(255,255,255,0.5);
-  --input-border:       rgba(255,255,255,0.7);
+  --input-bg:           rgba(195,228,252,0.68);
+  --input-border:       rgba(255,255,255,0.8);
   --input-focus:        rgba(0,86,179,0.2);
 
   /* Navbar */
-  --navbar-bg:          rgba(255,255,255,0.35);
+  --navbar-bg:          rgba(165,215,252,0.55);
 
   /* Mobile nav */
-  --mobile-nav-bg:      rgba(255,255,255,0.65);
+  --mobile-nav-bg:      rgba(180,222,252,0.75);
 
   /* RGB channels for Tailwind opacity modifiers */
   --color-secondary-fixed-rgb:        0,95,158;
@@ -160,11 +160,11 @@ body {
 
   /* Glass popup */
   .glass-popup {
-    background: rgba(255,255,255,0.88);
+    background: rgba(205,232,252,0.95);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
     border: 1px solid rgba(255,255,255,0.95);
-    box-shadow: 0 24px 64px rgba(0,80,160,0.18), 0 1px 0 rgba(255,255,255,0.95) inset;
+    box-shadow: 0 24px 64px rgba(0,90,180,0.22), 0 1px 0 rgba(255,255,255,0.95) inset;
   }
   html.dark .glass-popup {
     background: rgba(14,28,50,0.92);
@@ -215,13 +215,13 @@ body {
            transition-all flex items-center justify-center gap-2;
   }
   .btn-cyan {
-    background: rgba(255,255,255,0.3);
+    background: rgba(170,215,250,0.55);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.8);
     color: var(--color-on-surface);
     @apply font-bold text-sm px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2;
   }
-  .btn-cyan:hover { background: rgba(255,255,255,0.45); }
+  .btn-cyan:hover { background: rgba(190,228,252,0.7); }
 }
 
 /* ── OTP Input ───────────────────────────────────────────────── */
@@ -248,14 +248,14 @@ body {
 
 /* ── Booking slots ───────────────────────────────────────────── */
 .slot-available {
-  background: rgba(255,255,255,0.3);
+  background: rgba(170,215,250,0.52);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.75);
   color: var(--color-on-surface);
   transition: all 0.2s;
 }
 .slot-available:hover {
-  background: rgba(255,255,255,0.5);
+  background: rgba(190,228,252,0.72);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }

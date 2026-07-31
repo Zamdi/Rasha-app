@@ -140,8 +140,7 @@ export default function Navbar() {
                 <span className="material-symbols-outlined" style={{fontSize:'14px', transition:'transform 0.2s', transform: menuOpen ? 'rotate(180deg)' : 'rotate(0deg)'}}>expand_more</span>
               </button>
               {menuOpen && (
-                <div className="absolute end-0 mt-2 w-48 rounded-2xl py-2 animate-fade-in z-50"
-                  style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+                <div className="glass-popup absolute end-0 mt-2 w-48 rounded-2xl py-2 animate-fade-in z-50">
                   <div className="px-4 py-2 border-b" style={{borderColor: 'var(--color-outline-variant)'}}>
                     <p className="text-xs font-bold text-on-surface">{customer.first_name} {customer.last_name}</p>
                     <p className="text-xs text-on-surface-variant truncate">{customer.email}</p>
