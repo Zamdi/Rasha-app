@@ -96,19 +96,11 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 w-full z-50 transition-all duration-300"
       style={{
-        background: scrolled
-          ? isDark
-            ? 'var(--navbar-bg)'
-            : 'rgba(244,241,236,0.6)'
-          : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled
-          ? isDark
-            ? '1px solid rgba(66,71,82,0.3)'
-            : '1px solid rgba(203,199,193,0.6)'
-          : 'none',
-        boxShadow: scrolled && !isDark ? '0 4px 24px rgba(0,86,179,0.06)' : 'none',
+        background: scrolled ? 'var(--navbar-bg)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(24px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(24px)' : 'none',
+        borderBottom: scrolled ? '1px solid var(--glass-border)' : 'none',
+        boxShadow: scrolled ? 'var(--glass-shadow-card)' : 'none',
       }}>
       <div className="max-w-7xl mx-auto flex justify-between items-center h-14 px-4 md:px-6">
         {/* Logo */}

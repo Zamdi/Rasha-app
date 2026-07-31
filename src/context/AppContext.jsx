@@ -20,8 +20,8 @@ export function AppProvider({ children }) {
     }
 
     // Set explicit colors — Chrome Android needs this to repaint GPU layers
-    const bg = isLight ? '#f4f1ec' : '#101415'
-    const fg = isLight ? '#1a1a18' : '#e0e3e5'
+    const bg = isDarkMode ? '#0a1628' : 'transparent'
+    const fg = isDarkMode ? '#e8f0fe' : '#0d1825'
     root.style.backgroundColor = bg
     root.style.color = fg
     body.style.backgroundColor = bg
@@ -29,7 +29,7 @@ export function AppProvider({ children }) {
 
     // Update meta theme-color (used by Mi Browser, Samsung Internet, Chrome)
     const metaTheme = document.getElementById('theme-meta')
-    if (metaTheme) metaTheme.setAttribute('content', isLight ? '#f4f1ec' : '#101415')
+    if (metaTheme) metaTheme.setAttribute('content', isDarkMode ? '#0a1628' : '#a8d8ea')
 
     // Force all mobile browsers to repaint CSS variable changes
     body.style.willChange = 'background-color, color'
