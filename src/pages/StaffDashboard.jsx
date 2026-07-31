@@ -2013,6 +2013,32 @@ export default function StaffDashboard() {
             <div className="flex justify-center py-16"><div className="loader" /></div>
           ) : (<>
 
+            {/* Recent account deletions — staff-initiated AND customer self-deletions, surfaced by default */}
+            {activityLogs.some(l => l.action === 'delete_customer' || l.action === 'delete_customer_self') && (
+              <div className="rounded-2xl p-4" style={{background:'rgba(220,38,38,0.08)', border:'1px solid rgba(220,38,38,0.25)'}}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="material-symbols-outlined" style={{color:'#dc2626'}}>person_remove</span>
+                  <h3 className="font-bold" style={{color:'#dc2626'}}>{t('Recent Account Deletions', 'حسابات محذوفة مؤخراً')}</h3>
+                </div>
+                <div className="space-y-2">
+                  {activityLogs.filter(l => l.action === 'delete_customer' || l.action === 'delete_customer_self').slice(0, 8).map(l => (
+                    <div key={l.id} className="text-xs flex flex-wrap items-center gap-x-2" style={{color:'var(--color-on-surface)'}}>
+                      {l.action === 'delete_customer_self' ? (
+                        <span className="px-1.5 py-0.5 rounded-full font-bold" style={{background:'rgba(220,38,38,0.15)', color:'#dc2626', fontSize:'10px'}}>
+                          {t('SELF-DELETED', 'حذف ذاتي')}
+                        </span>
+                      ) : (
+                        <span className="font-semibold">{l.display_name || l.username}</span>
+                      )}
+                      <span className="text-on-surface-variant">—</span>
+                      <span>{l.detail}</span>
+                      <span className="text-on-surface-variant ms-auto">{new Date(l.created_at).toLocaleString('en-GB')}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Summary cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="glass rounded-2xl p-4">
