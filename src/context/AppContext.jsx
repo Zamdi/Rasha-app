@@ -9,14 +9,15 @@ export function AppProvider({ children }) {
     const root = document.documentElement
     const body = document.body
     const isLight = theme === 'light'
+    const isDarkMode = !isLight
 
-    // Apply immediately
-    if (isLight) {
-      root.classList.add('light')
-      root.classList.remove('dark')
-    } else {
-      root.classList.remove('light')
+    // Light is default (no class). Dark gets 'dark' class.
+    if (isDarkMode) {
       root.classList.add('dark')
+      root.classList.remove('light')
+    } else {
+      root.classList.remove('dark')
+      root.classList.add('light')
     }
 
     // Set explicit colors — Chrome Android needs this to repaint GPU layers
@@ -27,11 +28,11 @@ export function AppProvider({ children }) {
     body.style.backgroundColor = bg
     body.style.color = fg
 
-    // Update meta theme-color (used by Mi Browser, Samsung Internet, Chrome)
+    // Update meta theme-color
     const metaTheme = document.getElementById('theme-meta')
     if (metaTheme) metaTheme.setAttribute('content', isDarkMode ? '#0a1628' : '#a8d8ea')
 
-    // Force all mobile browsers to repaint CSS variable changes
+    // Force mobile browsers to repaint CSS variable changes
     body.style.willChange = 'background-color, color'
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
