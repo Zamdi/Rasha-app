@@ -174,7 +174,12 @@ export default function Booking() {
             </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Date', 'التاريخ')} *</label>
-              <input type="date" className="rasha-input" min={today()} value={form.date} onChange={e => setForm(f => ({...f, date: e.target.value}))} />
+              <input type="date" className="rasha-input" min={today()} value={form.date}
+                onChange={e => {
+                  // Some mobile browsers let a value below `min` through — clamp it.
+                  const picked = e.target.value
+                  setForm(f => ({ ...f, date: picked && picked < today() ? today() : picked }))
+                }} />
             </div>
             <button onClick={goToStep2} className="btn-primary w-full py-4 rounded-xl">
               {t('Choose Time Slot', 'اختر الموعد')}
