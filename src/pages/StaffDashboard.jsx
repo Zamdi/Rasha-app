@@ -1960,10 +1960,10 @@ export default function StaffDashboard() {
         <div className="space-y-6 animate-fade-in">
 
           {/* Filters + Download */}
-          <div className="glass rounded-2xl p-5">
-            <div className="flex flex-wrap gap-3 items-end">
-              {/* Search by username */}
-              <div className="flex-1 min-w-[160px]">
+          <div className="glass rounded-2xl p-4">
+            <div className="flex flex-col gap-3">
+              {/* Row 1: search */}
+              <div>
                 <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">{t('Staff Username', 'اسم المستخدم')}</label>
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{background:'var(--input-bg)',border:'1px solid var(--color-outline-variant)'}}>
                   <span className="material-symbols-outlined text-on-surface-variant text-base">search</span>
@@ -1974,34 +1974,38 @@ export default function StaffDashboard() {
                     onKeyDown={e => e.key === 'Enter' && loadActivity()} />
                 </div>
               </div>
-              {/* Date from */}
-              <div>
-                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">{t('From', 'من')}</label>
-                <input type="date" className="rasha-input text-xs" value={activityFrom}
-                  onChange={e => setActivityFrom(e.target.value)} />
+              {/* Row 2: date range */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">{t('From', 'من')}</label>
+                  <input type="date" className="rasha-input text-xs w-full" value={activityFrom}
+                    onChange={e => setActivityFrom(e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">{t('To', 'إلى')}</label>
+                  <input type="date" className="rasha-input text-xs w-full" value={activityTo}
+                    onChange={e => setActivityTo(e.target.value)} />
+                </div>
               </div>
-              {/* Date to */}
-              <div>
-                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">{t('To', 'إلى')}</label>
-                <input type="date" className="rasha-input text-xs" value={activityTo}
-                  onChange={e => setActivityTo(e.target.value)} />
+              {/* Row 3: action buttons */}
+              <div className="flex gap-2 flex-wrap">
+                <button onClick={() => loadActivity()}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-bold hydro-gradient text-white hover:opacity-90 flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-base">filter_list</span>
+                  {t('Apply', 'تطبيق')}
+                </button>
+                <button onClick={() => { setActivitySearch(''); setActivityFrom(''); setActivityTo(''); loadActivity({username:'',from:'',to:''}) }}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface"
+                  style={{background:'var(--input-bg)',border:'1px solid var(--color-outline-variant)'}}>
+                  {t('Clear', 'مسح')}
+                </button>
+                <button onClick={exportActivityPDF} disabled={activityLogs.length === 0}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-40"
+                  style={{background:'#7c3aed'}}>
+                  <span className="material-symbols-outlined text-base">picture_as_pdf</span>
+                  {t('PDF', 'PDF')}
+                </button>
               </div>
-              <button onClick={() => loadActivity()}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold hydro-gradient text-white hover:opacity-90 flex items-center gap-2">
-                <span className="material-symbols-outlined text-base">filter_list</span>
-                {t('Apply', 'تطبيق')}
-              </button>
-              <button onClick={() => { setActivitySearch(''); setActivityFrom(''); setActivityTo(''); loadActivity({username:'',from:'',to:''}) }}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface"
-                style={{background:'var(--input-bg)',border:'1px solid var(--color-outline-variant)'}}>
-                {t('Clear', 'مسح')}
-              </button>
-              <button onClick={exportActivityPDF} disabled={activityLogs.length === 0}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2 hover:opacity-90 disabled:opacity-40"
-                style={{background:'#7c3aed'}}>
-                <span className="material-symbols-outlined text-base">picture_as_pdf</span>
-                {t('Download PDF', 'تحميل PDF')}
-              </button>
             </div>
           </div>
 
