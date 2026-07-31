@@ -56,8 +56,8 @@ export default function Register() {
     finally { setLoading(false) }
   }
 
-  const verify = async () => {
-    const code = otp.trim()
+  const verify = async (codeOverride) => {
+    const code = (codeOverride ?? otp).trim()
     if (code.length < 6) { showToast(t('Enter the full code','أدخل الرمز كاملاً'),'error'); return }
     setLoading(true)
     try {
@@ -94,29 +94,29 @@ export default function Register() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('First Name','الاسم الأول')}</label>
-                <input className="rasha-input" value={form.firstName} onChange={e=>set('firstName',e.target.value)}/>
+                <input className="rasha-input" autoComplete="given-name" name="given-name" value={form.firstName} onChange={e=>set('firstName',e.target.value)}/>
               </div>
               <div>
                 <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Last Name','اسم العائلة')}</label>
-                <input className="rasha-input" value={form.lastName} onChange={e=>set('lastName',e.target.value)}/>
+                <input className="rasha-input" autoComplete="family-name" name="family-name" value={form.lastName} onChange={e=>set('lastName',e.target.value)}/>
               </div>
             </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Email','البريد الإلكتروني')}</label>
-              <input type="email" className="rasha-input" placeholder="you@example.com" value={form.email} onChange={e=>set('email',e.target.value)}/>
+              <input type="email" className="rasha-input" autoComplete="email" name="email" placeholder="you@example.com" value={form.email} onChange={e=>set('email',e.target.value)}/>
             </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Phone','الهاتف')}</label>
               <div className="flex" dir="ltr">
                 <span className="rounded-l-xl px-3 py-3 text-sm text-on-surface-variant flex items-center shrink-0"
                   style={{background:'var(--color-surface-container-high)', border:'1px solid var(--color-outline-variant)', borderRight:'none'}}>+249</span>
-                <input type="tel" placeholder="9XX XXX XXXX" className="rasha-input" style={{borderRadius:'0 0.75rem 0.75rem 0'}} value={form.phone} onChange={e=>set('phone',e.target.value.replace(/\D/g,''))}/>
+                <input type="tel" placeholder="9XX XXX XXXX" autoComplete="tel-national" name="tel" className="rasha-input" style={{borderRadius:'0 0.75rem 0.75rem 0'}} value={form.phone} onChange={e=>set('phone',e.target.value.replace(/\D/g,''))}/>
               </div>
             </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Password','كلمة المرور')}</label>
               <div className="relative">
-                <input type={showPw?'text':'password'} placeholder={t('Min 8 characters','8 أحرف على الأقل')} className="rasha-input pe-12" value={form.password} onChange={e=>set('password',e.target.value)}/>
+                <input type={showPw?'text':'password'} placeholder={t('Min 8 characters','8 أحرف على الأقل')} autoComplete="new-password" name="new-password" className="rasha-input pe-12" value={form.password} onChange={e=>set('password',e.target.value)}/>
                 <button type="button" onClick={()=>setShowPw(p=>!p)} className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary-fixed">
                   <span className="material-symbols-outlined text-xl">{showPw?'visibility_off':'visibility'}</span>
                 </button>
@@ -136,7 +136,7 @@ export default function Register() {
               <h3 className="font-bold text-on-surface mb-1">{t('Verify Your Email','تحقق من بريدك الإلكتروني')}</h3>
               <p className="text-on-surface-variant text-sm">{t(`We sent a 6-digit code to`,'أرسلنا رمزاً إلى')} <span className="text-secondary-fixed font-semibold">{maskedEmail}</span></p>
             </div>
-            <OtpInput value={otp} onChange={setOtp} />
+            <OtpInput value={otp} onChange={setOtp} onComplete={code => verify(code)} />
             {/* Timer */}
             <div className="text-center">
               {timer > 0 ? (

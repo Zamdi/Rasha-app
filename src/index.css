@@ -113,9 +113,8 @@ html {
 }
 html.dark {
   background:
-    linear-gradient(rgba(10,22,40,0.75), rgba(10,22,40,0.75)),
-    url('/bg.png') center center / cover fixed,
-    #0a1628;
+    url('/bg-dark.png') center center / cover fixed,
+    #05070d;
 }
 body {
   background: transparent;

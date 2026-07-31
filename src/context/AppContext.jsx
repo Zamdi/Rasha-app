@@ -4,7 +4,10 @@ export const API = 'https://rasha-backend.onrender.com'
 export function AppProvider({ children }) {
   const [lang, setLang] = useState('en')
   const [toast, setToast] = useState(null)
-  const [theme, setThemeState] = useState(() => localStorage.getItem('rasha_theme') || 'light')
+  const [theme, setThemeState] = useState(() =>
+    localStorage.getItem('rasha_theme')
+    || (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  )
   useEffect(() => {
     const root = document.documentElement
     const body = document.body

@@ -57,6 +57,13 @@ export default function Booking() {
     if (!form.firstName || !form.lastName || !form.phone || !form.date) {
       showToast(t('Please fill all required fields', 'يرجى ملء الحقول المطلوبة'), 'error'); return
     }
+    // iOS Safari renders its own scroll-wheel date picker and does not enforce
+    // the `min` attribute, so the date must be re-checked here before advancing.
+    if (form.date < today()) {
+      showToast(t('Please choose today or a future date', 'يرجى اختيار تاريخ اليوم أو تاريخ لاحق'), 'error')
+      setForm(f => ({ ...f, date: today() }))
+      return
+    }
     setStep(2); window.scrollTo(0, 0)
   }
 
@@ -66,6 +73,12 @@ export default function Booking() {
   }
 
   const submitBooking = async () => {
+    if (form.date < today()) {
+      showToast(t('Please choose today or a future date', 'يرجى اختيار تاريخ اليوم أو تاريخ لاحق'), 'error')
+      setForm(f => ({ ...f, date: today() }))
+      setStep(1)
+      return
+    }
     if (payFromWallet && walletBalance < price) {
       showToast(t(`Wallet balance insufficient. You have ${walletBalance.toLocaleString()} SDG, need ${price.toLocaleString()} SDG.`, `رصيد المحفظة غير كافٍ. لديك ${walletBalance.toLocaleString()} SDG، تحتاج ${price.toLocaleString()} SDG.`), 'error')
       return
@@ -176,9 +189,16 @@ export default function Booking() {
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Date', 'التاريخ')} *</label>
               <input type="date" className="rasha-input" min={today()} value={form.date}
                 onChange={e => {
-                  // Some mobile browsers let a value below `min` through — clamp it.
                   const picked = e.target.value
-                  setForm(f => ({ ...f, date: picked && picked < today() ? today() : picked }))
+                  if (!picked) { setForm(f => ({ ...f, date: '' })); return }
+                  // iOS Safari does not disable dates below `min` — it lets any
+                  // day be tapped and only validates on submit. So enforce it here.
+                  if (picked < today()) {
+                    showToast(t('You cannot book a date in the past.', 'لا يمكنك الحجز في تاريخ سابق.'), 'error')
+                    setForm(f => ({ ...f, date: today() }))
+                    return
+                  }
+                  setForm(f => ({ ...f, date: picked }))
                 }} />
             </div>
             <button onClick={goToStep2} className="btn-primary w-full py-4 rounded-xl">

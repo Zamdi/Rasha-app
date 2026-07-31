@@ -46,8 +46,8 @@ export default function Login() {
     finally { setLoading(false) }
   }
 
-  const verify = async () => {
-    const code = otp.trim()
+  const verify = async (codeOverride) => {
+    const code = (codeOverride ?? otp).trim()
     if (code.length < 6) { showToast(t('Enter the full code','أدخل الرمز كاملاً'),'error'); return }
     setLoading(true)
     try {
@@ -80,7 +80,7 @@ export default function Login() {
           <div className="glass p-6 rounded-2xl space-y-4 animate-fade-in">
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Email or Phone','البريد أو الهاتف')}</label>
-              <input className="rasha-input" placeholder="email@example.com" value={identifier} onChange={e=>setIdentifier(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
+              <input className="rasha-input" autoComplete="username" name="username" placeholder="email@example.com" value={identifier} onChange={e=>setIdentifier(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
             </div>
             <div>
               <div className="flex justify-between mb-2">
@@ -88,7 +88,7 @@ export default function Login() {
                 <Link to="/forgot-password" className="text-xs text-secondary-fixed hover:underline">{t('Forgot password?','نسيت كلمة المرور؟')}</Link>
               </div>
               <div className="relative">
-                <input type={showPw?'text':'password'} className="rasha-input pe-12" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
+                <input type={showPw?'text':'password'} autoComplete="current-password" name="current-password" className="rasha-input pe-12" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
                 <button type="button" onClick={()=>setShowPw(p=>!p)} className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary-fixed">
                   <span className="material-symbols-outlined text-xl">{showPw?'visibility_off':'visibility'}</span>
                 </button>
@@ -108,7 +108,7 @@ export default function Login() {
               <h3 className="font-bold text-on-surface mb-1">{t('Enter Verification Code','أدخل رمز التحقق')}</h3>
               <p className="text-on-surface-variant text-sm">{t('Code sent to','تم الإرسال إلى')} <span className="text-secondary-fixed font-semibold">{maskedEmail}</span></p>
             </div>
-            <OtpInput value={otp} onChange={setOtp}/>
+            <OtpInput value={otp} onChange={setOtp} onComplete={code => verify(code)}/>
             <div className="text-center">
               {timer > 0 ? (
                 <p className="text-sm text-on-surface-variant">
