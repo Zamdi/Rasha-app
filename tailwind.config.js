@@ -9,9 +9,6 @@ export default {
         'surface-dim':               'var(--color-surface-dim)',
         'surface-container-lowest':  'var(--color-surface-container-lowest)',
         'surface-container-low':     'var(--color-surface-container-low)',
-        'surface-container':         'var(--color-surface-container)',
-        'surface-container-high':    'var(--color-surface-container-high)',
-        'surface-container-highest': 'var(--color-surface-container-highest)',
         'surface-bright':            'var(--color-surface-bright)',
         'surface-variant':           'var(--color-surface-variant)',
         'on-surface':                'var(--color-on-surface)',
@@ -21,26 +18,48 @@ export default {
         'primary-container':         'var(--color-primary-container)',
         'background':                'var(--color-background)',
         'on-background':             'var(--color-on-background)',
-        // Use rgb channel vars so opacity modifiers work AND colors switch between themes
-        'secondary-fixed':      ({ opacityValue }) =>
+        'outline':                   'var(--color-outline)',
+        'error-container':           'var(--color-error-container)',
+        'secondary-fixed-dim':       'var(--color-secondary-fixed-dim)',
+
+        // Colors that need opacity modifier support — use RGB channel pattern
+        'secondary-fixed': ({ opacityValue }) =>
           opacityValue !== undefined
             ? `rgba(var(--color-secondary-fixed-rgb), ${opacityValue})`
             : 'var(--color-secondary-fixed)',
-        'secondary-fixed-dim':       'var(--color-secondary-fixed-dim)',
-        'secondary-container':       'var(--color-secondary-container)',
-        'outline':                   'var(--color-outline)',
-        'outline-variant':      ({ opacityValue }) =>
+
+        'secondary-container': ({ opacityValue }) =>
+          opacityValue !== undefined
+            ? `rgba(var(--color-secondary-container-rgb), ${opacityValue})`
+            : 'var(--color-secondary-container)',
+
+        'surface-container': ({ opacityValue }) =>
+          opacityValue !== undefined
+            ? `rgba(var(--color-surface-container-rgb), ${opacityValue})`
+            : 'var(--color-surface-container)',
+
+        'surface-container-high': ({ opacityValue }) =>
+          opacityValue !== undefined
+            ? `rgba(var(--color-surface-container-rgb), ${opacityValue})`
+            : 'var(--color-surface-container-high)',
+
+        'surface-container-highest': ({ opacityValue }) =>
+          opacityValue !== undefined
+            ? `rgba(var(--color-surface-container-rgb), ${opacityValue})`
+            : 'var(--color-surface-container-highest)',
+
+        'outline-variant': ({ opacityValue }) =>
           opacityValue !== undefined
             ? `rgba(var(--color-outline-variant-rgb), ${opacityValue})`
             : 'var(--color-outline-variant)',
-        'error':                ({ opacityValue }) =>
+
+        'error': ({ opacityValue }) =>
           opacityValue !== undefined
             ? `rgba(var(--color-error-rgb), ${opacityValue})`
             : 'var(--color-error)',
-        'error-container':           'var(--color-error-container)',
       },
       fontFamily: {
-        sans:    ['Inter', 'Noto Kufi Arabic', 'sans-serif'],
+        sans:    ['Inter', 'IBM Plex Sans Arabic', 'Noto Kufi Arabic', 'sans-serif'],
         display: ['Montserrat', 'Noto Kufi Arabic', 'sans-serif'],
       },
     },
