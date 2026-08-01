@@ -10,34 +10,48 @@ export default function Home() {
       {/* Hero */}
       <section className="relative min-h-[70vh] flex items-center overflow-hidden">
         <div className="relative z-10 max-w-7xl mx-auto px-5 w-full py-8 md:py-16">
-          <div className="max-w-2xl space-y-4 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/10 border border-secondary-fixed/25 text-secondary-fixed">
-              <span className="material-symbols-outlined fill-icon text-sm">auto_awesome</span>
-              <span className="text-xs font-bold uppercase tracking-widest">{t("Sudan's Premier Car Wash", 'أفضل غسيل سيارات في السودان')}</span>
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div className="max-w-2xl space-y-4 animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/10 border border-secondary-fixed/25 text-secondary-fixed">
+                <span className="material-symbols-outlined fill-icon text-sm">auto_awesome</span>
+                <span className="text-xs font-bold uppercase tracking-widest">{t("Sudan's Premier Car Wash", 'أفضل غسيل سيارات في السودان')}</span>
+              </div>
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-on-surface leading-snug font-display">
+                {t('The Ultimate', 'النظافة')}{' '}
+                <span className="text-secondary-fixed">{t('Clean Shine', 'المثالية')}</span>
+                <br />{t('For Your Car.', 'لسيارتك.')}
+              </h1>
+              <p className="text-on-surface-variant text-sm max-w-md leading-relaxed">
+                {t("Experience Khartoum's finest car wash. Professional care, loyalty rewards, and easy online booking.", "استمتع بأفضل خدمة غسيل سيارات في الخرطوم. عناية احترافية ومكافآت ولاء وحجز سهل.")}
+              </p>
+              <div className="flex flex-wrap gap-3 pt-1">
+                <a href="#services" className="btn-primary text-sm px-6 py-3 rounded-xl">
+                  {t('Our Services', 'خدماتنا')}
+                </a>
+                <Link to="/register" className="btn-cyan text-sm px-6 py-3 rounded-xl">
+                  {t('Join Now', 'انضم الآن')}
+                </Link>
+              </div>
+              <div className="flex gap-6 pt-1">
+                {[['500+', t('Customers', 'عميل')], ['4.9★', t('Rating', 'التقييم')], ['2', t('Services', 'خدمات')]].map(([v, l]) => (
+                  <div key={l}>
+                    <div className="text-xl font-extrabold text-secondary-fixed font-display">{v}</div>
+                    <div className="text-xs text-on-surface-variant">{l}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-on-surface leading-snug font-display">
-              {t('The Ultimate', 'النظافة')}{' '}
-              <span className="text-secondary-fixed">{t('Clean Shine', 'المثالية')}</span>
-              <br />{t('For Your Car.', 'لسيارتك.')}
-            </h1>
-            <p className="text-on-surface-variant text-sm max-w-md leading-relaxed">
-              {t("Experience Khartoum's finest car wash. Professional care, loyalty rewards, and easy online booking.", "استمتع بأفضل خدمة غسيل سيارات في الخرطوم. عناية احترافية ومكافآت ولاء وحجز سهل.")}
-            </p>
-            <div className="flex flex-wrap gap-3 pt-1">
-              <a href="#services" className="btn-primary text-sm px-6 py-3 rounded-xl">
-                {t('Our Services', 'خدماتنا')}
-              </a>
-              <Link to="/register" className="btn-cyan text-sm px-6 py-3 rounded-xl">
-                {t('Join Now', 'انضم الآن')}
-              </Link>
-            </div>
-            <div className="flex gap-6 pt-1">
-              {[['500+', t('Customers', 'عميل')], ['4.9★', t('Rating', 'التقييم')], ['2', t('Services', 'خدمات')]].map(([v, l]) => (
-                <div key={l}>
-                  <div className="text-xl font-extrabold text-secondary-fixed font-display">{v}</div>
-                  <div className="text-xs text-on-surface-variant">{l}</div>
-                </div>
-              ))}
+
+            {/* Illustration — opposite side of the hero text */}
+            <div className="hidden md:flex justify-center animate-fade-in">
+              <div className="glass rounded-3xl p-2 max-w-md w-full overflow-hidden">
+                <img
+                  src="/hero-illustration.png"
+                  alt={t('Rasha car wash illustration', 'رسم توضيحي لغسيل السيارات رشة')}
+                  className="w-full h-auto rounded-2xl"
+                  loading="eager"
+                />
+              </div>
             </div>
           </div>
         </div>
