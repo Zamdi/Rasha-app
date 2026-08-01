@@ -1957,7 +1957,7 @@ export default function StaffDashboard() {
 
       {/* ── Activity / Reports Tab ── */}
       {activeTab === 'activity' && isSuperAdmin && (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6 animate-fade-in max-w-7xl mx-auto px-4 md:px-6 pb-10">
 
           {/* Filters + Download */}
           <div className="glass rounded-2xl p-4">
