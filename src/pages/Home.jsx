@@ -1,8 +1,5 @@
-import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-
-const CarScene = lazy(() => import('../components/CarScene'))
 
 
 export default function Home() {
@@ -11,49 +8,65 @@ export default function Home() {
   return (
     <div className="pt-14 pb-16 md:pb-0">
       {/* Hero */}
-      <section className="relative min-h-[70vh] flex items-center overflow-hidden">
-        <div className="relative z-10 max-w-7xl mx-auto px-5 w-full py-8 md:py-16">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div className="max-w-2xl space-y-4 animate-fade-in">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/10 border border-secondary-fixed/25 text-secondary-fixed">
-                <span className="material-symbols-outlined fill-icon text-sm">auto_awesome</span>
-                <span className="text-xs font-bold uppercase tracking-widest">{t("Sudan's Premier Car Wash", 'أفضل غسيل سيارات في السودان')}</span>
-              </div>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-on-surface leading-snug font-display">
-                {t('The Ultimate', 'النظافة')}{' '}
-                <span className="text-secondary-fixed">{t('Clean Shine', 'المثالية')}</span>
-                <br />{t('For Your Car.', 'لسيارتك.')}
-              </h1>
-              <p className="text-on-surface-variant text-sm max-w-md leading-relaxed">
-                {t("Experience Khartoum's finest car wash. Professional care, loyalty rewards, and easy online booking.", "استمتع بأفضل خدمة غسيل سيارات في الخرطوم. عناية احترافية ومكافآت ولاء وحجز سهل.")}
-              </p>
-              <div className="flex flex-wrap gap-3 pt-1">
-                <a href="#services" className="btn-primary text-sm px-6 py-3 rounded-xl">
-                  {t('Our Services', 'خدماتنا')}
-                </a>
-                <Link to="/register" className="btn-cyan text-sm px-6 py-3 rounded-xl">
-                  {t('Join Now', 'انضم الآن')}
-                </Link>
-              </div>
-              <div className="flex gap-6 pt-1">
-                {[['500+', t('Customers', 'عميل')], ['4.9★', t('Rating', 'التقييم')], ['2', t('Services', 'خدمات')]].map(([v, l]) => (
-                  <div key={l}>
-                    <div className="text-xl font-extrabold text-secondary-fixed font-display">{v}</div>
-                    <div className="text-xs text-on-surface-variant">{l}</div>
-                  </div>
-                ))}
-              </div>
+      <section className="relative min-h-[92vh] flex items-end overflow-hidden">
+        {/* Full-bleed car photo */}
+        <img
+          src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1920&q=85"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          style={{ zIndex: 0 }}
+        />
+
+        {/* Dark gradient overlay — heavier on left for text legibility */}
+        <div
+          className="absolute inset-0"
+          style={{
+            zIndex: 1,
+            background: 'linear-gradient(100deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.15) 100%)',
+          }}
+        />
+        {/* Bottom fade into page bg */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-32"
+          style={{ zIndex: 2, background: 'linear-gradient(to bottom, transparent, var(--color-background))' }}
+        />
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-5 w-full py-16 md:py-24">
+          <div className="max-w-2xl space-y-5 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 text-white/70" style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
+              <span className="material-symbols-outlined fill-icon text-sm" style={{ color: 'var(--color-secondary-fixed)' }}>auto_awesome</span>
+              <span className="text-xs font-bold uppercase tracking-widest">{t("Sudan's Premier Car Wash", 'أفضل غسيل سيارات في السودان')}</span>
             </div>
 
-            {/* 3D Car */}
-            <div className="hidden md:block relative animate-fade-in" style={{ height: '420px' }}>
-              <Suspense fallback={
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="loader" />
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight font-display">
+              {t('Drive Clean.', 'اقد نظيفاً.')}<br />
+              <span style={{ color: 'var(--color-secondary-fixed)' }}>{t('Drive Confident.', 'اقد بثقة.')}</span>
+            </h1>
+
+            <p className="text-white/70 text-base max-w-lg leading-relaxed">
+              {t("Experience Khartoum's finest car wash. Professional care, loyalty rewards, and easy online booking.", "استمتع بأفضل خدمة غسيل سيارات في الخرطوم. عناية احترافية ومكافآت ولاء وحجز سهل.")}
+            </p>
+
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Link to="/book" className="btn-primary text-sm px-8 py-3.5 rounded-xl flex items-center gap-2">
+                {t('Book a Wash', 'احجز الآن')}
+                <span className="material-symbols-outlined rtl-flip text-base">arrow_forward</span>
+              </Link>
+              <a href="#services" className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold text-white transition-all"
+                style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                {t('Our Services', 'خدماتنا')}
+              </a>
+            </div>
+
+            <div className="flex gap-8 pt-2">
+              {[['500+', t('Happy Customers', 'عميل سعيد')], ['4.9★', t('Rating', 'التقييم')], ['2', t('Services', 'خدمات')]].map(([v, l]) => (
+                <div key={l}>
+                  <div className="text-2xl font-extrabold font-display" style={{ color: 'var(--color-secondary-fixed)' }}>{v}</div>
+                  <div className="text-xs text-white/60">{l}</div>
                 </div>
-              }>
-                <CarScene />
-              </Suspense>
+              ))}
             </div>
           </div>
         </div>
