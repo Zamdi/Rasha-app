@@ -83,7 +83,7 @@ export default function Home() {
           <Link to="/book" state={{ service: 'full' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine block overflow-hidden">
             <div className="w-full h-60 overflow-hidden relative">
               <img
-                src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=900&q=80"
+                src="https://bluesky-cogcms.cdn.imgeng.in/media/irmbopnk/spruce-and-shine-collage.png?&width=900&center=0.5,0.5&mode=crop&scale=both"
                 alt="Full Wash — interior and exterior cleaning"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
@@ -113,7 +113,7 @@ export default function Home() {
           <Link to="/book" state={{ service: 'outside' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine block overflow-hidden">
             <div className="w-full h-60 overflow-hidden relative">
               <img
-                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80"
+                src="https://as1.ftcdn.net/v2/jpg/05/98/53/80/1000_F_598538072_lS9ob1WSu5Ah8yqN2IMgMHgFrcehk0pL.jpg"
                 alt="Exterior Wash — foam and water cleaning"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
