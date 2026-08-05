@@ -171,13 +171,17 @@ export default function Home() {
         {/* Massive brand name */}
         <div className="px-4 md:px-6 pt-6 pb-2 overflow-hidden select-none">
           <p
-            className="leading-none text-secondary-fixed w-full text-center"
+            className="leading-none w-full text-center"
             style={{
-              fontFamily: "'Unbounded', sans-serif",
+              fontFamily: "'Nunito', sans-serif",
               fontWeight: 900,
               fontSize: 'clamp(72px, 22vw, 220px)',
-              letterSpacing: '-0.03em',
-              opacity: 0.92,
+              letterSpacing: '-0.02em',
+              background: 'linear-gradient(135deg, #74f5ff 0%, #38d4f5 35%, #0088dd 65%, #74f5ff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              filter: 'drop-shadow(0 0 48px rgba(116,245,255,0.45)) drop-shadow(0 2px 8px rgba(0,80,200,0.3))',
             }}>
             RASHA
           </p>
