@@ -113,7 +113,7 @@ export default function Home() {
           <Link to="/book" state={{ service: 'outside' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine block overflow-hidden">
             <div className="w-full h-60 overflow-hidden relative">
               <img
-                src="https://as1.ftcdn.net/v2/jpg/05/98/53/80/1000_F_598538072_lS9ob1WSu5Ah8yqN2IMgMHgFrcehk0pL.jpg"
+                src="/external-wash.jpg"
                 alt="Exterior Wash — foam and water cleaning"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
