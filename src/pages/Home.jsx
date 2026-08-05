@@ -81,12 +81,14 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Wash */}
           <Link to="/book" state={{ service: 'full' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine block overflow-hidden">
-            <div className="w-full h-48 overflow-hidden">
+            <div className="w-full h-60 overflow-hidden relative">
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_jO7XyleM3iFOJrmDPs2teXvHDS9Zltt9DAehpgjFuvenenm7_ZWWUVfjcxgzWEOR5_1fj8_qf-ejH6VFl1yIad2gT9SlKrancMX0ljwpuS2eriaJuiz-ArC-rF8n9u6wt9FQNAfe2_IFqGWUbftS46A1tcHBV_kFcfdawKdDG4Q6MvjGc_Vjq4tMNSDaPJt1tuJNctg-Srx-9dGI9LCCoMMlZHKT-7GhI5FEzTwXbEe83XoHdeQ"
-                alt="Full Wash"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=900&q=80"
+                alt="Full Wash — interior and exterior cleaning"
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />
+              <span className="absolute bottom-3 left-4 text-white text-xs font-bold uppercase tracking-widest opacity-90">Interior + Exterior</span>
             </div>
             <div className="p-8">
             <div className="flex justify-between items-start mb-6">
@@ -109,12 +111,14 @@ export default function Home() {
 
           {/* Exterior Only */}
           <Link to="/book" state={{ service: 'outside' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine block overflow-hidden">
-            <div className="w-full h-48 overflow-hidden">
+            <div className="w-full h-60 overflow-hidden relative">
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3pxjVHrXFtPlLv-RGq2Sef4rqM7Lh9Gpg_QLgV5NmIcIUqSEIpyBCEPeTmX3QVoXBIiAFv8oTi80VayMXsEr35Uk73tEhu7BFNiw3vZKQfbHBQmqLyFsoUwYR085I6QQXWCETFVq3o64WaLpLxKF_nkEmheTk7wnNU9jVIpRcx1Bs_Hz90N0kHmwitil4WWI8E3WpMqLsn6BS9F-U4MAn0IBwEcSj60mMcXrTF7ROJ0gSk5a_vSA"
-                alt="Exterior Wash"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80"
+                alt="Exterior Wash — foam and water cleaning"
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />
+              <span className="absolute bottom-3 left-4 text-white text-xs font-bold uppercase tracking-widest opacity-90">Exterior Cleaning</span>
             </div>
             <div className="p-8">
             <div className="flex justify-between items-start mb-6">
