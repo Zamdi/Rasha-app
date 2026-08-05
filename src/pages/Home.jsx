@@ -182,7 +182,7 @@ export default function Home() {
                 <stop offset="100%" stopColor="#0055cc" />
               </linearGradient>
               <filter id="rasha-glow" x="-10%" y="-20%" width="120%" height="150%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
@@ -198,7 +198,7 @@ export default function Home() {
               letterSpacing="-8"
               fill="url(#rasha-grad)"
               stroke="url(#rasha-grad)"
-              strokeWidth="28"
+              strokeWidth="7"
               strokeLinejoin="round"
               strokeLinecap="round"
               paintOrder="stroke fill"
