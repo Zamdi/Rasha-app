@@ -128,32 +128,64 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-surface-container-lowest border-t border-outline-variant/10 py-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 flex flex-col md:flex-row justify-between items-start gap-8">
-          <div>
-            <div className="font-display font-extrabold text-2xl tracking-tight text-secondary-fixed mb-3">Rasha</div>
-            <p className="text-on-surface-variant text-sm max-w-xs">{t("Khartoum's trusted car wash.", 'غسيل السيارات الموثوق في الخرطوم.')}</p>
+      <footer style={{ borderTop: '1px solid var(--color-outline-variant)', marginTop: '0' }}>
+        {/* Top nav columns */}
+        <div className="max-w-7xl mx-auto px-6 md:px-10 pt-14 pb-10 flex flex-col md:flex-row justify-between gap-10">
+          {/* Brand blurb */}
+          <div className="max-w-xs">
+            <p className="text-xs font-bold uppercase tracking-widest text-secondary-fixed mb-3">{t('Rasha Car Wash', 'رشة لغسيل السيارات')}</p>
+            <p className="text-on-surface-variant text-sm leading-relaxed">{t("Khartoum's premier car wash. Professional care, loyalty rewards, easy online booking.", 'أفضل غسيل سيارات في الخرطوم. عناية احترافية ومكافآت ولاء وحجز سهل.')}</p>
           </div>
-          <div className="flex gap-12 text-sm">
+
+          {/* Link columns */}
+          <div className="flex gap-14 md:gap-20 text-sm flex-wrap">
             <div>
-              <div className="text-on-surface font-bold mb-3">{t('Quick Links', 'روابط سريعة')}</div>
-              <div className="flex flex-col gap-2 text-on-surface-variant">
-                {[['/','Home','الرئيسية'],['/book','Book','احجز'],['/login','Sign In','دخول'],['/contact','Contact Support','الدعم']].map(([to,en,ar])=>(
-                  <Link key={to} to={to} className="hover:text-secondary-fixed transition-colors">{t(en,ar)}</Link>
-                ))}
+              <p className="text-xs font-bold uppercase tracking-widest text-on-surface mb-4">{t('Services', 'الخدمات')}</p>
+              <div className="flex flex-col gap-3 text-on-surface-variant">
+                <Link to="/book" state={{ service: 'full' }} className="hover:text-secondary-fixed transition-colors">{t('Full Wash', 'غسيل كامل')}</Link>
+                <Link to="/book" state={{ service: 'outside' }} className="hover:text-secondary-fixed transition-colors">{t('Exterior Only', 'خارجي فقط')}</Link>
+                <Link to="/loyalty" className="hover:text-secondary-fixed transition-colors">{t('Loyalty Card', 'بطاقة الولاء')}</Link>
               </div>
             </div>
-            <div className="space-y-4">
-              <div className="text-on-surface font-bold mb-3">{t('Legal', 'قانوني')}</div>
-              <div className="flex flex-col gap-2 text-on-surface-variant">
-                <Link to="/privacy" className="hover:text-secondary-fixed transition-colors">{t('Privacy Policy', 'سياسة الخصوصية')}</Link>
-                <Link to="/terms" className="hover:text-secondary-fixed transition-colors">{t('Terms of Service', 'شروط الخدمة')}</Link>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-on-surface mb-4">{t('Account', 'الحساب')}</p>
+              <div className="flex flex-col gap-3 text-on-surface-variant">
+                <Link to="/register" className="hover:text-secondary-fixed transition-colors">{t('Sign Up', 'إنشاء حساب')}</Link>
+                <Link to="/login" className="hover:text-secondary-fixed transition-colors">{t('Sign In', 'تسجيل دخول')}</Link>
+                <Link to="/contact" className="hover:text-secondary-fixed transition-colors">{t('Contact Support', 'الدعم')}</Link>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-on-surface mb-4">{t('Legal', 'قانوني')}</p>
+              <div className="flex flex-col gap-3 text-on-surface-variant">
+                <Link to="/privacy" className="hover:text-secondary-fixed transition-colors">{t('Privacy Policy', 'الخصوصية')}</Link>
+                <Link to="/terms" className="hover:text-secondary-fixed transition-colors">{t('Terms of Service', 'الشروط')}</Link>
               </div>
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 md:px-6 mt-8 pt-6 border-t border-outline-variant/10 text-center text-on-surface-variant text-xs">
-          © 2025 Rasha Car Wash. {t('All rights reserved.', 'جميع الحقوق محفوظة.')}
+
+        {/* Divider */}
+        <div style={{ height: '1px', background: 'var(--color-outline-variant)', opacity: 0.3, margin: '0 24px' }} />
+
+        {/* Massive brand name */}
+        <div className="px-4 md:px-6 pt-6 pb-2 overflow-hidden select-none">
+          <p
+            className="font-display font-black leading-none text-secondary-fixed w-full text-center"
+            style={{
+              fontSize: 'clamp(72px, 22vw, 220px)',
+              letterSpacing: '-0.03em',
+              opacity: 0.92,
+            }}>
+            RASHA
+          </p>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex flex-col sm:flex-row items-center justify-between gap-2"
+          style={{ borderTop: '1px solid var(--color-outline-variant)', opacity: 0.8 }}>
+          <span className="text-xs text-on-surface-variant">© 2025 Rasha Car Wash. {t('All rights reserved.', 'جميع الحقوق محفوظة.')}</span>
+          <span className="text-xs text-on-surface-variant">{t('Khartoum, Sudan', 'الخرطوم، السودان')}</span>
         </div>
       </footer>
     </div>
