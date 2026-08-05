@@ -10,7 +10,7 @@ export default function Home() {
       {/* Hero */}
       <section className="relative min-h-[70vh] flex items-center overflow-hidden">
         <div className="relative z-10 max-w-7xl mx-auto px-5 w-full py-8 md:py-16">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
+          <div className="grid md:grid-cols-1 gap-10 items-center">
             <div className="max-w-2xl space-y-4 animate-fade-in">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/10 border border-secondary-fixed/25 text-secondary-fixed">
                 <span className="material-symbols-outlined fill-icon text-sm">auto_awesome</span>
@@ -42,17 +42,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Illustration — opposite side of the hero text */}
-            <div className="hidden md:flex justify-center animate-fade-in">
-              <div className="glass rounded-3xl p-2 max-w-md w-full overflow-hidden">
-                <img
-                  src="/hero-illustration.png"
-                  alt={t('Rasha car wash illustration', 'رسم توضيحي لغسيل السيارات رشة')}
-                  className="w-full h-auto rounded-2xl"
-                  loading="eager"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </section>

@@ -87,7 +87,7 @@ export default function Loyalty() {
         {/* Welcome */}
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl font-bold text-secondary-fixed font-display">
-            {t('Welcome back,', 'أهلاً,')} {name.split(' ')[0]}
+            {t('Hi,', 'أهلاً')} {name.split(' ')[0]} 👋
           </h1>
           <p className="text-on-surface-variant mt-1">{t('Track your stamps and redeem your rewards.', 'تابع طوابعك واستبدل مكافآتك.')}</p>
         </div>

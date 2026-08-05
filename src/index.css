@@ -67,7 +67,7 @@ html.dark {
   --color-surface-container-high:    rgba(8,20,44,0.65);
   --color-surface-container-highest: rgba(8,20,44,0.75);
   --color-surface-variant:           rgba(8,20,44,0.50);
-  --color-on-surface:                #e8f0fe;
+  --color-on-surface:                #ffffff;
   --color-on-surface-variant:        #8ab4d8;
   --color-outline:                   rgba(116,245,255,0.2);
   --color-outline-variant:           rgba(116,245,255,0.1);
