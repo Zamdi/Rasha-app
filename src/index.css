@@ -10,7 +10,7 @@
 
 /* ── Light mode tokens (default) ────────────────────────────── */
 :root {
-  --color-background:                #a8d8ea;
+  --color-background:                #ddeeff;
   --color-surface:                   rgba(255,255,255,0.15);
   --color-surface-container:         rgba(255,255,255,0.25);
   --color-surface-container-high:    rgba(255,255,255,0.35);
@@ -61,7 +61,7 @@
 
 /* ── Dark mode tokens ────────────────────────────────────────── */
 html.dark {
-  --color-background:                #0a1628;
+  --color-background:                #070d1a;
   --color-surface:                   rgba(8,20,44,0.45);
   --color-surface-container:         rgba(8,20,44,0.55);
   --color-surface-container-high:    rgba(8,20,44,0.65);
@@ -107,14 +107,10 @@ html.dark {
 /* ── Full-page background ────────────────────────────────────── */
 html {
   min-height: 100%;
-  background:
-    url('/bg.png') center center / cover fixed,
-    #a8d8ea;
+  background: #ddeeff;
 }
 html.dark {
-  background:
-    url('/bg-dark.png') center center / cover fixed,
-    #05070d;
+  background: #070d1a;
 }
 body {
   background: transparent;
