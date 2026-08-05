@@ -169,44 +169,16 @@ export default function Home() {
         <div style={{ height: '1px', background: 'var(--color-outline-variant)', opacity: 0.3, margin: '0 24px' }} />
 
         {/* Massive brand name */}
-        <div className="px-2 md:px-4 pt-4 pb-0 overflow-hidden select-none">
-          <svg
-            viewBox="0 0 1000 220"
-            style={{ width: '100%', display: 'block', overflow: 'visible' }}
-            aria-label="RASHA"
-          >
-            <defs>
-              <linearGradient id="rasha-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%"   stopColor="#74f5ff" />
-                <stop offset="45%"  stopColor="#1ab8f0" />
-                <stop offset="100%" stopColor="#0055cc" />
-              </linearGradient>
-              <filter id="rasha-glow" x="-10%" y="-20%" width="120%" height="150%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            <text
-              x="500" y="190"
-              textAnchor="middle"
-              fontFamily="'Nunito', sans-serif"
-              fontWeight="900"
-              fontSize="210"
-              letterSpacing="-8"
-              fill="url(#rasha-grad)"
-              stroke="url(#rasha-grad)"
-              strokeWidth="7"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-              paintOrder="stroke fill"
-              filter="url(#rasha-glow)"
-            >
-              RASHA
-            </text>
-          </svg>
+        <div className="px-4 md:px-6 pt-6 pb-2 overflow-hidden select-none">
+          <p
+            className="font-display font-black leading-none text-secondary-fixed w-full text-center"
+            style={{
+              fontSize: 'clamp(72px, 22vw, 220px)',
+              letterSpacing: '-0.03em',
+              opacity: 0.92,
+            }}>
+            RASHA
+          </p>
         </div>
 
         {/* Bottom bar */}
