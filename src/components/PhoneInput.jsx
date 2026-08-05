@@ -79,43 +79,58 @@ export default function PhoneInput({ value, onChange, dialCode, onDialChange }) 
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute top-full left-0 mt-1 z-[200] rounded-xl overflow-hidden animate-fade-in"
+          className="absolute top-full left-0 mt-1 z-[500] rounded-xl overflow-hidden animate-fade-in"
           style={{
-            width: '240px',
-            background: 'var(--color-surface-container)',
-            border: '1px solid var(--color-outline-variant)',
-            boxShadow: '0 12px 40px rgba(0,0,0,0.25)',
+            width: '260px',
+            background: 'var(--glass-high-bg)',
+            backdropFilter: 'blur(32px)',
+            WebkitBackdropFilter: 'blur(32px)',
+            border: '1px solid var(--glass-high-border)',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2)',
           }}
         >
-          <div className="p-2" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+          {/* Search */}
+          <div className="p-2.5" style={{ borderBottom: '1px solid var(--glass-high-border)' }}>
             <input
               autoFocus
               type="text"
               placeholder="Search country…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full px-3 py-1.5 text-xs rounded-lg outline-none"
-              style={{ background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--color-on-surface)' }}
+              className="w-full px-3 py-2 text-xs rounded-lg outline-none"
+              style={{
+                background: 'var(--input-bg)',
+                border: '1px solid var(--input-border)',
+                color: 'var(--color-on-surface)',
+              }}
             />
           </div>
-          <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+
+          {/* List */}
+          <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
             {filtered.length === 0 ? (
-              <p className="px-3 py-6 text-xs text-center text-on-surface-variant">No results</p>
-            ) : filtered.map(c => (
-              <button
-                key={c.code}
-                type="button"
-                onClick={() => { onDialChange(c.dial); setOpen(false); setSearch('') }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors"
-                style={{ color: 'var(--color-on-surface)' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--color-surface-container-high)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >
-                <span className="text-lg leading-none shrink-0">{c.flag}</span>
-                <span className="flex-1 text-xs">{c.name}</span>
-                <span className="text-xs font-bold" style={{ color: 'var(--color-secondary-fixed)' }}>{c.dial}</span>
-              </button>
-            ))}
+              <p className="px-3 py-6 text-xs text-center" style={{ color: 'var(--color-on-surface-variant)' }}>No results</p>
+            ) : filtered.map(c => {
+              const isActive = c.dial === dialCode
+              return (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => { onDialChange(c.dial); setOpen(false); setSearch('') }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors"
+                  style={{
+                    background: isActive ? 'rgba(var(--color-secondary-fixed-rgb),0.12)' : 'transparent',
+                    color: 'var(--color-on-surface)',
+                  }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--color-surface-container-high)' }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
+                >
+                  <span className="text-lg leading-none shrink-0">{c.flag}</span>
+                  <span className="flex-1 text-xs font-medium">{c.name}</span>
+                  <span className="text-xs font-bold" style={{ color: 'var(--color-secondary-fixed)' }}>{c.dial}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
       )}
