@@ -1,5 +1,8 @@
+import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+
+const CarScene = lazy(() => import('../components/CarScene'))
 
 
 export default function Home() {
@@ -10,7 +13,7 @@ export default function Home() {
       {/* Hero */}
       <section className="relative min-h-[70vh] flex items-center overflow-hidden">
         <div className="relative z-10 max-w-7xl mx-auto px-5 w-full py-8 md:py-16">
-          <div className="grid md:grid-cols-1 gap-10 items-center">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
             <div className="max-w-2xl space-y-4 animate-fade-in">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/10 border border-secondary-fixed/25 text-secondary-fixed">
                 <span className="material-symbols-outlined fill-icon text-sm">auto_awesome</span>
@@ -42,6 +45,16 @@ export default function Home() {
               </div>
             </div>
 
+            {/* 3D Car */}
+            <div className="hidden md:block relative animate-fade-in" style={{ height: '420px' }}>
+              <Suspense fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="loader" />
+                </div>
+              }>
+                <CarScene />
+              </Suspense>
+            </div>
           </div>
         </div>
       </section>
