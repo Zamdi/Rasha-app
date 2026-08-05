@@ -76,14 +76,16 @@ export default function CalendarPicker({ value, onChange, minDate, lang = 'en' }
         <div className="absolute left-0 right-0 z-50 mt-1 rounded-xl overflow-hidden animate-fade-in"
           style={{
             top: '100%',
-            background: 'var(--color-surface-container-high)',
-            border: '1px solid var(--color-outline-variant)',
+            background: 'var(--glass-high-bg)',
+            backdropFilter: 'blur(48px) saturate(1.2)',
+            WebkitBackdropFilter: 'blur(48px) saturate(1.2)',
+            border: '1px solid var(--glass-high-border)',
             boxShadow: 'var(--glass-shadow-lg)',
           }}>
 
           {/* Month nav */}
           <div className="flex items-center justify-between px-3 py-2.5"
-            style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+            style={{ borderBottom: '1px solid var(--glass-high-border)' }}>
             <button type="button" onClick={prev}
               className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
               style={{ color: 'var(--color-on-surface-variant)' }}
