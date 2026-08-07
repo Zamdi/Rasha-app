@@ -1,7 +1,7 @@
-import { useStaff } from '../context/StaffContext'
+import { useApp } from '../context/AppContext'
 
 export default function Toast() {
-  const { toast } = useStaff()
+  const { toast } = useApp()
   if (!toast) return null
   return (
     <div key={toast.id}
