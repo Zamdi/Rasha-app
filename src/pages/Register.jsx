@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import OtpInput from '../components/OtpInput'
+import PhoneInput from '../components/PhoneInput'
 
 const OTP_SECONDS = 60
 
@@ -11,6 +12,7 @@ export default function Register() {
   const location = useLocation()
   const returnTo = location.state?.returnTo || '/loyalty'
   const [form, setForm] = useState({ firstName:'', lastName:'', email:'', phone:'', password:'' })
+  const [dialCode, setDialCode] = useState('+249')
   const [showPw, setShowPw] = useState(false)
   const [step, setStep] = useState('form')
   const [otp, setOtp] = useState('')
@@ -41,7 +43,7 @@ export default function Register() {
     try {
       const res = await fetch(`${API}/api/auth/register`, {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:'+249'+form.phone, password:form.password })
+        body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:dialCode+form.phone, password:form.password })
       })
       const data = await res.json()
       if (!res.ok) {
@@ -63,7 +65,7 @@ export default function Register() {
     try {
       const res = await fetch(`${API}/api/auth/verify-register`, {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:'+249'+form.phone, password:form.password, otp: code })
+        body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:dialCode+form.phone, password:form.password, otp: code })
       })
       const data = await res.json()
       if (!res.ok) { showToast(data.error||t('Invalid or expired code','رمز غير صحيح أو منتهي الصلاحية'),'error'); setLoading(false); return }
@@ -107,11 +109,12 @@ export default function Register() {
             </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Phone','الهاتف')}</label>
-              <div className="flex" dir="ltr">
-                <span className="rounded-l-xl px-3 py-3 text-sm text-on-surface-variant flex items-center shrink-0"
-                  style={{background:'var(--color-surface-container-high)', border:'1px solid var(--color-outline-variant)', borderRight:'none'}}>+249</span>
-                <input type="tel" placeholder="9XX XXX XXXX" autoComplete="tel-national" name="tel" className="rasha-input" style={{borderRadius:'0 0.75rem 0.75rem 0'}} value={form.phone} onChange={e=>set('phone',e.target.value.replace(/\D/g,''))}/>
-              </div>
+              <PhoneInput
+                value={form.phone}
+                onChange={v => set('phone', v)}
+                dialCode={dialCode}
+                onDialChange={setDialCode}
+              />
             </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Password','كلمة المرور')}</label>

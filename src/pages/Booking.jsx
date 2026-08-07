@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import { formatTime } from '../utils/format'
+import CalendarPicker from '../components/CalendarPicker'
 
 const today = () => {
   // Use Khartoum local time (UTC+3) so the minimum date is never yesterday
@@ -23,10 +24,6 @@ export default function Booking() {
 
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
-    firstName: customer?.first_name || '',
-    lastName: customer?.last_name || '',
-    phone: (customer?.phone || '').replace('+249', '') || location.state?.phone || '',
-    email: customer?.email || '',
     vehicle: '',
     service: location.state?.service || 'full',
     date: today(),
@@ -54,11 +51,9 @@ export default function Booking() {
   }
 
   const goToStep2 = () => {
-    if (!form.firstName || !form.lastName || !form.phone || !form.date) {
-      showToast(t('Please fill all required fields', 'يرجى ملء الحقول المطلوبة'), 'error'); return
+    if (!form.date) {
+      showToast(t('Please select a date', 'يرجى اختيار تاريخ'), 'error'); return
     }
-    // iOS Safari renders its own scroll-wheel date picker and does not enforce
-    // the `min` attribute, so the date must be re-checked here before advancing.
     if (form.date < today()) {
       showToast(t('Please choose today or a future date', 'يرجى اختيار تاريخ اليوم أو تاريخ لاحق'), 'error')
       setForm(f => ({ ...f, date: today() }))
@@ -90,9 +85,9 @@ export default function Booking() {
       const res = await fetch(`${API}/api/bookings`, {
         method: 'POST', headers,
         body: JSON.stringify({
-          name: `${form.firstName} ${form.lastName}`,
-          phone: '+249' + form.phone,
-          email: form.email || undefined,
+          name: customer ? `${customer.first_name} ${customer.last_name}` : '',
+          phone: customer?.phone || '',
+          email: customer?.email || undefined,
           vehicle: form.vehicle || undefined,
           service: form.service,
           date: form.date,
@@ -114,7 +109,8 @@ export default function Booking() {
         login(token, { ...customer, wallet_balance: data.walletBalance })
       }
       const ref = '#RSH-' + data.booking.booking_uid.replace('BK-', '')
-      navigate('/confirmation', { state: { ref, service: form.service, date: form.date, time: selectedSlot, name: `${form.firstName} ${form.lastName}`, paidFromWallet: payFromWallet, amount: price } })
+      const custName = customer ? `${customer.first_name} ${customer.last_name}` : ''
+      navigate('/confirmation', { state: { ref, service: form.service, date: form.date, time: selectedSlot, name: custName, phone: customer?.phone, email: customer?.email, vehicle: form.vehicle, paidFromWallet: payFromWallet, amount: price } })
     } catch { showToast(t('Connection error', 'خطأ في الاتصال'), 'error') }
     finally { setLoading(false) }
   }
@@ -151,55 +147,52 @@ export default function Booking() {
         {/* Step 1 */}
         {step === 1 && (
           <div className="glass p-6 rounded-2xl space-y-4 animate-fade-in">
-            <h3 className="font-bold text-on-surface mb-2">{t('Your Details', 'بياناتك')}</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('First Name', 'الاسم الأول')} *</label>
-                <input className="rasha-input" value={form.firstName} onChange={e => setForm(f => ({...f, firstName: e.target.value}))} />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Last Name', 'اسم العائلة')} *</label>
-                <input className="rasha-input" value={form.lastName} onChange={e => setForm(f => ({...f, lastName: e.target.value}))} />
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Phone', 'الهاتف')} *</label>
-              <div className="flex" dir="ltr">
-                <span className="rounded-l-xl px-3 py-3 text-sm text-on-surface-variant flex items-center shrink-0"
-                  style={{background:'var(--color-surface-container-high)', border:'1px solid var(--color-outline-variant)', borderRight:'none'}}>+249</span>
-                <input type="tel" placeholder="9XX XXX XXXX" className="rasha-input" style={{borderRadius:'0 0.75rem 0.75rem 0'}} value={form.phone} onChange={e => setForm(f => ({...f, phone: e.target.value.replace(/\D/g,'')}))} />
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Email (optional)', 'البريد (اختياري)')}</label>
-              <input type="email" className="rasha-input" placeholder="you@example.com" value={form.email} onChange={e => setForm(f => ({...f, email: e.target.value}))} />
-            </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Vehicle Info (optional)', 'السيارة (اختياري)')}</label>
               <input className="rasha-input" placeholder={t('e.g. Toyota Camry - White', 'مثال: تويوتا كامري - أبيض')} value={form.vehicle} onChange={e => setForm(f => ({...f, vehicle: e.target.value}))} />
             </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Service Type', 'نوع الخدمة')} *</label>
-              <select className="rasha-select" value={form.service} onChange={e => setForm(f => ({...f, service: e.target.value}))}>
-                <option value="full">{t('Full Wash', 'غسيل كامل')}</option>
-                <option value="outside">{t('Exterior Only', 'خارجي فقط')}</option>
-              </select>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: 'full',    label: t('Full Wash', 'غسيل كامل'),    sub: t('Interior + Exterior', 'داخلي + خارجي'), icon: 'local_car_wash', price: '8,500 SDG' },
+                  { value: 'outside', label: t('Exterior Only', 'خارجي فقط'), sub: t('Exterior cleaning', 'تنظيف خارجي'),    icon: 'water_drop',    price: '5,000 SDG' },
+                ].map(opt => {
+                  const active = form.service === opt.value
+                  return (
+                    <button key={opt.value} type="button"
+                      onClick={() => setForm(f => ({ ...f, service: opt.value }))}
+                      className="relative p-4 rounded-xl text-left transition-all"
+                      style={{
+                        background: active ? 'rgba(var(--color-secondary-fixed-rgb),0.08)' : 'var(--input-bg)',
+                        border: active ? '2px solid var(--color-secondary-fixed)' : '1px solid var(--color-outline-variant)',
+                      }}>
+                      <span className={`material-symbols-outlined text-2xl mb-2 block ${active ? 'fill-icon text-secondary-fixed' : 'text-on-surface-variant'}`}>{opt.icon}</span>
+                      <p className={`text-sm font-bold mb-0.5 ${active ? 'text-secondary-fixed' : 'text-on-surface'}`}>{opt.label}</p>
+                      <p className="text-xs text-on-surface-variant">{opt.sub}</p>
+                      <p className="text-xs font-bold mt-1.5 text-on-surface-variant">{opt.price}</p>
+                      {active && (
+                        <span className="material-symbols-outlined fill-icon text-secondary-fixed absolute top-2 end-2" style={{ fontSize: '16px' }}>check_circle</span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Date', 'التاريخ')} *</label>
-              <input type="date" className="rasha-input" min={today()} value={form.date}
-                onChange={e => {
-                  const picked = e.target.value
-                  if (!picked) { setForm(f => ({ ...f, date: '' })); return }
-                  // iOS Safari does not disable dates below `min` — it lets any
-                  // day be tapped and only validates on submit. So enforce it here.
+              <CalendarPicker
+                value={form.date}
+                onChange={picked => {
                   if (picked < today()) {
                     showToast(t('You cannot book a date in the past.', 'لا يمكنك الحجز في تاريخ سابق.'), 'error')
-                    setForm(f => ({ ...f, date: today() }))
                     return
                   }
                   setForm(f => ({ ...f, date: picked }))
-                }} />
+                }}
+                minDate={today()}
+                lang={lang}
+              />
             </div>
             <button onClick={goToStep2} className="btn-primary w-full py-4 rounded-xl">
               {t('Choose Time Slot', 'اختر الموعد')}
@@ -254,8 +247,9 @@ export default function Booking() {
               <h3 className="font-bold text-on-surface mb-4">{t('Review & Confirm', 'مراجعة وتأكيد')}</h3>
               <div className="space-y-3 text-sm">
                 {[
-                  [t('Name','الاسم'), `${form.firstName} ${form.lastName}`, false],
-                  [t('Phone','الهاتف'), `+249${form.phone}`, true],
+                  [t('Name','الاسم'), customer ? `${customer.first_name} ${customer.last_name}` : '', false],
+                  [t('Phone','الهاتف'), customer?.phone || '', true],
+                  ...(customer?.email ? [[t('Email','البريد'), customer.email, false]] : []),
                   [t('Service','الخدمة'), serviceLabel, false],
                   [t('Date','التاريخ'), new Date(form.date + 'T12:00:00').toLocaleDateString(t('en-US','ar-EG'), {year:'numeric',month:'long',day:'numeric'}), false],
                   [t('Time','الوقت'), formatTime(selectedSlot, lang), true],

@@ -28,7 +28,7 @@ export function AppProvider({ children }) {
     const fg = isDarkMode ? '#e8f0fe' : '#0d1825'
     root.style.backgroundColor = bg
     root.style.color = fg
-    body.style.backgroundColor = bg
+    body.style.backgroundColor = 'transparent'
     body.style.color = fg
 
     // Update meta theme-color
