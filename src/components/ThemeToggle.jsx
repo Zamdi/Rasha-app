@@ -1,6 +1,8 @@
-import { useApp } from '../context/AppContext'
+import { useStaff } from '../context/StaffContext'
+
 export default function ThemeToggle() {
-  const { isDark, toggleTheme } = useApp()
+  const { isDark, toggleTheme } = useStaff()
+
   return (
     <button
       onClick={toggleTheme}
@@ -22,6 +24,7 @@ export default function ThemeToggle() {
         direction: 'ltr',
       }}
     >
+      {/* Sun icon — left side */}
       <span className="material-symbols-outlined" style={{
         position: 'absolute', left: '5px',
         fontSize: '14px',
@@ -29,6 +32,8 @@ export default function ThemeToggle() {
         opacity: isDark ? 0.4 : 1,
         transition: 'all 0.2s',
       }}>light_mode</span>
+
+      {/* Moon icon — right side */}
       <span className="material-symbols-outlined" style={{
         position: 'absolute', right: '5px',
         fontSize: '14px',
@@ -36,6 +41,8 @@ export default function ThemeToggle() {
         opacity: isDark ? 1 : 0.4,
         transition: 'all 0.2s',
       }}>dark_mode</span>
+
+      {/* Sliding pill — uses left position, not translateX, to avoid RTL flip */}
       <div style={{
         position: 'absolute',
         left: isDark ? '27px' : '3px',
