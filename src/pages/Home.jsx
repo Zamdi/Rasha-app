@@ -199,13 +199,15 @@ export default function Home() {
         <div style={{ height: '1px', background: 'var(--color-outline-variant)', opacity: 0.3, margin: '0 24px' }} />
 
         {/* Massive brand name */}
-        <div className="px-4 md:px-6 pt-6 pb-2 overflow-hidden select-none">
+        <div className="px-4 md:px-6 pt-6 pb-2 overflow-hidden select-none flex justify-center">
           <p
-            className="font-display font-black leading-none text-secondary-fixed w-full text-center"
+            className="font-display font-black leading-none text-secondary-fixed"
             style={{
               fontSize: 'clamp(72px, 22vw, 220px)',
               letterSpacing: '-0.03em',
               opacity: 0.92,
+              writingMode: 'vertical-lr',
+              transform: 'rotate(180deg)',
             }}>
             RASHA
           </p>
