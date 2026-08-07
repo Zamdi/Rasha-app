@@ -206,8 +206,6 @@ export default function Home() {
               fontSize: 'clamp(72px, 22vw, 220px)',
               letterSpacing: '-0.03em',
               opacity: 0.92,
-              writingMode: 'vertical-lr',
-              transform: 'rotate(180deg)',
             }}>
             RASHA
           </p>
