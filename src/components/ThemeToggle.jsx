@@ -1,7 +1,7 @@
-import { useStaff } from '../context/StaffContext'
+import { useApp } from '../context/AppContext'
 
 export default function ThemeToggle() {
-  const { isDark, toggleTheme } = useStaff()
+  const { isDark, toggleTheme } = useApp()
 
   return (
     <button
