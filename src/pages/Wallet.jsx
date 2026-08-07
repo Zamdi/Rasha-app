@@ -1,18 +1,30 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
+import { useApp, API } from '../context/AppContext'
 
 export default function Wallet() {
-  const { t, customer } = useApp()
+  const { t, customer, login, token } = useApp()
   const [showAddCard, setShowAddCard] = useState(false)
+  const [balance, setBalance] = useState(Number(customer?.wallet_balance || 0))
 
   // One-time cleanup: purge card data saved by earlier builds
-  // (raw card details must never be stored client-side).
   useEffect(() => { try { localStorage.removeItem('rasha_saved_card') } catch {} }, [])
 
-  if (!customer) return null
+  // Fetch fresh balance from server every time this page is opened
+  useEffect(() => {
+    if (!token) return
+    fetch(`${API}/api/auth/me`, { headers: { Authorization: 'Bearer ' + token } })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.customer) {
+          setBalance(Number(data.customer.wallet_balance || 0))
+          login(token, data.customer)
+        }
+      })
+      .catch(() => {})
+  }, [token])
 
-  const balance = customer.wallet_balance || 0
+  if (!customer) return null
 
 
   const navItems = [
