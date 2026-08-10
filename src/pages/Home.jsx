@@ -80,7 +80,7 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Wash */}
-          <Link to="/book" state={{ service: 'full' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine block overflow-hidden">
+          <Link to="/book" state={{ service: 'full' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine flex flex-col overflow-hidden">
             <div className="w-full h-60 overflow-hidden relative">
               <img
                 src="https://bluesky-cogcms.cdn.imgeng.in/media/irmbopnk/spruce-and-shine-collage.png?&width=900&center=0.5,0.5&mode=crop&scale=both"
@@ -90,7 +90,7 @@ export default function Home() {
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />
               <span className="absolute bottom-3 left-4 text-white text-xs font-bold uppercase tracking-widest opacity-90">Interior + Exterior</span>
             </div>
-            <div className="p-8">
+            <div className="p-8 flex flex-col flex-1">
             <div className="flex justify-between items-start mb-6">
               <span className="material-symbols-outlined fill-icon text-secondary-fixed text-4xl">local_car_wash</span>
               <span className="bg-secondary-fixed/10 text-secondary-fixed text-xs font-bold px-3 py-1 rounded-full border border-secondary-fixed/30">{t('Full Wash', 'غسيل كامل')}</span>
@@ -105,12 +105,12 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <button className="btn-primary w-full py-3 rounded-xl">{t('Book Full Wash', 'احجز غسيل كامل')}</button>
+            <button className="btn-primary w-full py-3 rounded-xl mt-auto">{t('Book Full Wash', 'احجز غسيل كامل')}</button>
             </div>
           </Link>
 
           {/* Exterior Only */}
-          <Link to="/book" state={{ service: 'outside' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine block overflow-hidden">
+          <Link to="/book" state={{ service: 'outside' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine flex flex-col overflow-hidden">
             <div className="w-full h-60 overflow-hidden relative">
               <img
                 src="/external-wash.jpg"
@@ -120,7 +120,7 @@ export default function Home() {
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />
               <span className="absolute bottom-3 left-4 text-white text-xs font-bold uppercase tracking-widest opacity-90">Exterior Cleaning</span>
             </div>
-            <div className="p-8">
+            <div className="p-8 flex flex-col flex-1">
             <div className="flex justify-between items-start mb-6">
               <span className="material-symbols-outlined text-secondary-fixed text-4xl">water_drop</span>
               <span className="bg-surface-container-highest/50 text-on-surface-variant text-xs font-bold px-3 py-1 rounded-full border border-outline-variant">{t('Exterior', 'خارجي')}</span>
@@ -135,7 +135,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <button className="btn-primary w-full py-3 rounded-xl">{t('Book Exterior', 'احجز خارجي')}</button>
+            <button className="btn-primary w-full py-3 rounded-xl mt-auto">{t('Book Exterior', 'احجز خارجي')}</button>
             </div>
           </Link>
         </div>
