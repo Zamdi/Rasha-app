@@ -12,8 +12,8 @@ export default function Home() {
       <section className="relative min-h-[92vh] flex items-center overflow-hidden"
         style={{ background: isDark
           ? (isAr
-              ? 'linear-gradient(255deg, #070d1a 0%, #0a1f24 40%, #0d2a30 100%)'
-              : 'linear-gradient(105deg, #070d1a 0%, #0a1f24 40%, #0d2a30 100%)')
+              ? 'linear-gradient(255deg, #070d1a 0%, #0a1f24 35%, #155058 65%, #1d6b75 100%)'
+              : 'linear-gradient(105deg, #070d1a 0%, #0a1f24 35%, #155058 65%, #1d6b75 100%)')
           : (isAr
               ? 'linear-gradient(255deg, #0a1a1c 0%, #0e2a2e 35%, #1a4a52 60%, #e8f8f8 100%)'
               : 'linear-gradient(105deg, #0a1a1c 0%, #0e2a2e 35%, #1a4a52 60%, #e8f8f8 100%)') }}>
@@ -35,9 +35,9 @@ export default function Home() {
             width: '75%',
             maxWidth: '1080px',
             filter: isDark
-              ? `brightness(1.6) contrast(1.1) drop-shadow(${isAr ? '12px' : '-12px'} 0 40px rgba(116,245,255,0.3))`
+              ? `brightness(1.15) contrast(1.1) drop-shadow(${isAr ? '12px' : '-12px'} 0 50px rgba(116,245,255,0.25))`
               : `brightness(1.0) contrast(1.08) drop-shadow(${isAr ? '12px' : '-12px'} 0 40px rgba(21,80,88,0.5))`,
-            mixBlendMode: isDark ? 'multiply' : 'normal',
+            mixBlendMode: 'normal',
             transform: isAr ? 'scaleX(-1)' : 'none',
             zIndex: 1,
             pointerEvents: 'none',
