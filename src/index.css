@@ -10,52 +10,52 @@
 
 /* ── Light mode tokens (default) ────────────────────────────── */
 :root {
-  --color-background:                #f2f5f9;
+  --color-background:                #f8fffe;
   --color-surface:                   #ffffff;
   --color-surface-container:         #ffffff;
-  --color-surface-container-high:    #f8fafc;
-  --color-surface-container-highest: #eef2f7;
-  --color-surface-variant:           #eef2f7;
+  --color-surface-container-high:    #f0fafa;
+  --color-surface-container-highest: #e4f4f4;
+  --color-surface-variant:           #e4f4f4;
   --color-on-surface:                #0d1825;
-  --color-on-surface-variant:        #3a5570;
-  --color-outline:                   rgba(0,60,130,0.15);
-  --color-outline-variant:           rgba(0,60,130,0.12);
-  --color-primary:                   #0056b3;
+  --color-on-surface-variant:        #2d5a5e;
+  --color-outline:                   rgba(21,80,88,0.15);
+  --color-outline-variant:           rgba(21,80,88,0.12);
+  --color-primary:                   #155058;
   --color-on-primary:                #ffffff;
-  --color-primary-container:         #0056b3;
-  --color-secondary-fixed:           #005f9e;
-  --color-secondary-fixed-rgb:       0,95,158;
-  --color-secondary-fixed-dim:       #004d85;
+  --color-primary-container:         #155058;
+  --color-secondary-fixed:           #155058;
+  --color-secondary-fixed-rgb:       21,80,88;
+  --color-secondary-fixed-dim:       #0e383e;
   --color-error:                     #c0392b;
   --color-error-container:           rgba(192,57,43,0.10);
   --color-on-background:             #0d1825;
 
   /* Glass tokens — opaque white cards on off-white bg */
   --glass-bg:           #ffffff;
-  --glass-bg-hover:     #f8fafd;
+  --glass-bg-hover:     #f0fafa;
   --glass-high-bg:      #ffffff;
-  --glass-border:       rgba(0,60,130,0.10);
-  --glass-high-border:  rgba(0,60,130,0.16);
-  --glass-shadow:       0 4px 24px rgba(0,50,120,0.10), 0 1px 3px rgba(0,0,0,0.06);
-  --glass-shadow-lg:    0 12px 48px rgba(0,50,120,0.14), 0 2px 8px rgba(0,0,0,0.07);
-  --glass-shadow-card:  0 2px 12px rgba(0,50,120,0.09), 0 1px 3px rgba(0,0,0,0.05);
+  --glass-border:       rgba(21,80,88,0.10);
+  --glass-high-border:  rgba(21,80,88,0.16);
+  --glass-shadow:       0 4px 24px rgba(21,80,88,0.10), 0 1px 3px rgba(0,0,0,0.06);
+  --glass-shadow-lg:    0 12px 48px rgba(21,80,88,0.14), 0 2px 8px rgba(0,0,0,0.07);
+  --glass-shadow-card:  0 2px 12px rgba(21,80,88,0.09), 0 1px 3px rgba(0,0,0,0.05);
 
   /* Inputs */
-  --input-bg:           #f4f7fb;
-  --input-border:       rgba(0,60,130,0.18);
-  --input-focus:        rgba(0,86,179,0.15);
+  --input-bg:           #f0fafa;
+  --input-border:       rgba(21,80,88,0.18);
+  --input-focus:        rgba(21,80,88,0.15);
 
   /* Navbar */
-  --navbar-bg:          rgba(242,245,249,0.92);
+  --navbar-bg:          rgba(248,255,254,0.92);
 
   /* Mobile nav */
   --mobile-nav-bg:      #ffffff;
 
   /* RGB channels for Tailwind opacity modifiers */
-  --color-secondary-fixed-rgb:        0,95,158;
-  --color-outline-variant-rgb:        0,60,130;
+  --color-secondary-fixed-rgb:        21,80,88;
+  --color-outline-variant-rgb:        21,80,88;
   --color-error-rgb:                  192,57,43;
-  --color-secondary-container-rgb:    0,86,179;
+  --color-secondary-container-rgb:    21,80,88;
   --color-surface-container-rgb:      255,255,255;
 }
 
@@ -73,7 +73,7 @@ html.dark {
   --color-outline-variant:           rgba(116,245,255,0.06);
   --color-primary:                   #74f5ff;
   --color-on-primary:                #003640;
-  --color-primary-container:         #0056b3;
+  --color-primary-container:         #155058;
   --color-secondary-fixed:           #74f5ff;
   --color-secondary-fixed-rgb:       116,245,255;
   --color-secondary-fixed-dim:       #00dbe7;
