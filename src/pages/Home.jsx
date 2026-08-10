@@ -135,7 +135,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <button className="btn-cyan w-full py-3 rounded-xl">{t('Book Exterior', 'احجز خارجي')}</button>
+            <button className="btn-primary w-full py-3 rounded-xl">{t('Book Exterior', 'احجز خارجي')}</button>
             </div>
           </Link>
         </div>
