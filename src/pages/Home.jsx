@@ -3,46 +3,55 @@ import { useApp } from '../context/AppContext'
 
 
 export default function Home() {
-  const { t } = useApp()
+  const { t, lang } = useApp()
+  const isAr = lang === 'ar'
 
   return (
     <div className="pt-14 pb-16 md:pb-0">
       {/* Hero */}
-      <section className="relative min-h-[92vh] flex items-end overflow-hidden">
-        {/* Full-bleed car photo */}
+      <section className="relative min-h-[92vh] flex items-center overflow-hidden"
+        style={{ background: isAr
+          ? 'linear-gradient(255deg, #0a1a1c 0%, #0e2a2e 35%, #1a4a52 60%, #e8f8f8 100%)'
+          : 'linear-gradient(105deg, #0a1a1c 0%, #0e2a2e 35%, #1a4a52 60%, #e8f8f8 100%)' }}>
+
+        {/* Soft divider glow between dark and light zones */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 55% 80% at 68% 55%, rgba(240,255,255,0.18) 0%, transparent 65%)',
+        }} />
+
+        {/* Mustang — right side, sits on the light zone */}
         <img
-          src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1920&q=85"
+          src="/hero-mustang.png"
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-          style={{ zIndex: 0 }}
-        />
-
-        {/* Dark gradient overlay — heavier on left for text legibility */}
-        <div
-          className="absolute inset-0"
+          className="absolute hidden md:block"
           style={{
+            ...(isAr ? { left: '8%' } : { right: '8%' }),
+            bottom: '6%',
+            width: '75%',
+            maxWidth: '1080px',
+            filter: `brightness(1.0) contrast(1.08) drop-shadow(${isAr ? '12px' : '-12px'} 0 40px rgba(21,80,88,0.5))`,
+            transform: isAr ? 'scaleX(-1)' : 'none',
             zIndex: 1,
-            background: 'linear-gradient(100deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.15) 100%)',
+            pointerEvents: 'none',
+            userSelect: 'none',
           }}
         />
+
         {/* Bottom fade into page bg */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-32"
-          style={{ zIndex: 2, background: 'linear-gradient(to bottom, transparent, var(--color-background))' }}
-        />
+        <div className="absolute bottom-0 left-0 right-0 h-28" style={{ zIndex: 2, background: 'linear-gradient(to bottom, transparent, var(--color-background))' }} />
 
         {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-5 w-full py-16 md:py-24">
-          <div className="max-w-2xl space-y-5 animate-fade-in">
+        <div className="relative w-full max-w-7xl mx-auto px-5 py-16 md:py-24" style={{ zIndex: 3 }}>
+          <div className="max-w-xl space-y-5 animate-fade-in">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 text-white/70" style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
-              <span className="material-symbols-outlined fill-icon text-sm" style={{ color: 'var(--color-secondary-fixed)' }}>auto_awesome</span>
+              <span className="material-symbols-outlined fill-icon text-sm" style={{ color: '#74f5ff' }}>auto_awesome</span>
               <span className="text-xs font-bold uppercase tracking-widest">{t("Sudan's Premier Car Wash", 'أفضل غسيل سيارات في السودان')}</span>
             </div>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight font-display">
               {t('Drive Clean.', 'اقد نظيفاً.')}<br />
-              <span style={{ color: 'var(--color-secondary-fixed)' }}>{t('Drive Confident.', 'اقد بثقة.')}</span>
+              <span style={{ color: '#74f5ff' }}>{t('Drive Confident.', 'اقد بثقة.')}</span>
             </h1>
 
             <p className="text-white/70 text-base max-w-lg leading-relaxed">
@@ -63,7 +72,7 @@ export default function Home() {
             <div className="flex gap-8 pt-2">
               {[['500+', t('Happy Customers', 'عميل سعيد')], ['4.9★', t('Rating', 'التقييم')], ['2', t('Services', 'خدمات')]].map(([v, l]) => (
                 <div key={l}>
-                  <div className="text-2xl font-extrabold font-display" style={{ color: 'var(--color-secondary-fixed)' }}>{v}</div>
+                  <div className="text-2xl font-extrabold font-display" style={{ color: '#74f5ff' }}>{v}</div>
                   <div className="text-xs text-white/60">{l}</div>
                 </div>
               ))}
