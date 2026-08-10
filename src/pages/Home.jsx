@@ -97,11 +97,12 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Wash */}
           <Link to="/book" state={{ service: 'full' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine flex flex-col overflow-hidden">
-            <div className="w-full h-60 overflow-hidden relative group-hover:scale-105 transition-transform duration-500" style={{
-                backgroundImage: 'url(https://bluesky-cogcms.cdn.imgeng.in/media/irmbopnk/spruce-and-shine-collage.png?&width=900&height=480&center=0.5,0.5&mode=crop&scale=both)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}>
+            <div className="w-full h-60 overflow-hidden relative">
+              <img
+                src="/full-wash.jpg"
+                alt="Full Wash — interior and exterior cleaning"
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+              />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />
               <span className="absolute bottom-3 left-4 text-white text-xs font-bold uppercase tracking-widest opacity-90">Interior + Exterior</span>
             </div>
