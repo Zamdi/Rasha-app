@@ -333,6 +333,11 @@ html.dark .slot-available:hover {
   overflow: hidden;
 }
 
+/* ── Dark mode label brightness ─────────────────────────────── */
+html.dark label {
+  color: #c8e6f7;
+}
+
 /* ── RTL helpers ─────────────────────────────────────────────── */
 .rtl-flip { transform: scaleX(1); }
 [dir="rtl"] .rtl-flip { transform: scaleX(-1); }
