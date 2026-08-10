@@ -32,7 +32,7 @@
 
   /* Glass tokens — opaque white cards on off-white bg */
   --glass-bg:           #ffffff;
-  --glass-bg-hover:     #f0fafa;
+  --glass-bg-hover:     #f7f7f7;
   --glass-high-bg:      #ffffff;
   --glass-border:       rgba(21,80,88,0.10);
   --glass-high-border:  rgba(21,80,88,0.16);
