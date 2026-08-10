@@ -175,13 +175,13 @@ body {
 
   /* Gradient button */
   .hydro-gradient {
-    background: linear-gradient(135deg, #0077cc 0%, #0055aa 50%, #003d88 100%);
-    box-shadow: 0 2px 12px rgba(0,86,179,0.25);
+    background: linear-gradient(135deg, #1d6b75 0%, #155058 50%, #0e383e 100%);
+    box-shadow: 0 2px 12px rgba(21,80,88,0.30);
     transition: all 0.2s;
   }
   .hydro-gradient:hover {
-    background: linear-gradient(135deg, #0088dd 0%, #0066bb 50%, #004e99 100%);
-    box-shadow: 0 4px 16px rgba(0,86,179,0.35);
+    background: linear-gradient(135deg, #227f8a 0%, #1a6570 50%, #124045 100%);
+    box-shadow: 0 4px 16px rgba(21,80,88,0.40);
     transform: translateY(-1px);
   }
 
