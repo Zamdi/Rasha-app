@@ -3,16 +3,20 @@ import { useApp } from '../context/AppContext'
 
 
 export default function Home() {
-  const { t, lang } = useApp()
+  const { t, lang, isDark } = useApp()
   const isAr = lang === 'ar'
 
   return (
     <div className="pt-14 pb-16 md:pb-0">
       {/* Hero */}
       <section className="relative min-h-[92vh] flex items-center overflow-hidden"
-        style={{ background: isAr
-          ? 'linear-gradient(255deg, #0a1a1c 0%, #0e2a2e 35%, #1a4a52 60%, #e8f8f8 100%)'
-          : 'linear-gradient(105deg, #0a1a1c 0%, #0e2a2e 35%, #1a4a52 60%, #e8f8f8 100%)' }}>
+        style={{ background: isDark
+          ? (isAr
+              ? 'linear-gradient(255deg, #070d1a 0%, #0a1f24 40%, #0d2a30 100%)'
+              : 'linear-gradient(105deg, #070d1a 0%, #0a1f24 40%, #0d2a30 100%)')
+          : (isAr
+              ? 'linear-gradient(255deg, #0a1a1c 0%, #0e2a2e 35%, #1a4a52 60%, #e8f8f8 100%)'
+              : 'linear-gradient(105deg, #0a1a1c 0%, #0e2a2e 35%, #1a4a52 60%, #e8f8f8 100%)') }}>
 
         {/* Soft divider glow between dark and light zones */}
         <div className="absolute inset-0 pointer-events-none" style={{
@@ -30,7 +34,10 @@ export default function Home() {
             bottom: '6%',
             width: '75%',
             maxWidth: '1080px',
-            filter: `brightness(1.0) contrast(1.08) drop-shadow(${isAr ? '12px' : '-12px'} 0 40px rgba(21,80,88,0.5))`,
+            filter: isDark
+              ? `brightness(1.6) contrast(1.1) drop-shadow(${isAr ? '12px' : '-12px'} 0 40px rgba(116,245,255,0.3))`
+              : `brightness(1.0) contrast(1.08) drop-shadow(${isAr ? '12px' : '-12px'} 0 40px rgba(21,80,88,0.5))`,
+            mixBlendMode: isDark ? 'multiply' : 'normal',
             transform: isAr ? 'scaleX(-1)' : 'none',
             zIndex: 1,
             pointerEvents: 'none',
@@ -90,11 +97,12 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Wash */}
           <Link to="/book" state={{ service: 'full' }} className="glass rounded-3xl hover:border-secondary-fixed/40 transition-all group wet-shine flex flex-col overflow-hidden">
-            <div className="w-full h-60 overflow-hidden relative">
+            <div className="w-full h-60 overflow-hidden relative" style={{ background: '#0d2535' }}>
               <img
-                src="https://bluesky-cogcms.cdn.imgeng.in/media/irmbopnk/spruce-and-shine-collage.png?&width=900&center=0.5,0.5&mode=crop&scale=both"
+                src="https://bluesky-cogcms.cdn.imgeng.in/media/irmbopnk/spruce-and-shine-collage.png?&width=900&height=480&center=0.5,0.5&mode=crop&scale=both"
                 alt="Full Wash — interior and exterior cleaning"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
               />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />
               <span className="absolute bottom-3 left-4 text-white text-xs font-bold uppercase tracking-widest opacity-90">Interior + Exterior</span>
