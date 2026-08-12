@@ -131,8 +131,19 @@ export default function MobileNav() {
 
   if (hidden) return null
 
-  const activeColor   = isDark ? '#ffffff' : '#155058'
-  const inactiveColor = isDark ? 'rgba(255,255,255,0.62)' : 'rgba(21,80,88,0.62)'
+  // White in both themes. The pill is close to fully transparent, so the
+  // shadow is doing the legibility work — without it white labels wash out
+  // wherever the bar happens to sit over a light patch of the page.
+  // Glyphs invert with the theme so they always contrast the bar behind them:
+  // dark on the light glass, white on the smoked glass.
+  const activeColor   = isDark ? '#ffffff' : '#0e383e'
+  const inactiveColor = isDark ? 'rgba(255,255,255,0.72)' : 'rgba(14,56,62,0.62)'
+  // Only the white glyphs need a halo — the pill is near-transparent, so in
+  // dark mode they can land on a bright patch of the page behind it. Dark
+  // glyphs on light glass already have contrast and a shadow just muddies them.
+  const glyphShadow = isDark
+    ? '0 0 1px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.45)'
+    : 'none'
 
   return (
     <div className="md:hidden fixed bottom-5 left-0 right-0 z-50 flex justify-center px-3 pointer-events-none">
@@ -181,6 +192,7 @@ export default function MobileNav() {
                   fontSize: '21px',
                   lineHeight: 1,
                   color: isActive ? activeColor : inactiveColor,
+                  textShadow: glyphShadow,
                   fontVariationSettings: isActive ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400",
                   transition: 'color 0.3s ease',
                   flexShrink: 0,
@@ -193,6 +205,7 @@ export default function MobileNav() {
                 fontSize: '13px',
                 fontWeight: 700,
                 color: activeColor,
+                textShadow: glyphShadow,
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 maxWidth: isActive ? '90px' : '0px',
@@ -217,8 +230,9 @@ export default function MobileNav() {
           <span className="material-symbols-outlined" style={{
             fontSize: '21px',
             lineHeight: 1,
-            color: isDark ? '#ffd479' : '#155058',
-            transition: 'color 0.3s ease, transform 0.4s cubic-bezier(0.34,1.15,0.64,1)',
+            color: activeColor,
+            textShadow: glyphShadow,
+            transition: 'transform 0.4s cubic-bezier(0.34,1.15,0.64,1)',
             transform: isDark ? 'rotate(-40deg)' : 'rotate(0deg)',
           }}>{isDark ? 'dark_mode' : 'light_mode'}</span>
         </button>
