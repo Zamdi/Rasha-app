@@ -47,16 +47,6 @@
 
   /* Navbar */
   --navbar-bg:          rgba(248,255,254,0.92);
-
-  /* Mobile nav */
-  --mobile-nav-bg:      #ffffff;
-
-  /* RGB channels for Tailwind opacity modifiers */
-  --color-secondary-fixed-rgb:        21,80,88;
-  --color-outline-variant-rgb:        21,80,88;
-  --color-error-rgb:                  192,57,43;
-  --color-secondary-container-rgb:    21,80,88;
-  --color-surface-container-rgb:      255,255,255;
 }
 
 /* ── Dark mode tokens ────────────────────────────────────────── */
@@ -94,14 +84,6 @@ html.dark {
   --input-border:       rgba(116,245,255,0.25);
   --input-focus:        rgba(116,245,255,0.25);
   --navbar-bg:          rgba(10,22,40,0.85);
-  --mobile-nav-bg:      rgba(10,22,40,0.82);
-
-  /* RGB channels for dark mode */
-  --color-secondary-fixed-rgb:        116,245,255;
-  --color-outline-variant-rgb:        116,245,255;
-  --color-error-rgb:                  255,107,107;
-  --color-secondary-container-rgb:    0,241,254;
-  --color-surface-container-rgb:      255,255,255;
 }
 
 /* ── Full-page background ────────────────────────────────────── */
