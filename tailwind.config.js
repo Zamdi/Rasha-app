@@ -6,13 +6,9 @@ export default {
     extend: {
       colors: {
         'surface':                   'var(--color-surface)',
-        'surface-dim':               'var(--color-surface-dim)',
-        'surface-container-lowest':  'var(--color-surface-container-lowest)',
-        'surface-container-low':     'var(--color-surface-container-low)',
         'surface-container':         'var(--color-surface-container)',
         'surface-container-high':    'var(--color-surface-container-high)',
         'surface-container-highest': 'var(--color-surface-container-highest)',
-        'surface-bright':            'var(--color-surface-bright)',
         'surface-variant':           'var(--color-surface-variant)',
         'on-surface':                'var(--color-on-surface)',
         'on-surface-variant':        'var(--color-on-surface-variant)',
@@ -23,7 +19,6 @@ export default {
         'primary-container':         'var(--color-primary-container)',
         'secondary-fixed':           'var(--color-secondary-fixed)',
         'secondary-fixed-dim':       'var(--color-secondary-fixed-dim)',
-        'secondary-container':       'var(--color-secondary-container)',
         'error':                     'var(--color-error)',
         'error-container':           'var(--color-error-container)',
         'background':                'var(--color-background)',
