@@ -117,7 +117,10 @@ export default function Navbar() {
 
         {/* Right actions */}
         <div className="flex items-center gap-3">
-          <ThemeToggle />
+          {/* Desktop only — on mobile the theme toggle lives in the bottom nav. */}
+          <span className="hidden md:inline-flex">
+            <ThemeToggle />
+          </span>
           <button onClick={toggleLang} className="flex items-center gap-1 text-secondary-fixed text-xs font-bold hover:opacity-80 transition-opacity">
             <span className="material-symbols-outlined text-base">language</span>
             <span>{lang === 'en' ? 'AR' : 'EN'}</span>

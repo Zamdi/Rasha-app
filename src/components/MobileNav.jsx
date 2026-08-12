@@ -6,38 +6,12 @@ const HIDDEN_PAGES = ['/staff', '/confirmation', '/reset-password', '/forgot-pas
 
 export default function MobileNav() {
   const { pathname } = useLocation()
-  const { t, customer, theme } = useApp()
-  const isDark = theme === 'dark'
-  const [expanded, setExpanded] = useState(true)
-  const lastY = useRef(0)
-  const ticking = useRef(false)
-  const navRef = useRef(null)
+  const { t, customer, isDark, toggleTheme } = useApp()
+
+  const navRef  = useRef(null)
   const tabRefs = useRef([])
-  const [pillStyle, setPillStyle] = useState({ left: 0, top: 6, width: 0, height: 0, opacity: 0 })
-  const prevExpanded = useRef(expanded)
-  useEffect(() => {
-    const id = setTimeout(() => { prevExpanded.current = expanded }, 500)
-    return () => clearTimeout(id)
-  }, [expanded])
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (ticking.current) return
-      ticking.current = true
-      requestAnimationFrame(() => {
-        const y = window.scrollY
-        if (y < 50) setExpanded(true)
-        else if (y > lastY.current + 8) setExpanded(false)
-        else if (y < lastY.current - 8) setExpanded(true)
-        lastY.current = y
-        ticking.current = false
-      })
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  useEffect(() => { setExpanded(true) }, [pathname])
+  const glareRef = useRef(null)
+  const [pillStyle, setPillStyle] = useState({ left: 0, top: 0, width: 0, height: 0, opacity: 0 })
 
   // NOTE: no early return above this point. Every hook below must run on every
   // render, otherwise React sees a different hook count when this component
@@ -50,8 +24,8 @@ export default function MobileNav() {
 
   const guestItems = [
     { to: '/',      icon: 'home',                   label: t('Home', 'الرئيسية') },
-    { to: '/book',  icon: 'local_car_wash',          label: t('Book', 'احجز') },
-    { to: '/login', icon: 'person',                  label: t('Profile', 'حسابي') },
+    { to: '/book',  icon: 'local_car_wash',         label: t('Book', 'احجز') },
+    { to: '/login', icon: 'person',                 label: t('Profile', 'حسابي') },
   ]
   const loggedInItems = [
     { to: '/book',    icon: 'local_car_wash',         label: t('Book', 'احجز') },
@@ -63,11 +37,10 @@ export default function MobileNav() {
 
   // Keep the pill locked to the active tab.
   //
-  // The tabs animate padding/min-width/height for 0.3s on every expand/shrink.
-  // Any single measurement taken during that window captures mid-animation
-  // geometry and freezes there — which is why the pill ended up narrow and
-  // sitting between two tabs. So: sample every frame until the transition has
-  // settled, and re-sample whenever layout changes afterwards.
+  // Labels expand/collapse when the active tab changes, so a single measurement
+  // taken during that transition captures mid-animation geometry and freezes
+  // there. Sample every frame until the transition settles, then re-sample on
+  // any later layout change.
   useEffect(() => {
     if (hidden) return
     const nav = navRef.current
@@ -88,7 +61,6 @@ export default function MobileNav() {
         height: tr.height,
         opacity: 1,
       }
-      // Skip no-op state updates so the rAF loop stays cheap.
       setPillStyle(p =>
         (Math.abs(p.left - next.left) < 0.5 &&
          Math.abs(p.top - next.top) < 0.5 &&
@@ -108,7 +80,7 @@ export default function MobileNav() {
       rafId = requestAnimationFrame(loop)
     }
 
-    track()  // follow the expand/shrink transition to completion
+    track()
 
     const ro = new ResizeObserver(() => track(200))
     ro.observe(nav)
@@ -125,51 +97,64 @@ export default function MobileNav() {
       ro.disconnect()
       window.removeEventListener('resize', onResize)
     }
-  }, [activeIdx, expanded, items.length, hidden])
+  }, [activeIdx, items.length, hidden])
 
-  // Theme-aware colors — derived from theme string not isDark bool
-  // so it always re-renders when theme changes
-  const navBg    = isDark ? 'rgba(20,22,24,0.88)'       : 'rgba(255,255,255,0.72)'
-  const navBorder= isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,86,179,0.18)'
-  const navShadow= isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 8px 32px rgba(0,86,179,0.14)'
-  const pillBg   = isDark ? 'rgba(255,255,255,0.16)'    : 'rgba(0,86,179,0.12)'
-  const iconColor= (active) => isDark ? 'white' : (active ? '#0056b3' : '#555')
-  const labelColor=(active) => isDark ? 'white' : (active ? '#0056b3' : '#555')
+  // Specular highlight follows the finger. Written straight to the node so a
+  // touchmove never triggers a React render.
+  useEffect(() => {
+    if (hidden) return
+    const nav = navRef.current
+    const glare = glareRef.current
+    if (!nav || !glare) return
+
+    const move = (clientX) => {
+      const r = nav.getBoundingClientRect()
+      glare.style.transform = `translateX(${clientX - r.left}px)`
+      glare.style.opacity = '1'
+    }
+    const onPointer = e => move(e.clientX)
+    const onTouch = e => { if (e.touches[0]) move(e.touches[0].clientX) }
+    const leave = () => { glare.style.opacity = '0' }
+
+    nav.addEventListener('pointermove', onPointer)
+    nav.addEventListener('pointerleave', leave)
+    nav.addEventListener('touchmove', onTouch, { passive: true })
+    nav.addEventListener('touchend', leave)
+
+    return () => {
+      nav.removeEventListener('pointermove', onPointer)
+      nav.removeEventListener('pointerleave', leave)
+      nav.removeEventListener('touchmove', onTouch)
+      nav.removeEventListener('touchend', leave)
+    }
+  }, [hidden])
 
   if (hidden) return null
 
-  return (
-    <div className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none">
-      <nav ref={navRef} className="pointer-events-auto relative flex items-center"
-        style={{
-          background: navBg,
-          backdropFilter: 'blur(28px)',
-          WebkitBackdropFilter: 'blur(28px)',
-          border: navBorder,
-          borderRadius: '9999px',
-          padding: expanded ? '6px 8px' : '4px 6px',
-          gap: '2px',
-          boxShadow: navShadow,
-          transition: 'padding 0.3s ease',
-        }}>
+  const activeColor   = isDark ? '#ffffff' : '#155058'
+  const inactiveColor = isDark ? 'rgba(255,255,255,0.62)' : 'rgba(21,80,88,0.62)'
 
-        {/* Sliding pill — animates between tabs, but follows the expand/shrink
-            transition instantly so it can never lag behind the tab it sits on. */}
+  return (
+    <div className="md:hidden fixed bottom-5 left-0 right-0 z-50 flex justify-center px-3 pointer-events-none">
+      <nav ref={navRef} className="liquid-nav pointer-events-auto">
+
+        {/* Decorative layers — clipped to the pill, behind the buttons */}
+        <div className="liquid-layer">
+          <div className="liquid-blob liquid-blob-1" />
+          <div className="liquid-blob liquid-blob-2" />
+          <div className="liquid-blob liquid-blob-3" />
+          <div ref={glareRef} className="liquid-glare" />
+        </div>
+
+        {/* Sliding highlight behind the active tab */}
         {activeIdx >= 0 && pillStyle.width > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: pillStyle.top,
+          <div className="liquid-pill" style={{
             left: pillStyle.left,
+            top: pillStyle.top,
             width: pillStyle.width,
             height: pillStyle.height,
-            borderRadius: '9999px',
-            background: pillBg,
             opacity: pillStyle.opacity,
-            transition: expanded === prevExpanded.current
-              ? 'left 0.38s cubic-bezier(0.34,1.2,0.64,1), width 0.38s cubic-bezier(0.34,1.2,0.64,1), opacity 0.2s ease'
-              : 'opacity 0.2s ease',
-            pointerEvents: 'none',
-            zIndex: 0,
+            transition: 'left 0.42s cubic-bezier(0.34,1.15,0.64,1), width 0.42s cubic-bezier(0.34,1.15,0.64,1), opacity 0.2s ease',
           }} />
         )}
 
@@ -178,48 +163,65 @@ export default function MobileNav() {
           return (
             <Link key={item.to} to={item.to}
               ref={el => tabRefs.current[idx] = el}
-              className="relative flex flex-col items-center justify-center z-10"
+              aria-current={isActive ? 'page' : undefined}
+              className="relative z-10 flex items-center justify-center gap-1.5 rounded-full"
               style={{
-                padding: expanded ? '8px 20px' : '6px 16px',
-                borderRadius: '9999px',
-                minWidth: expanded ? '72px' : '56px',
-                transition: 'padding 0.3s ease, min-width 0.3s ease',
+                padding: isActive ? '9px 14px' : '9px 12px',
+                transition: 'padding 0.3s ease',
+                textDecoration: 'none',
               }}>
               {item.avatar ? (
-                <div style={{
-                  width: expanded ? '26px' : '22px',
-                  height: expanded ? '26px' : '22px',
-                  borderRadius: '50%',
-                  overflow: 'hidden',
-                  border: isActive ? '2px solid #0056b3' : '2px solid transparent',
-                  transition: 'all 0.3s ease',
-                  flexShrink: 0,
-                }}>
-                  <img src={item.avatar} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}} />
-                </div>
+                <img src={item.avatar} alt="" style={{
+                  width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover',
+                  border: isActive ? `2px solid ${activeColor}` : '2px solid transparent',
+                  flexShrink: 0, transition: 'border-color 0.3s ease',
+                }} />
               ) : (
                 <span className="material-symbols-outlined" style={{
-                  fontSize: expanded ? '24px' : '20px',
-                  color: iconColor(isActive),
-                  opacity: isActive ? 1 : 0.6,
-                  fontVariationSettings: isActive ? "'FILL' 1, 'wght' 400" : "'FILL' 0, 'wght' 400",
-                  transition: 'all 0.3s ease',
+                  fontSize: '21px',
+                  lineHeight: 1,
+                  color: isActive ? activeColor : inactiveColor,
+                  fontVariationSettings: isActive ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400",
+                  transition: 'color 0.3s ease',
+                  flexShrink: 0,
                 }}>{item.icon}</span>
               )}
+
+              {/* Label reveals for the active tab only — keeps the bar inside
+                  narrow viewports in both English and Arabic. */}
               <span style={{
-                fontSize: '10px',
-                fontWeight: 600,
-                color: labelColor(isActive),
-                opacity: expanded ? (isActive ? 1 : 0.6) : 0,
-                maxHeight: expanded ? '14px' : '0',
-                marginTop: expanded ? '2px' : '0',
-                overflow: 'hidden',
+                fontSize: '13px',
+                fontWeight: 700,
+                color: activeColor,
                 whiteSpace: 'nowrap',
-                transition: 'opacity 0.3s, max-height 0.3s, margin-top 0.3s',
+                overflow: 'hidden',
+                maxWidth: isActive ? '90px' : '0px',
+                opacity: isActive ? 1 : 0,
+                transition: 'max-width 0.35s cubic-bezier(0.34,1.15,0.64,1), opacity 0.25s ease',
               }}>{item.label}</span>
             </Link>
           )
         })}
+
+        <div className="liquid-divider" />
+
+        {/* Theme toggle — moved here from the top bar */}
+        <button
+          onClick={toggleTheme}
+          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="relative z-10 flex items-center justify-center rounded-full"
+          style={{
+            width: '38px', height: '38px', flexShrink: 0,
+            background: 'transparent', border: 'none', cursor: 'pointer',
+          }}>
+          <span className="material-symbols-outlined" style={{
+            fontSize: '21px',
+            lineHeight: 1,
+            color: isDark ? '#ffd479' : '#155058',
+            transition: 'color 0.3s ease, transform 0.4s cubic-bezier(0.34,1.15,0.64,1)',
+            transform: isDark ? 'rotate(-40deg)' : 'rotate(0deg)',
+          }}>{isDark ? 'dark_mode' : 'light_mode'}</span>
+        </button>
       </nav>
     </div>
   )

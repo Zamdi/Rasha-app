@@ -353,3 +353,112 @@ html.dark label {
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   LIQUID GLASS MOBILE NAV
+   A self-contained floating bar. The iridescence comes from blobs
+   drifting *inside* the pill, so the effect holds on any page
+   background rather than depending on what happens to sit behind it.
+   ══════════════════════════════════════════════════════════════ */
+
+.liquid-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 9999px;
+  isolation: isolate;
+  background: linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.45));
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.65);
+  box-shadow:
+    0 12px 40px rgba(21,80,88,0.18),
+    0 2px 8px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -1px 0 rgba(255,255,255,0.25);
+}
+html.dark .liquid-nav {
+  background: linear-gradient(135deg, rgba(40,48,52,0.72), rgba(18,24,28,0.55));
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow:
+    0 12px 40px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 -1px 0 rgba(255,255,255,0.05);
+}
+
+/* Everything decorative lives behind the buttons and is clipped to the pill. */
+.liquid-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.liquid-blob {
+  position: absolute;
+  width: 60%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(26px);
+  opacity: 0.55;
+  will-change: transform;
+}
+.liquid-blob-1 { left: -10%; top: -60%; background: #ff8fa3; animation: liquidDrift1 14s ease-in-out infinite alternate; }
+.liquid-blob-2 { left: 35%;  top: -40%; background: #8fb8ff; animation: liquidDrift2 18s ease-in-out infinite alternate; }
+.liquid-blob-3 { left: 70%;  top: -55%; background: #b79dff; animation: liquidDrift3 16s ease-in-out infinite alternate; }
+html.dark .liquid-blob { opacity: 0.4; }
+
+@keyframes liquidDrift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,14px) scale(1.25); } }
+@keyframes liquidDrift2 { from { transform: translate(0,0) scale(1.1); } to { transform: translate(-34px,18px) scale(0.9); } }
+@keyframes liquidDrift3 { from { transform: translate(0,0) scale(0.95); } to { transform: translate(-46px,12px) scale(1.2); } }
+
+/* Specular highlight tracking the pointer. */
+.liquid-glare {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 140px;
+  margin-left: -70px;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  will-change: transform;
+}
+html.dark .liquid-glare {
+  background: radial-gradient(circle at center, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 70%);
+}
+
+/* The sliding highlight behind the active tab. */
+.liquid-pill {
+  position: absolute;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.82));
+  box-shadow:
+    0 2px 10px rgba(21,80,88,0.16),
+    inset 0 1px 0 rgba(255,255,255,1);
+  pointer-events: none;
+  z-index: 0;
+}
+html.dark .liquid-pill {
+  background: linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0.10));
+  box-shadow:
+    0 2px 10px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.28);
+}
+
+.liquid-divider {
+  width: 1px;
+  height: 22px;
+  margin: 0 4px;
+  background: rgba(21,80,88,0.22);
+  flex-shrink: 0;
+}
+html.dark .liquid-divider { background: rgba(255,255,255,0.18); }
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-blob { animation: none; }
+  .liquid-glare { transition: none; }
+}
