@@ -33,9 +33,20 @@ export default function Booking() {
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [payFromWallet, setPayFromWallet] = useState(false)
   const walletBalance = customer?.wallet_balance || 0
-  const SERVICE_PRICES = { full: 8500, outside: 5000 }
-  const price = SERVICE_PRICES[form.service] || 0
+  // Pulled from the server rather than hardcoded — staff can change prices
+  // from the Expenses tab and this must reflect that without a redeploy.
+  // Falls back to the values that were compiled in here until recently, so
+  // the page still shows something sane if the request fails.
+  const [servicePrices, setServicePrices] = useState({ full: 8500, outside: 5000 })
+  const price = servicePrices[form.service] || 0
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    fetch(`${API}/api/bookings/pricing`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(d => setServicePrices({ full: Number(d.full) || 0, outside: Number(d.outside) || 0 }))
+      .catch(() => {}) // keep the fallback values
+  }, [])
 
   useEffect(() => { if (form.date) loadSlots(form.date) }, [form.date])
 
@@ -155,8 +166,8 @@ export default function Booking() {
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Service Type', 'نوع الخدمة')} *</label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: 'full',    label: t('Full Wash', 'غسيل كامل'),    sub: t('Interior + Exterior', 'داخلي + خارجي'), icon: 'local_car_wash', price: '8,500 SDG' },
-                  { value: 'outside', label: t('Exterior Only', 'خارجي فقط'), sub: t('Exterior cleaning', 'تنظيف خارجي'),    icon: 'water_drop',    price: '5,000 SDG' },
+                  { value: 'full',    label: t('Full Wash', 'غسيل كامل'),    sub: t('Interior + Exterior', 'داخلي + خارجي'), icon: 'local_car_wash', price: `${servicePrices.full.toLocaleString()} SDG` },
+                  { value: 'outside', label: t('Exterior Only', 'خارجي فقط'), sub: t('Exterior cleaning', 'تنظيف خارجي'),    icon: 'water_drop',    price: `${servicePrices.outside.toLocaleString()} SDG` },
                 ].map(opt => {
                   const active = form.service === opt.value
                   return (
