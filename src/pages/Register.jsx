@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import OtpInput from '../components/OtpInput'
 import PhoneInput from '../components/PhoneInput'
+import { passwordStrength } from '../utils/passwordStrength'
 
 const OTP_SECONDS = 60
 
@@ -124,6 +125,22 @@ export default function Register() {
                   <span className="material-symbols-outlined text-xl">{showPw?'visibility_off':'visibility'}</span>
                 </button>
               </div>
+              {form.password && (() => {
+                const strength = passwordStrength(form.password)
+                return (
+                  <div className="mt-2">
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3].map(i => (
+                        <div key={i} className="h-1 flex-1 rounded-full transition-colors"
+                          style={{ background: i < strength.score ? strength.color : 'var(--color-outline-variant)' }} />
+                      ))}
+                    </div>
+                    <p className="text-xs mt-1 font-semibold" style={{ color: strength.color }}>
+                      {t(...strength.label)}
+                    </p>
+                  </div>
+                )
+              })()}
             </div>
             <button onClick={submit} disabled={loading} className="btn-primary w-full py-4 rounded-xl">
               {loading ? <div className="loader"/> : t('Create Account','إنشاء الحساب')}

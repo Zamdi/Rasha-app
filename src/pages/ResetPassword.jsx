@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
+import { passwordStrength } from '../utils/passwordStrength'
 
 export default function ResetPassword() {
   const { t } = useApp()
@@ -101,6 +102,22 @@ export default function ResetPassword() {
                 </button>
               </div>
               {errors.password && <p className="text-xs mt-1" style={{color:'var(--color-error)'}}>{errors.password}</p>}
+              {password && (() => {
+                const strength = passwordStrength(password)
+                return (
+                  <div className="mt-2">
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3].map(i => (
+                        <div key={i} className="h-1 flex-1 rounded-full transition-colors"
+                          style={{ background: i < strength.score ? strength.color : 'var(--color-outline-variant)' }} />
+                      ))}
+                    </div>
+                    <p className="text-xs mt-1 font-semibold" style={{ color: strength.color }}>
+                      {t(...strength.label)}
+                    </p>
+                  </div>
+                )
+              })()}
             </div>
 
             <div>
