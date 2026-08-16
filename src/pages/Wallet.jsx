@@ -4,7 +4,6 @@ import { useApp, API } from '../context/AppContext'
 
 export default function Wallet() {
   const { t, customer, login, token } = useApp()
-  const [showAddCard, setShowAddCard] = useState(false)
   const [balance, setBalance] = useState(Number(customer?.wallet_balance || 0))
 
   // One-time cleanup: purge card data saved by earlier builds
@@ -88,7 +87,7 @@ export default function Wallet() {
               {/* Balance Card */}
               <div className="rounded-2xl p-7" style={{ background: 'linear-gradient(135deg, #1d6b75 0%, #0e383e 100%)' }}>
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="material-symbols-outlined text-white/60 text-base">database</span>
+                  <span className="material-symbols-outlined text-white/60 text-base">account_balance_wallet</span>
                   <p className="text-white/70 text-xs font-semibold uppercase tracking-widest">{t('Available Balance', 'الرصيد المتاح')}</p>
                 </div>
                 <p className="text-white font-display font-bold mb-5" style={{ fontSize: 'clamp(32px,5vw,48px)' }}>
@@ -168,56 +167,6 @@ export default function Wallet() {
           </div>
         </main>
       </div>
-      {/* Payment Method Popup — no raw card data is ever collected or stored.
-          Card capture must happen on the payment provider's hosted page (PCI-DSS). */}
-      {showAddCard && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-full max-w-sm rounded-2xl p-6 animate-fade-in" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-bold text-on-surface font-display">{t('Top Up Methods', 'طرق الشحن')}</h3>
-              <button onClick={() => setShowAddCard(false)}>
-                <span className="material-symbols-outlined text-on-surface-variant">close</span>
-              </button>
-            </div>
-
-            <div className="flex flex-col items-center text-center gap-3 mb-5">
-              <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'rgba(21,80,88,0.08)' }}>
-                <span className="material-symbols-outlined text-secondary-fixed text-3xl">lock</span>
-              </div>
-              <p className="text-sm text-on-surface-variant">
-                {t('Online payments are being connected to a licensed payment provider. Until then, you can top up in person and our staff will credit your wallet instantly.',
-                   'يتم حالياً ربط المدفوعات الإلكترونية بمزود دفع مرخص. حتى ذلك الحين يمكنك الشحن في الفرع وسيقوم الموظف بإضافة الرصيد فوراً.')}
-              </p>
-            </div>
-
-            <div className="rounded-xl p-4 mb-5 space-y-2" style={{ background: 'var(--input-bg)', border: '1px solid var(--color-outline-variant)' }}>
-              <p className="text-xs font-bold text-on-surface uppercase tracking-wider">{t('How to top up now', 'كيفية الشحن الآن')}</p>
-              {[
-                t('Visit Rasha Car Wash, Khartoum', 'قم بزيارة رشة لغسيل السيارات، الخرطوم'),
-                t('Give the staff your Member ID', 'أعطِ الموظف رقم العضوية الخاص بك'),
-                t('Your balance updates immediately', 'يتم تحديث رصيدك فوراً'),
-              ].map((line, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <span className="text-xs font-bold text-secondary-fixed shrink-0">{i + 1}.</span>
-                  <span className="text-xs text-on-surface-variant">{line}</span>
-                </div>
-              ))}
-              {customer?.customer_uid && (
-                <div className="pt-2 mt-1" style={{ borderTop: '1px solid var(--color-outline-variant)' }}>
-                  <span className="text-xs text-on-surface-variant">{t('Your Member ID:', 'رقم عضويتك:')} </span>
-                  <span className="text-xs font-bold text-secondary-fixed" dir="ltr">{customer.customer_uid}</span>
-                </div>
-              )}
-            </div>
-
-            <button onClick={() => setShowAddCard(false)}
-              className="w-full py-3 rounded-xl text-sm font-bold hydro-gradient text-white hover:opacity-90">
-              {t('Got it', 'حسناً')}
-            </button>
-          </div>
-        </div>
-      )}
-
     </div>
   )
 }

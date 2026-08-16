@@ -2,8 +2,21 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 const AppContext = createContext(null)
 export const API = 'https://rasha-backend.onrender.com'
 export function AppProvider({ children }) {
-  const [lang, setLang] = useState('en')
+  const [lang, setLang] = useState(() =>
+    localStorage.getItem('rasha_lang')
+    || (navigator.language?.toLowerCase().startsWith('ar') ? 'ar' : 'en')
+  )
   const [toast, setToast] = useState(null)
+
+  // Sync dir/lang on mount and whenever lang changes, not only inside
+  // toggleLang — otherwise a returning Arabic-speaking customer sees an
+  // English, LTR page for one render (or forever, if lang was never
+  // persisted) before any toggle click fires.
+  useEffect(() => {
+    document.documentElement.lang = lang
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
+    localStorage.setItem('rasha_lang', lang)
+  }, [lang])
   const [theme, setThemeState] = useState(() =>
     localStorage.getItem('rasha_theme')
     || (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
@@ -76,12 +89,7 @@ export function AppProvider({ children }) {
   const [staffPermissions, setStaffPermissionsState] = useState(() => {
     try { return JSON.parse(localStorage.getItem('rasha_staff_perms') || '{}') } catch { return {} }
   })
-  const toggleLang = () => {
-    const next = lang === 'en' ? 'ar' : 'en'
-    setLang(next)
-    document.documentElement.lang = next
-    document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr'
-  }
+  const toggleLang = () => setLang(l => l === 'en' ? 'ar' : 'en')
   const t = (en, ar) => lang === 'ar' ? ar : en
   const showToast = useCallback((msg, type = 'success') => {
     setToast({ msg, type, id: Date.now() })

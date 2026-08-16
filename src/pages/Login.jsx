@@ -106,7 +106,12 @@ export default function Login() {
           <div className="glass p-6 rounded-2xl space-y-6 animate-fade-in">
             <div>
               <h3 className="font-bold text-on-surface mb-1">{t('Enter Verification Code','أدخل رمز التحقق')}</h3>
-              <p className="text-on-surface-variant text-sm">{t('Code sent to','تم الإرسال إلى')} <span className="text-secondary-fixed font-semibold">{maskedEmail}</span></p>
+              <p className="text-on-surface-variant text-sm">
+                {t('Code sent to','تم الإرسال إلى')} <span className="text-secondary-fixed font-semibold">{maskedEmail}</span>{' '}
+                <button type="button" onClick={() => setStep('form')} className="text-secondary-fixed hover:underline font-semibold">
+                  {t('Wrong email? Edit','بريد خاطئ؟ تعديل')}
+                </button>
+              </p>
             </div>
             <OtpInput value={otp} onChange={setOtp} onComplete={code => verify(code)}/>
             <div className="text-center">

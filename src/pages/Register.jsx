@@ -137,7 +137,12 @@ export default function Register() {
           <div className="glass p-6 rounded-2xl space-y-6 animate-fade-in">
             <div>
               <h3 className="font-bold text-on-surface mb-1">{t('Verify Your Email','تحقق من بريدك الإلكتروني')}</h3>
-              <p className="text-on-surface-variant text-sm">{t(`We sent a 6-digit code to`,'أرسلنا رمزاً إلى')} <span className="text-secondary-fixed font-semibold">{maskedEmail}</span></p>
+              <p className="text-on-surface-variant text-sm">
+                {t(`We sent a 6-digit code to`,'أرسلنا رمزاً إلى')} <span className="text-secondary-fixed font-semibold">{maskedEmail}</span>{' '}
+                <button type="button" onClick={() => setStep('form')} className="text-secondary-fixed hover:underline font-semibold">
+                  {t('Wrong email? Edit','بريد خاطئ؟ تعديل')}
+                </button>
+              </p>
             </div>
             <OtpInput value={otp} onChange={setOtp} onComplete={code => verify(code)} />
             {/* Timer */}

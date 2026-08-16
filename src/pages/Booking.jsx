@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import { formatTime } from '../utils/format'
 import CalendarPicker from '../components/CalendarPicker'
@@ -295,9 +295,13 @@ export default function Booking() {
                     {!payFromWallet && <span className="material-symbols-outlined fill-icon ms-auto">check_circle</span>}
                   </button>
 
-                  {/* Pay from wallet */}
-                  <button onClick={() => setPayFromWallet(true)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${payFromWallet ? 'text-secondary-fixed' : 'text-on-surface-variant'}`}
+                  {/* Pay from wallet — a div, not a button, because the
+                      "How to top up" link below must be a real interactive
+                      child; nesting an <a> inside a <button> is invalid HTML. */}
+                  <div role="button" tabIndex={0}
+                    onClick={() => setPayFromWallet(true)}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPayFromWallet(true) } }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold cursor-pointer ${payFromWallet ? 'text-secondary-fixed' : 'text-on-surface-variant'}`}
                     style={payFromWallet
                       ? {background:'rgba(var(--color-secondary-fixed-rgb),0.08)', border:'1px solid rgba(var(--color-secondary-fixed-rgb),0.3)'}
                       : {background:'var(--input-bg)', border:'1px solid var(--color-outline-variant)'}}>
@@ -308,9 +312,15 @@ export default function Booking() {
                         {t('Balance:', 'الرصيد:')} {walletBalance.toLocaleString()} SDG
                         {walletBalance < price && <span className="ms-2 font-bold">{t('• Insufficient', '• غير كافٍ')}</span>}
                       </p>
+                      {walletBalance < price && (
+                        <Link to="/wallet" onClick={e => e.stopPropagation()}
+                          className="text-xs font-bold text-secondary-fixed hover:underline mt-1 inline-block">
+                          {t('How to top up →', 'كيفية الشحن ←')}
+                        </Link>
+                      )}
                     </div>
                     {payFromWallet && <span className="material-symbols-outlined fill-icon">check_circle</span>}
-                  </button>
+                  </div>
                 </div>
 
                 {/* Price summary */}
