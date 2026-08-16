@@ -61,7 +61,7 @@ export default function ResetPassword() {
       <div className="w-full max-w-md">
 
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl hydro-gradient flex items-center justify-center mx-auto mb-4 cyan-glow">
+          <div className="w-16 h-16 rounded-2xl hydro-gradient flex items-center justify-center mx-auto mb-4 teal-glow">
             <span className="material-symbols-outlined text-white text-3xl">lock_reset</span>
           </div>
           <h1 className="text-3xl font-bold text-on-surface font-display">

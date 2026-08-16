@@ -16,7 +16,7 @@ export default function ThemeToggle() {
         height: '28px',
         borderRadius: '14px',
         background: isDark ? '#1d2022' : '#e8e4de',
-        border: isDark ? '1px solid rgba(116,245,255,0.25)' : '1px solid rgba(0,86,179,0.2)',
+        border: isDark ? '1px solid rgba(116,245,255,0.25)' : '1px solid rgba(21,80,88,0.2)',
         padding: '3px',
         cursor: 'pointer',
         flexShrink: 0,
@@ -50,7 +50,7 @@ export default function ThemeToggle() {
         width: '20px',
         height: '20px',
         borderRadius: '50%',
-        background: isDark ? '#74f5ff' : '#0056b3',
+        background: isDark ? '#74f5ff' : '#155058',
         transition: 'left 0.25s cubic-bezier(0.4,0,0.2,1), background 0.2s',
         zIndex: 1,
       }} />

@@ -25,8 +25,8 @@ export default {
         'on-background':             'var(--color-on-background)',
       },
       fontFamily: {
-        sans:    ['Inter', 'Noto Kufi Arabic', 'sans-serif'],
-        display: ['Montserrat', 'Noto Kufi Arabic', 'sans-serif'],
+        sans:    ['IBM Plex Sans', 'IBM Plex Sans Arabic', 'sans-serif'],
+        display: ['Space Grotesk', 'IBM Plex Sans Arabic', 'sans-serif'],
       },
     },
   },

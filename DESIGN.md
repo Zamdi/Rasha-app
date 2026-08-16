@@ -12,9 +12,9 @@ colors:
   error-dark: "#ff6b6b"
 typography:
   display:
-    fontFamily: "Montserrat, Noto Kufi Arabic, sans-serif"
+    fontFamily: "Space Grotesk, IBM Plex Sans Arabic, sans-serif"
   body:
-    fontFamily: "Inter, Noto Kufi Arabic, sans-serif"
+    fontFamily: "IBM Plex Sans, IBM Plex Sans Arabic, sans-serif"
 rounded:
   xl: "12px"
   "2xl": "20px"
@@ -42,7 +42,7 @@ The customer app is a dual-theme glassmorphism system: white frosted-glass cards
 - Dual-theme by design: light = teal-on-white glass, dark = cyan-glow-on-navy glass
 - Frosted-glass card language throughout (both themes)
 - Fully rounded pill CTAs, xl (12px) inputs/buttons, up to 3xl (24px) hero/feature cards
-- Bilingual EN/AR, same type family as the sibling Rasha Staff Portal (Montserrat/Inter)
+- Bilingual EN/AR, same type family as the sibling Rasha Staff Portal (Space Grotesk/IBM Plex Sans) — chosen over the original Montserrat/Inter default for a more engineered, less generic-SaaS character
 - **Known gap:** light-mode background does not yet consistently apply below the hero — flagged for hardening, not treated as intentional
 
 ## Colors
@@ -60,7 +60,7 @@ The customer app is a dual-theme glassmorphism system: white frosted-glass cards
 
 ## Typography
 
-**Display Font:** Montserrat. **Body Font:** Inter (with Noto Kufi Arabic fallback in both).
+**Display Font:** Space Grotesk. **Body Font:** IBM Plex Sans (with IBM Plex Sans Arabic fallback in both).
 
 ## Layout
 

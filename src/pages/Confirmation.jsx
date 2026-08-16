@@ -55,14 +55,14 @@ export default function Confirmation() {
   <title>Rasha Booking Receipt - ${ref}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: #fff; color: #111; }
+    body { font-family: 'Segoe UI', 'IBM Plex Sans', sans-serif; background: #fff; color: #111; }
     .page { max-width: 600px; margin: 0 auto; padding: 48px 40px; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid #0056b3; }
-    .logo { font-size: 26px; font-weight: 900; letter-spacing: 4px; color: #0056b3; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid #155058; }
+    .logo { font-size: 26px; font-weight: 900; letter-spacing: 4px; color: #155058; }
     .logo-sub { font-size: 11px; color: #888; letter-spacing: 1px; margin-top: 4px; }
-    .badge { background: #f0f7ff; border: 1px solid #0056b3; border-radius: 6px; padding: 8px 14px; text-align: right; }
-    .badge-label { font-size: 10px; color: #0056b3; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-    .badge-ref { font-size: 20px; font-weight: 800; color: #0056b3; letter-spacing: 1px; }
+    .badge { background: #eef6f5; border: 1px solid #155058; border-radius: 6px; padding: 8px 14px; text-align: right; }
+    .badge-label { font-size: 10px; color: #155058; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .badge-ref { font-size: 20px; font-weight: 800; color: #155058; letter-spacing: 1px; }
     .confirmed-section { text-align: center; margin-bottom: 32px; }
     .check { width: 56px; height: 56px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 28px; }
     h1 { font-size: 24px; font-weight: 800; color: #111; margin-bottom: 6px; }
@@ -73,10 +73,10 @@ export default function Confirmation() {
     .card-value { font-size: 18px; font-weight: 700; color: #111; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .detail { display: flex; align-items: flex-start; gap: 10px; }
-    .detail-icon { width: 36px; height: 36px; background: #e8f0fe; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .detail-icon { width: 36px; height: 36px; background: #e6f2f1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
     .detail-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; margin-bottom: 3px; }
     .detail-value { font-size: 14px; font-weight: 600; color: #111; }
-    .notice { background: #eff6ff; border-left: 4px solid #0056b3; border-radius: 4px; padding: 12px 16px; margin-bottom: 32px; font-size: 12px; color: #444; line-height: 1.6; }
+    .notice { background: #eef6f5; border-left: 4px solid #155058; border-radius: 4px; padding: 12px 16px; margin-bottom: 32px; font-size: 12px; color: #444; line-height: 1.6; }
     .footer { text-align: center; font-size: 11px; color: #aaa; padding-top: 24px; border-top: 1px solid #eee; }
     @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
   </style>
@@ -95,7 +95,7 @@ export default function Confirmation() {
   <div class="card">
     <div class="card-header">
       <div><div class="card-label">Service</div><div class="card-value">${svcLabel}</div></div>
-      <div style="text-align:right"><div class="card-label">Reference</div><div class="card-value" style="color:#0056b3">${ref}</div></div>
+      <div style="text-align:right"><div class="card-label">Reference</div><div class="card-value" style="color:#155058">${ref}</div></div>
     </div>
     <div class="grid">
       <div class="detail"><div class="detail-icon">📅</div><div><div class="detail-label">Date</div><div class="detail-value">${formattedDate}</div></div></div>
@@ -131,9 +131,9 @@ export default function Confirmation() {
           <div className="mb-6 flex items-center justify-center">
             <div className="relative">
               <div className="absolute inset-0 rounded-full blur-3xl"
-                style={{ background: 'rgba(0,241,254,0.2)', animation: 'pulse-cyan 3s ease-in-out infinite' }} />
+                style={{ background: 'rgba(var(--color-secondary-fixed-rgb),0.2)', animation: 'pulse-glow 3s ease-in-out infinite' }} />
               <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-secondary-fixed flex items-center justify-center backdrop-blur-xl"
-                style={{ background: 'var(--glass-bg)', boxShadow: '0 0 20px rgba(0,241,254,0.3)' }}>
+                style={{ background: 'var(--glass-bg)', boxShadow: '0 0 20px rgba(var(--color-secondary-fixed-rgb),0.3)' }}>
                 <span className="material-symbols-outlined fill-icon text-secondary-fixed"
                   style={{ fontSize: '4rem' }}>check_circle</span>
               </div>
@@ -200,7 +200,7 @@ export default function Confirmation() {
             </div>
 
             <div className="p-4 rounded-lg flex items-start gap-3"
-              style={{ background: 'rgba(0,241,254,0.04)', border: '1px solid rgba(0,241,254,0.1)' }}>
+              style={{ background: 'rgba(var(--color-secondary-fixed-rgb),0.04)', border: '1px solid rgba(var(--color-secondary-fixed-rgb),0.1)' }}>
               <span className="material-symbols-outlined text-secondary-fixed shrink-0" style={{ fontSize: '16px', marginTop: '2px' }}>info</span>
               <p className="text-xs text-on-surface-variant leading-relaxed">
                 {t('Please arrive 15 minutes prior to your appointment for a pre-wash inspection with our lead detailer.',
@@ -212,8 +212,7 @@ export default function Confirmation() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
             <button
               onClick={downloadPDF}
-              className="h-14 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all active:scale-[0.98] group"
-              style={{ background: 'linear-gradient(135deg,#0056b3 0%,#115cb9 100%)', color: 'white', boxShadow: '0 0 20px rgba(0,241,254,0.3)' }}
+              className="hydro-gradient teal-glow h-14 rounded-xl flex items-center justify-center gap-2 font-bold text-sm text-white transition-all active:scale-[0.98] group"
               onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.1)'}
               onMouseLeave={e => e.currentTarget.style.filter = 'brightness(1)'}
             >
@@ -260,7 +259,7 @@ export default function Confirmation() {
       </footer>
 
       <style>{`
-        @keyframes pulse-cyan {
+        @keyframes pulse-glow {
           0%   { transform: scale(1);    opacity: 0.8; }
           50%  { transform: scale(1.05); opacity: 1;   }
           100% { transform: scale(1);    opacity: 0.8; }

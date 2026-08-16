@@ -138,7 +138,7 @@ export default function Settings() {
   ]
 
   // Card style
-  const card = { background: 'var(--color-surface-container-low)', border: '1px solid var(--color-outline-variant)', boxShadow: '0 4px 24px rgba(0,86,179,0.06)', borderRadius: '1rem' }
+  const card = { background: 'var(--color-surface-container-low)', border: '1px solid var(--color-outline-variant)', boxShadow: '0 4px 24px rgba(21,80,88,0.06)', borderRadius: '1rem' }
   const secRow = { borderBottom: '1px solid var(--color-outline-variant)' }
 
   return (
@@ -206,7 +206,7 @@ export default function Settings() {
                 {/* Avatar with upload */}
                 <div className="relative group cursor-pointer" onClick={() => fileRef.current?.click()}>
                   <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center text-white text-3xl font-bold"
-                    style={{ background: avatar ? 'transparent' : 'linear-gradient(135deg,#0056b3,#004491)', boxShadow: '0 0 0 4px var(--color-surface-container-low), 0 0 0 6px rgba(var(--color-secondary-fixed-rgb),0.2)' }}>
+                    style={{ background: avatar ? 'transparent' : 'linear-gradient(135deg,#1d6b75,#0e383e)', boxShadow: '0 0 0 4px var(--color-surface-container-low), 0 0 0 6px rgba(var(--color-secondary-fixed-rgb),0.2)' }}>
                     {avatar
                       ? <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
                       : <span>{initials}</span>
@@ -216,7 +216,7 @@ export default function Settings() {
                     <span className="material-symbols-outlined text-white text-xl">photo_camera</span>
                   </div>
                   <div className="absolute bottom-0.5 end-0.5 w-7 h-7 rounded-full flex items-center justify-center"
-                    style={{ background: '#0056b3', border: '2px solid var(--color-surface-container-low)' }}>
+                    style={{ background: '#155058', border: '2px solid var(--color-surface-container-low)' }}>
                     <span className="material-symbols-outlined text-white fill-icon" style={{ fontSize: '14px' }}>photo_camera</span>
                   </div>
                 </div>

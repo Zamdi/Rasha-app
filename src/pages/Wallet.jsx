@@ -33,7 +33,7 @@ export default function Wallet() {
     { id: 'wallet', icon: 'account_balance_wallet', label: t('Wallet', 'المحفظة'), href: '/wallet' },
   ]
 
-  const card = { background: 'var(--color-surface-container-low)', border: '1px solid var(--color-outline-variant)', boxShadow: '0 4px 24px rgba(0,86,179,0.06)', borderRadius: '1rem' }
+  const card = { background: 'var(--color-surface-container-low)', border: '1px solid var(--color-outline-variant)', boxShadow: '0 4px 24px rgba(21,80,88,0.06)', borderRadius: '1rem' }
 
   return (
     <div className="pt-14 min-h-screen pb-24 md:pb-0" style={{ background: 'var(--color-background)' }}>
@@ -86,7 +86,7 @@ export default function Wallet() {
             <div className="lg:col-span-2 space-y-5">
 
               {/* Balance Card */}
-              <div className="rounded-2xl p-7" style={{ background: 'linear-gradient(135deg, #0056b3 0%, #003f87 100%)' }}>
+              <div className="rounded-2xl p-7" style={{ background: 'linear-gradient(135deg, #1d6b75 0%, #0e383e 100%)' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="material-symbols-outlined text-white/60 text-base">database</span>
                   <p className="text-white/70 text-xs font-semibold uppercase tracking-widest">{t('Available Balance', 'الرصيد المتاح')}</p>
@@ -181,7 +181,7 @@ export default function Wallet() {
             </div>
 
             <div className="flex flex-col items-center text-center gap-3 mb-5">
-              <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,86,179,0.08)' }}>
+              <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'rgba(21,80,88,0.08)' }}>
                 <span className="material-symbols-outlined text-secondary-fixed text-3xl">lock</span>
               </div>
               <p className="text-sm text-on-surface-variant">

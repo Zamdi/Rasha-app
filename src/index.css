@@ -98,7 +98,7 @@ html.dark {
 body {
   background: transparent;
   color: var(--color-on-surface);
-  font-family: 'Inter', 'IBM Plex Sans Arabic', sans-serif;
+  font-family: 'IBM Plex Sans', 'IBM Plex Sans Arabic', sans-serif;
   min-height: 100vh;
   position: relative;
 }
@@ -107,7 +107,7 @@ body {
 @layer base {
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(0,86,179,0.3); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb { background: rgba(21,80,88,0.3); border-radius: 10px; }
 }
 
 /* ── Components ──────────────────────────────────────────────── */
@@ -168,7 +168,7 @@ body {
     transform: translateY(-1px);
   }
 
-  .cyan-glow { box-shadow: 0 2px 12px rgba(0,86,179,0.25); }
+  .teal-glow { box-shadow: 0 2px 12px rgba(21,80,88,0.30); }
 
   /* Text input */
   .rasha-input {
@@ -234,11 +234,11 @@ body {
   color: var(--color-primary);
 }
 .slot-selected {
-  background: linear-gradient(135deg, rgba(0,102,204,0.7), rgba(0,68,170,0.7));
+  background: linear-gradient(135deg, rgba(29,107,117,0.85), rgba(14,56,62,0.85));
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.5);
   color: #ffffff;
-  box-shadow: 0 4px 16px rgba(0,86,179,0.3);
+  box-shadow: 0 4px 16px rgba(21,80,88,0.3);
 }
 .slot-booked {
   background: rgba(255,255,255,0.08);
@@ -279,7 +279,7 @@ html.dark .slot-available:hover {
 /* ── Loader ──────────────────────────────────────────────────── */
 .loader {
   width: 22px; height: 22px;
-  border: 2.5px solid rgba(0,86,179,0.15);
+  border: 2.5px solid rgba(21,80,88,0.15);
   border-top: 2.5px solid var(--color-primary);
   border-radius: 50%;
   animation: spin 0.75s linear infinite;

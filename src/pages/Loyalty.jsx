@@ -101,7 +101,7 @@ export default function Loyalty() {
             </div>
             <button
               onClick={() => setQrExpanded(true)}
-              className="hydro-gradient px-4 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-2 cyan-glow">
+              className="hydro-gradient px-4 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-2 teal-glow">
               <span className="material-symbols-outlined text-base">qr_code</span>
               {t('Show QR', 'عرض QR')}
             </button>

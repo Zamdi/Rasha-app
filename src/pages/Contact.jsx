@@ -147,7 +147,7 @@ export default function Contact() {
                 <button onClick={handleSubmit} disabled={loading || !form.name || !form.email || !form.message}
                   className="w-full h-14 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                   style={{
-                    background: form.name && form.email && form.message ? 'var(--color-secondary-container)' : 'rgba(0,241,254,0.3)',
+                    background: form.name && form.email && form.message ? 'var(--color-secondary-container)' : 'var(--input-bg)',
                     color: form.name && form.email && form.message ? '#002022' : 'var(--color-outline)',
                     cursor: !form.name || !form.email || !form.message ? 'not-allowed' : 'pointer',
                   }}
