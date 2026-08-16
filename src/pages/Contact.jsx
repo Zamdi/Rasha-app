@@ -6,7 +6,7 @@ const WHATSAPP_NUMBER = '249900088989'
 const WHATSAPP_DISPLAY = '+249 9000 88989'
 
 export default function Contact() {
-  const { t, token } = useApp()
+  const { t, token, showToast } = useApp()
   const [form, setForm] = useState({ name: '', email: '', subject: 'General Inquiry', message: '' })
   const [sent, setSent] = useState(false)
   const [reference, setReference] = useState(null)
@@ -28,13 +28,13 @@ export default function Contact() {
       const data = await res.json()
       if (!res.ok) {
         // Show the real backend error
-        alert(data.error || 'Failed to send message. Please try again.')
+        showToast(data.error || t('Failed to send message. Please try again.', 'تعذر إرسال الرسالة. حاول مرة أخرى.'), 'error')
         return
       }
       if (data.reference) setReference(data.reference)
       setSent(true)
     } catch {
-      alert('Connection error. Please check your internet and try again.')
+      showToast(t('Connection error. Please check your internet and try again.', 'خطأ في الاتصال. تحقق من الإنترنت وحاول مرة أخرى.'), 'error')
     } finally {
       setLoading(false)
     }

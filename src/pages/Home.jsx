@@ -7,7 +7,10 @@ export default function Home() {
   const isAr = lang === 'ar'
 
   return (
-    <div className="pt-14 pb-16 md:pb-0">
+    // Explicit background rather than relying on inherited transparency —
+    // everything below the hero must commit to the page surface color so it
+    // can never read as an unstyled dark gap between the hero and the cards.
+    <div className="pt-14 pb-16 md:pb-0" style={{ background: 'var(--color-background)' }}>
       {/* Hero */}
       <section className="relative min-h-[92vh] flex items-center overflow-hidden"
         style={{ background: isDark
@@ -45,8 +48,14 @@ export default function Home() {
           }}
         />
 
-        {/* Bottom fade into page bg */}
-        <div className="absolute bottom-0 left-0 right-0 h-28" style={{ zIndex: 2, background: 'linear-gradient(to bottom, transparent, var(--color-background))' }} />
+        {/* Bottom fade into page bg — the hero's gradient runs at 105deg (nearly
+            horizontal), so its dark stops persist across most of the width even
+            near the bottom edge. A short vertical fade only masks that on the
+            lighter (right) side; a taller fade with an early solid stop is
+            needed to fully resolve to the page background across the full
+            width before the section ends, or "Our Services" reads as sitting
+            on a black block instead of the page's light surface. */}
+        <div className="absolute bottom-0 left-0 right-0 h-48" style={{ zIndex: 2, background: 'linear-gradient(to bottom, transparent, var(--color-background) 75%)' }} />
 
         {/* Content */}
         <div className="relative w-full max-w-7xl mx-auto px-5 py-16 md:py-24" style={{ zIndex: 3 }}>

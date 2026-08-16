@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext'
 import { formatTime } from '../utils/format'
 
 export default function Confirmation() {
-  const { t, lang } = useApp()
+  const { t, lang, showToast } = useApp()
   const { state } = useLocation()
   const navigate = useNavigate()
   const canvasRef = useRef(null)
@@ -114,7 +114,7 @@ export default function Confirmation() {
 </body>
 </html>`
     const win = window.open('', '_blank')
-    if (!win) { alert('Please allow popups to download the receipt.'); return }
+    if (!win) { showToast(t('Please allow popups to download the receipt.', 'يرجى السماح بالنوافذ المنبثقة لتحميل الإيصال.'), 'error'); return }
     win.document.write(html)
     win.document.close()
     win.focus()

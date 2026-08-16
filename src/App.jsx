@@ -17,6 +17,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Settings from './pages/Settings'
 import Wallet from './pages/Wallet'
+import NotFound from './pages/NotFound'
 
 function AppShell() {
   const { theme, customer } = useApp()
@@ -45,6 +46,7 @@ function AppShell() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/wallet" element={<Wallet />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <MobileNav />
       </BrowserRouter>
