@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext'
 import ThemeToggle from './ThemeToggle'
 import { useEffect, useState, useRef } from 'react'
 
-function DesktopNavPill({ pathname, customer, t }) {
+function DesktopNavPill({ pathname, customer, t, lang }) {
   const tabRefs = useRef([])
   const containerRef = useRef(null)
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 })
@@ -21,18 +21,32 @@ function DesktopNavPill({ pathname, customer, t }) {
   const activeIdx = navItems.findIndex(item => item.to === pathname)
 
   useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
     const update = () => {
-      const container = containerRef.current
       const tab = tabRefs.current[activeIdx]
-      if (!container || !tab) { setPillStyle(p => ({...p, opacity: 0})); return }
+      if (!tab) { setPillStyle(p => (p.opacity === 0 ? p : { ...p, opacity: 0 })); return }
       const cRect = container.getBoundingClientRect()
       const tRect = tab.getBoundingClientRect()
+      // left offset from the container's physical left edge — correct in both
+      // LTR and RTL, as long as it's measured after the layout has settled.
       setPillStyle({ left: tRect.left - cRect.left, width: tRect.width, height: tRect.height, opacity: 1 })
     }
-    const timer = setTimeout(update, 20)
+    // Measure now and again next frame, after an RTL flip / label-width change
+    // has reflowed. lang is in the deps so a language switch re-runs this.
+    update()
+    const raf = requestAnimationFrame(update)
+    const ro = new ResizeObserver(update)
+    ro.observe(container)
+    tabRefs.current.forEach(el => el && ro.observe(el))
+    if (document.fonts?.ready) document.fonts.ready.then(update).catch(() => {})
     window.addEventListener('resize', update)
-    return () => { clearTimeout(timer); window.removeEventListener('resize', update) }
-  }, [activeIdx, pathname])
+    return () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+      window.removeEventListener('resize', update)
+    }
+  }, [activeIdx, pathname, lang, customer])
 
   return (
     <div ref={containerRef} className="relative flex items-center gap-0.5">
@@ -112,7 +126,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center relative p-1 rounded-full gap-0.5"
           style={{background: scrolled ? 'rgba(128,128,128,0.08)' : 'transparent', transition: 'background 0.3s'}}>
           {/* Sliding pill background */}
-          <DesktopNavPill pathname={location.pathname} customer={customer} t={t} />
+          <DesktopNavPill pathname={location.pathname} customer={customer} t={t} lang={lang} />
         </div>
 
         {/* Right actions */}
