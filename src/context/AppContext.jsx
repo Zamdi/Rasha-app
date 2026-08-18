@@ -137,6 +137,15 @@ export function AppProvider({ children }) {
     const id = setTimeout(() => setToast(null), 3500)
     return () => clearTimeout(id)
   }, [toast])
+
+  // Keep the Render free-tier server warm — ping every 14 minutes so new
+  // visitors don't hit a 30-50 second cold-start timeout on their first request.
+  useEffect(() => {
+    const ping = () => fetch(`${API}/health`).catch(() => {})
+    ping()
+    const id = setInterval(ping, 14 * 60 * 1000)
+    return () => clearInterval(id)
+  }, [])
   return (
     <AppContext.Provider value={{ lang, toggleLang, t, toast, showToast, customer, token, login, logout, staffToken, setStaffToken, staffRole, staffPermissions, isSuperAdmin, hasPerm, theme, toggleTheme, isDark }}>
       {children}

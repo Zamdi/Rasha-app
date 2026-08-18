@@ -41,22 +41,34 @@ export default function Register() {
     }
     if (form.password.length < 8) { showToast(t('Password must be at least 8 characters','كلمة المرور 8 أحرف على الأقل'),'error'); return }
     setLoading(true)
-    try {
-      const res = await fetch(`${API}/api/auth/register`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:dialCode+form.phone, password:form.password })
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        // Show duplicate errors as popup
-        if (res.status === 409) { setDupError(data.error); return }
-        showToast(data.error||t('Error','خطأ'),'error'); return
+    let retries = 0
+    const attempt = async () => {
+      try {
+        const res = await fetch(`${API}/api/auth/register`, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:dialCode+form.phone, password:form.password })
+        })
+        const data = await res.json()
+        setLoading(false)
+        if (!res.ok) {
+          if (res.status === 409) { setDupError(data.error); return }
+          showToast(data.error||t('Error','خطأ'),'error'); return
+        }
+        setMaskedEmail(data.maskedEmail)
+        setStep('otp')
+        startTimer()
+      } catch {
+        if (retries < 2) {
+          retries++
+          showToast(t('Server is starting up — retrying in 8 seconds…','الخادم يعمل — إعادة المحاولة خلال 8 ثوانٍ…'),'error')
+          setTimeout(attempt, 8000)
+        } else {
+          setLoading(false)
+          showToast(t('Connection error. Please try again in a moment.','خطأ في الاتصال. حاول مجدداً بعد لحظة.'),'error')
+        }
       }
-      setMaskedEmail(data.maskedEmail)
-      setStep('otp')
-      startTimer()
-    } catch { showToast(t('Connection error','خطأ في الاتصال'),'error') }
-    finally { setLoading(false) }
+    }
+    attempt()
   }
 
   const verify = async (codeOverride) => {
