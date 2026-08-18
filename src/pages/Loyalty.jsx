@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useApp, API } from '../context/AppContext'
-import { formatTime } from '../utils/format'
+import { formatTime, bookingStatus, bookingStatusLabel } from '../utils/format'
 
 export default function Loyalty() {
   const { t, token, lang, logout } = useApp()
@@ -45,10 +45,18 @@ export default function Loyalty() {
       setData(loy)
       setHistory(hist.visits || [])
       const today = new Date().toISOString().split('T')[0]
-      const upcoming = (bk.bookings || [])
-        .filter(b => b.status === 'confirmed' && b.booking_date >= today)
-        .sort((a, b) => a.booking_date.localeCompare(b.booking_date) || a.booking_time.localeCompare(b.booking_time))
-      setNextBooking(upcoming[0] || null)
+      const relevant = (bk.bookings || [])
+        // Upcoming confirmed bookings, plus any booking still dated today — so a
+        // booking that was scanned on arrival stays visible with its green
+        // "Scanned" badge instead of vanishing the moment attendance is marked.
+        .filter(b => {
+          const day = String(b.booking_date).slice(0, 10)
+          if (b.status === 'cancelled') return false
+          if (b.status === 'confirmed' && day >= today) return true
+          return day === today
+        })
+        .sort((a, b) => String(a.booking_date).localeCompare(String(b.booking_date)) || a.booking_time.localeCompare(b.booking_time))
+      setNextBooking(relevant[0] || null)
     } catch {
       setError(t('Connection error. The server may be starting up — please wait a moment and retry.', 'خطأ في الاتصال. قد يكون الخادم في وضع السكون — انتظر لحظة وحاول مجدداً.'))
     } finally {
@@ -209,7 +217,7 @@ export default function Loyalty() {
             {/* Next booking */}
             {nextBooking && (
               <div className="glass p-4 rounded-2xl">
-                <p className="text-xs font-bold text-on-surface-variant uppercase mb-3">{t('Next Booking', 'الحجز القادم')}</p>
+                <p className="text-xs font-bold text-on-surface-variant uppercase mb-3">{t('Your Booking', 'حجزك')}</p>
                 <div className="flex items-center gap-3">
                   <div className="bg-secondary-fixed/10 p-2 rounded-lg">
                     <span className="material-symbols-outlined text-secondary-fixed text-base">calendar_month</span>
@@ -219,12 +227,18 @@ export default function Loyalty() {
                       <p className="font-semibold text-on-surface text-sm">
                         {nextBooking.service_type === 'full' ? t('Full Wash', 'غسيل كامل') : t('Exterior Only', 'خارجي فقط')}
                       </p>
-                      {nextBooking.booking_uid && (
-                        <span className="text-xs font-bold text-secondary-fixed shrink-0" dir="ltr">
-                          #{nextBooking.booking_uid.replace('BK-', 'RSH-')}
+                      {(() => { const s = bookingStatus(nextBooking); return (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+                          style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.color }}>
+                          {bookingStatusLabel(s.key, t)}
                         </span>
-                      )}
+                      )})()}
                     </div>
+                    {nextBooking.booking_uid && (
+                      <span className="text-[11px] font-bold text-secondary-fixed" dir="ltr">
+                        #{nextBooking.booking_uid.replace('BK-', 'RSH-')}
+                      </span>
+                    )}
                     <p className="text-xs text-on-surface-variant mt-0.5">
                       <span>{new Date(nextBooking.booking_date.slice(0,10) + 'T12:00:00').toLocaleDateString(t('en-US','ar-EG'),{month:'short',day:'numeric'})}</span>
                       {' | '}
