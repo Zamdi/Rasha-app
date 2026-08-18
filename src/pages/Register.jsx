@@ -24,7 +24,14 @@ export default function Register() {
   const timerRef = useRef(null)
 
   const set = (k, v) => setForm(f => ({...f, [k]: v}))
-  const buildPhone = () => dialCode + (form.phone.startsWith('0') ? form.phone.slice(1) : form.phone)
+  const buildPhone = () => {
+    let p = form.phone
+    if (p.startsWith('00')) p = p.slice(2)
+    const dialDigits = dialCode.replace('+', '')
+    if (p.startsWith(dialDigits)) p = p.slice(dialDigits.length)
+    if (p.startsWith('0')) p = p.slice(1)
+    return dialCode + p
+  }
 
   const startTimer = () => {
     setTimer(OTP_SECONDS)

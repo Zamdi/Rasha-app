@@ -36,7 +36,14 @@ export default function Login() {
   useEffect(() => () => clearInterval(timerRef.current), [])
 
   const buildIdentifier = () => {
-    if (loginMode === 'phone') return dialCode + (phone.startsWith('0') ? phone.slice(1) : phone)
+    if (loginMode === 'phone') {
+      let p = phone
+      if (p.startsWith('00')) p = p.slice(2)       // 00249… → 249…
+      const dialDigits = dialCode.replace('+', '')
+      if (p.startsWith(dialDigits)) p = p.slice(dialDigits.length) // 249912… → 912…
+      if (p.startsWith('0')) p = p.slice(1)         // 0912… → 912…
+      return dialCode + p
+    }
     return identifier
   }
 
