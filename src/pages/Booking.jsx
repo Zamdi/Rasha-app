@@ -15,12 +15,6 @@ export default function Booking() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Guests must register/sign in before booking
-  useEffect(() => {
-    if (!customer) {
-      navigate('/register', { state: { returnTo: '/book' }, replace: true })
-    }
-  }, [customer, navigate])
 
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
@@ -62,6 +56,9 @@ export default function Booking() {
   }
 
   const goToStep2 = () => {
+    if (!customer) {
+      navigate('/register', { state: { returnTo: '/book' }, replace: true }); return
+    }
     if (!form.date) {
       showToast(t('Please select a date', 'يرجى اختيار تاريخ'), 'error'); return
     }
