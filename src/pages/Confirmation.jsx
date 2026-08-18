@@ -48,11 +48,14 @@ export default function Confirmation() {
   const formattedDate = date ? new Date(date.slice(0,10) + 'T12:00:00').toLocaleDateString(t('en-US', 'ar-EG'), { year: 'numeric', month: 'long', day: 'numeric' }) : ''
 
   const downloadPDF = () => {
+    // The receipt is written as raw HTML, so escape any value the customer
+    // typed (name, vehicle, phone) before it goes in.
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
     const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>Rasha Booking Receipt - ${ref}</title>
+  <title>Rasha Booking Receipt - ${esc(ref)}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', 'IBM Plex Sans', sans-serif; background: #fff; color: #111; }
@@ -85,7 +88,7 @@ export default function Confirmation() {
 <div class="page">
   <div class="header">
     <div><div class="logo">RASHA</div><div class="logo-sub">Premium Car Wash · Khartoum, Sudan</div></div>
-    <div class="badge"><div class="badge-label">Confirmation</div><div class="badge-ref">${ref}</div></div>
+    <div class="badge"><div class="badge-label">Confirmation</div><div class="badge-ref">${esc(ref)}</div></div>
   </div>
   <div class="confirmed-section">
     <div class="check">✓</div>
@@ -95,17 +98,17 @@ export default function Confirmation() {
   <div class="card">
     <div class="card-header">
       <div><div class="card-label">Service</div><div class="card-value">${svcLabel}</div></div>
-      <div style="text-align:right"><div class="card-label">Reference</div><div class="card-value" style="color:#155058">${ref}</div></div>
+      <div style="text-align:right"><div class="card-label">Reference</div><div class="card-value" style="color:#155058">${esc(ref)}</div></div>
     </div>
     <div class="grid">
       <div class="detail"><div class="detail-icon">📅</div><div><div class="detail-label">Date</div><div class="detail-value">${formattedDate}</div></div></div>
-      <div class="detail"><div class="detail-icon">⏰</div><div><div class="detail-label">Time</div><div class="detail-value">${time}</div></div></div>
-      <div class="detail"><div class="detail-icon">👤</div><div><div class="detail-label">Customer</div><div class="detail-value">${name || '—'}</div></div></div>
+      <div class="detail"><div class="detail-icon">⏰</div><div><div class="detail-label">Time</div><div class="detail-value">${esc(time)}</div></div></div>
+      <div class="detail"><div class="detail-icon">👤</div><div><div class="detail-label">Customer</div><div class="detail-value">${esc(name || '—')}</div></div></div>
       ${vehicle
-        ? `<div class="detail"><div class="detail-icon">🚗</div><div><div class="detail-label">Vehicle</div><div class="detail-value">${vehicle}</div></div></div>`
+        ? `<div class="detail"><div class="detail-icon">🚗</div><div><div class="detail-label">Vehicle</div><div class="detail-value">${esc(vehicle)}</div></div></div>`
         : `<div class="detail"><div class="detail-icon">📍</div><div><div class="detail-label">Location</div><div class="detail-value">Rasha Car Wash, Khartoum</div></div></div>`
       }
-      ${phone ? `<div class="detail"><div class="detail-icon">📞</div><div><div class="detail-label">Phone</div><div class="detail-value">${phone}</div></div></div>` : ''}
+      ${phone ? `<div class="detail"><div class="detail-icon">📞</div><div><div class="detail-label">Phone</div><div class="detail-value">${esc(phone)}</div></div></div>` : ''}
     </div>
   </div>
   <div class="notice">⏱ Please arrive <strong>15 minutes early</strong> for a pre-wash inspection with our lead detailer.</div>
