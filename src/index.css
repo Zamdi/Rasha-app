@@ -355,24 +355,29 @@ html.dark label {
   padding: 6px;
   border-radius: 9999px;
   isolation: isolate;
-  background: linear-gradient(135deg, rgba(255,255,255,0.70), rgba(255,255,255,0.46));
-  backdrop-filter: blur(24px) saturate(170%);
-  -webkit-backdrop-filter: blur(24px) saturate(170%);
-  border: 1px solid rgba(255,255,255,0.7);
+  /* Light: warm cream-tinted frosted glass */
+  background: linear-gradient(135deg, rgba(249,246,239,0.84), rgba(255,255,255,0.64));
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.82);
   box-shadow:
-    0 12px 40px rgba(21,80,88,0.22),
-    0 2px 10px rgba(13,24,37,0.12),
-    0 0 0 1px rgba(21,80,88,0.06),
-    inset 0 1px 0 rgba(255,255,255,0.9),
-    inset 0 -1px 0 rgba(255,255,255,0.25);
+    0 14px 44px rgba(18,69,75,0.20),
+    0 3px 12px rgba(18,69,75,0.10),
+    0 0 0 1px rgba(18,69,75,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.98),
+    inset 0 -1px 0 rgba(18,69,75,0.06);
 }
 html.dark .liquid-nav {
-  background: linear-gradient(135deg, rgba(40,48,52,0.70), rgba(18,24,28,0.56));
-  border: 1px solid rgba(255,255,255,0.16);
+  /* Dark: deep teal-black smoked glass */
+  background: linear-gradient(135deg, rgba(18,69,75,0.60), rgba(5,18,21,0.78));
+  backdrop-filter: blur(32px) saturate(160%);
+  -webkit-backdrop-filter: blur(32px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.12);
   box-shadow:
-    0 12px 40px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.18),
-    inset 0 -1px 0 rgba(255,255,255,0.05);
+    0 18px 52px rgba(0,0,0,0.65),
+    0 4px 18px rgba(0,0,0,0.38),
+    inset 0 1px 0 rgba(255,255,255,0.13),
+    inset 0 -1px 0 rgba(0,0,0,0.28);
 }
 
 /* Everything decorative lives behind the buttons and is clipped to the pill. */
@@ -385,22 +390,23 @@ html.dark .liquid-nav {
   z-index: -1;
 }
 
-/* Kept deliberately faint — these are a tint under frosted glass, not a
-   gradient in their own right. Turned up, the bar stops reading as glass
-   and starts reading as a coloured plastic pill. */
+/* Teal-family blobs — faint tints under frosted glass */
 .liquid-blob {
   position: absolute;
   width: 65%;
   aspect-ratio: 1;
   border-radius: 50%;
   filter: blur(32px);
-  opacity: 0.26;
+  opacity: 0.22;
   will-change: transform;
 }
-.liquid-blob-1 { left: -10%; top: -60%; background: #f2a3b3; animation: liquidDrift1 14s ease-in-out infinite alternate; }
-.liquid-blob-2 { left: 35%;  top: -40%; background: #a3c2f0; animation: liquidDrift2 18s ease-in-out infinite alternate; }
-.liquid-blob-3 { left: 70%;  top: -55%; background: #bDb0ee; animation: liquidDrift3 16s ease-in-out infinite alternate; }
-html.dark .liquid-blob { opacity: 0.30; }
+.liquid-blob-1 { left: -10%; top: -60%; background: #7ecfcf; animation: liquidDrift1 14s ease-in-out infinite alternate; }
+.liquid-blob-2 { left: 35%;  top: -40%; background: #a8dfd8; animation: liquidDrift2 18s ease-in-out infinite alternate; }
+.liquid-blob-3 { left: 70%;  top: -55%; background: #8ecece; animation: liquidDrift3 16s ease-in-out infinite alternate; }
+html.dark .liquid-blob { opacity: 0.28; }
+html.dark .liquid-blob-1 { background: #1e8c96; }
+html.dark .liquid-blob-2 { background: #0d5c68; }
+html.dark .liquid-blob-3 { background: #155260; }
 
 @keyframes liquidDrift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,14px) scale(1.25); } }
 @keyframes liquidDrift2 { from { transform: translate(0,0) scale(1.1); } to { transform: translate(-34px,18px) scale(0.9); } }
@@ -418,48 +424,44 @@ html.dark .liquid-blob { opacity: 0.30; }
   will-change: transform;
 }
 html.dark .liquid-glare {
-  background: radial-gradient(circle at center, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 70%);
+  background: radial-gradient(circle at center, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 70%);
 }
 
-/* The sliding highlight behind the active tab.
-   Real glass, not paint: it is translucent and carries its own backdrop
-   blur. saturate() below 1 is the important part — it drains the colour
-   out of the blobs drifting underneath so the pill reads as frosted
-   glass rather than picking up a pink or blue tint. */
+/* Active-tab sliding pill.
+   Light: near-opaque white — clearly reads as selected.
+   Dark:  near-opaque deep teal-black — same clear selected state. */
 .liquid-pill {
   position: absolute;
   border-radius: 9999px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
-  backdrop-filter: blur(10px) saturate(0.5);
-  -webkit-backdrop-filter: blur(10px) saturate(0.5);
-  /* At this transparency the fill barely registers — the rim and the inset
-     highlight are what make it read as a pill at all. */
-  border: 1px solid rgba(255,255,255,0.55);
-  /* The outer dark ring keeps the pill's edge visible when the bar happens to
-     sit over a light patch, where a white rim alone would vanish. */
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(12px) saturate(0.8);
+  -webkit-backdrop-filter: blur(12px) saturate(0.8);
+  border: 1px solid rgba(255,255,255,0.96);
   box-shadow:
-    0 0 0 1px rgba(0,0,0,0.06),
-    0 2px 10px rgba(0,0,0,0.16),
-    inset 0 1px 0 rgba(255,255,255,0.55);
+    0 2px 14px rgba(18,69,75,0.14),
+    0 0 0 1px rgba(18,69,75,0.04),
+    inset 0 1px 0 rgba(255,255,255,1);
   pointer-events: none;
   z-index: 0;
 }
 html.dark .liquid-pill {
-  background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
-  border: 1px solid rgba(255,255,255,0.30);
+  background: rgba(4,16,19,0.88);
+  backdrop-filter: blur(12px) saturate(0.6);
+  -webkit-backdrop-filter: blur(12px) saturate(0.6);
+  border: 1px solid rgba(255,255,255,0.20);
   box-shadow:
-    0 2px 8px rgba(0,0,0,0.3),
-    inset 0 1px 0 rgba(255,255,255,0.28);
+    0 2px 12px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.14);
 }
 
 .liquid-divider {
   width: 1px;
   height: 22px;
   margin: 0 4px;
-  background: rgba(21,80,88,0.22);
+  background: rgba(18,69,75,0.20);
   flex-shrink: 0;
 }
-html.dark .liquid-divider { background: rgba(255,255,255,0.18); }
+html.dark .liquid-divider { background: rgba(255,255,255,0.15); }
 
 @media (prefers-reduced-motion: reduce) {
   .liquid-blob { animation: none; }
