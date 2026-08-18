@@ -24,6 +24,7 @@ export default function Register() {
   const timerRef = useRef(null)
 
   const set = (k, v) => setForm(f => ({...f, [k]: v}))
+  const buildPhone = () => dialCode + (form.phone.startsWith('0') ? form.phone.slice(1) : form.phone)
 
   const startTimer = () => {
     setTimer(OTP_SECONDS)
@@ -46,7 +47,7 @@ export default function Register() {
       try {
         const res = await fetch(`${API}/api/auth/register`, {
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:dialCode+form.phone, password:form.password })
+          body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:buildPhone(), password:form.password })
         })
         const data = await res.json()
         setLoading(false)
@@ -78,7 +79,7 @@ export default function Register() {
     try {
       const res = await fetch(`${API}/api/auth/verify-register`, {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:dialCode+form.phone, password:form.password, otp: code })
+        body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:buildPhone(), password:form.password, otp: code })
       })
       const data = await res.json()
       if (!res.ok) { showToast(data.error||t('Invalid or expired code','رمز غير صحيح أو منتهي الصلاحية'),'error'); setLoading(false); return }

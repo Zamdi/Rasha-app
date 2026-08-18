@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import OtpInput from '../components/OtpInput'
+import PhoneInput from '../components/PhoneInput'
 
 const OTP_SECONDS = 60
 
@@ -10,7 +11,10 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const returnTo = location.state?.returnTo || '/loyalty'
+  const [loginMode, setLoginMode] = useState('email') // 'email' | 'phone'
   const [identifier, setIdentifier] = useState('')
+  const [phone, setPhone] = useState('')
+  const [dialCode, setDialCode] = useState('+249')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [step, setStep] = useState('form')
@@ -31,11 +35,17 @@ export default function Login() {
 
   useEffect(() => () => clearInterval(timerRef.current), [])
 
+  const buildIdentifier = () => {
+    if (loginMode === 'phone') return dialCode + (phone.startsWith('0') ? phone.slice(1) : phone)
+    return identifier
+  }
+
   const submit = async () => {
-    if (!identifier||!password) { showToast(t('Please fill all fields','يرجى ملء جميع الحقول'),'error'); return }
+    const id = buildIdentifier()
+    if (!id||!password) { showToast(t('Please fill all fields','يرجى ملء جميع الحقول'),'error'); return }
     setLoading(true)
     try {
-      const res = await fetch(`${API}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier,password})})
+      const res = await fetch(`${API}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier:id,password})})
       const data = await res.json()
       if (!res.ok) { showToast(data.error||t('Invalid credentials','بيانات غير صحيحة'),'error'); return }
       setLoginEmail(data.email)
@@ -79,8 +89,26 @@ export default function Login() {
         {step === 'form' ? (
           <div className="glass p-6 rounded-2xl space-y-4 animate-fade-in">
             <div>
-              <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Email or Phone','البريد أو الهاتف')}</label>
-              <input className="rasha-input" autoComplete="username" name="username" placeholder="email@example.com" value={identifier} onChange={e=>setIdentifier(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('Email or Phone','البريد أو الهاتف')}</label>
+                <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--color-outline-variant)', fontSize: '11px' }}>
+                  {['email','phone'].map(mode => (
+                    <button key={mode} type="button" onClick={() => setLoginMode(mode)}
+                      className="px-3 py-1 font-semibold transition-all"
+                      style={{
+                        background: loginMode === mode ? '#12454B' : 'var(--input-bg)',
+                        color: loginMode === mode ? '#fff' : 'var(--color-on-surface-variant)',
+                      }}>
+                      {mode === 'email' ? t('Email','بريد') : t('Phone','هاتف')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {loginMode === 'email' ? (
+                <input className="rasha-input" autoComplete="username" name="username" placeholder="email@example.com" value={identifier} onChange={e=>setIdentifier(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
+              ) : (
+                <PhoneInput value={phone} onChange={setPhone} dialCode={dialCode} onDialChange={setDialCode} />
+              )}
             </div>
             <div>
               <div className="flex justify-between mb-2">

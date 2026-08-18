@@ -138,13 +138,17 @@ export default function PhoneInput({ value, onChange, dialCode, onDialChange }) 
       {/* Number field */}
       <input
         type="tel"
-        placeholder="9XX XXX XXXX"
+        placeholder=""
         autoComplete="tel-national"
         name="tel"
         className="rasha-input flex-1"
         style={{ borderRadius: '0 0.75rem 0.75rem 0' }}
         value={value}
-        onChange={e => onChange(e.target.value.replace(/\D/g, ''))}
+        onChange={e => {
+          let v = e.target.value.replace(/\D/g, '')
+          if (v.startsWith('0')) v = v.slice(1)
+          onChange(v)
+        }}
       />
     </div>
   )
