@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react'
 const HIDDEN_PAGES = ['/staff', '/confirmation', '/reset-password', '/forgot-password']
 
 export default function MobileNav() {
-  const { pathname } = useLocation()
+  const { pathname, state } = useLocation()
   const { t, customer, isDark, toggleTheme } = useApp()
 
   const navRef  = useRef(null)
@@ -33,7 +33,7 @@ export default function MobileNav() {
     { to: '/wallet',  icon: 'account_balance_wallet', label: t('Wallet', 'محفظتي') },
   ]
   const items = customer ? loggedInItems : guestItems
-  const activeIdx = items.findIndex(i => i.to === pathname)
+  const activeIdx = items.findIndex(i => i.to === pathname || i.to === state?.returnTo)
 
   // Keep the pill locked to the active tab.
   //

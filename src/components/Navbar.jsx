@@ -4,6 +4,7 @@ import ThemeToggle from './ThemeToggle'
 import { useEffect, useState, useRef } from 'react'
 
 function DesktopNavPill({ pathname, customer, t, lang }) {
+  const { state } = useLocation()
   const tabRefs = useRef([])
   const containerRef = useRef(null)
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 })
@@ -18,7 +19,7 @@ function DesktopNavPill({ pathname, customer, t, lang }) {
     { to: '/contact', label: t('Support', 'الدعم') },
   ]
 
-  const activeIdx = navItems.findIndex(item => item.to === pathname)
+  const activeIdx = navItems.findIndex(item => item.to === pathname || item.to === state?.returnTo)
 
   useEffect(() => {
     const container = containerRef.current
