@@ -44,9 +44,11 @@ export function AppProvider({ children }) {
     body.style.backgroundColor = 'transparent'
     body.style.color = fg
 
-    // Update meta theme-color
+    // Update meta theme-color — must match the page background exactly, or
+    // the iOS status-bar and bottom safe-area paint a different color from
+    // the app surface and you see a visible seam at both edges.
     const metaTheme = document.getElementById('theme-meta')
-    if (metaTheme) metaTheme.setAttribute('content', isDarkMode ? '#0a1628' : '#a8d8ea')
+    if (metaTheme) metaTheme.setAttribute('content', isDarkMode ? '#0a1628' : '#f8fffe')
 
     // Force mobile browsers to repaint CSS variable changes
     body.style.willChange = 'background-color, color'

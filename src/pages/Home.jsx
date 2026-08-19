@@ -11,8 +11,10 @@ export default function Home() {
     // everything below the hero must commit to the page surface color so it
     // can never read as an unstyled dark gap between the hero and the cards.
     <div className="pt-14 pb-16 md:pb-0" style={{ background: 'var(--color-background)' }}>
-      {/* Hero */}
-      <section className="relative min-h-[92vh] flex items-center overflow-hidden"
+      {/* Hero — items-start on mobile pulls the headline up close to the top
+          of the viewport (with just enough clearance for the fixed navbar),
+          instead of vertically centering it inside a huge splash section. */}
+      <section className="relative min-h-[80vh] md:min-h-[92vh] flex items-start md:items-center overflow-hidden"
         style={{ background: isDark
           ? (isAr
               ? 'linear-gradient(255deg, #070d1a 0%, #0a1f24 35%, #155058 65%, #1d6b75 100%)'
@@ -58,7 +60,7 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 right-0 h-48" style={{ zIndex: 2, background: 'linear-gradient(to bottom, transparent, var(--color-background) 75%)' }} />
 
         {/* Content */}
-        <div className="relative w-full max-w-7xl mx-auto px-5 py-16 md:py-24" style={{ zIndex: 3 }}>
+        <div className="relative w-full max-w-7xl mx-auto px-5 pt-20 pb-16 md:py-24" style={{ zIndex: 3 }}>
           <div className="max-w-xl space-y-5 animate-fade-in">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 text-white/70" style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
               <span className="material-symbols-outlined fill-icon text-sm" style={{ color: '#74f5ff' }}>auto_awesome</span>
