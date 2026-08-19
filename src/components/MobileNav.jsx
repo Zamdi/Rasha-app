@@ -177,19 +177,18 @@ export default function MobileNav() {
               aria-current={isActive ? 'page' : undefined}
               className="relative z-10 flex items-center justify-center gap-1.5 rounded-full"
               style={{
-                padding: isActive ? '9px 14px' : '9px 12px',
-                transition: 'padding 0.3s ease',
+                padding: '8px 12px',
                 textDecoration: 'none',
               }}>
               {item.avatar ? (
                 <img src={item.avatar} alt="" style={{
-                  width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover',
+                  width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover',
                   border: isActive ? `2px solid ${activeColor}` : '2px solid transparent',
                   flexShrink: 0, transition: 'border-color 0.3s ease',
                 }} />
               ) : (
                 <span className="material-symbols-outlined" style={{
-                  fontSize: '21px',
+                  fontSize: '20px',
                   lineHeight: 1,
                   color: isActive ? activeColor : inactiveColor,
                   textShadow: glyphShadow,
@@ -199,18 +198,14 @@ export default function MobileNav() {
                 }}>{item.icon}</span>
               )}
 
-              {/* Label reveals for the active tab only — keeps the bar inside
-                  narrow viewports in both English and Arabic. */}
+              {/* Labels always visible so users can read every tab. */}
               <span style={{
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: 700,
-                color: activeColor,
+                color: isActive ? activeColor : inactiveColor,
                 textShadow: glyphShadow,
                 whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                maxWidth: isActive ? '90px' : '0px',
-                opacity: isActive ? 1 : 0,
-                transition: 'max-width 0.35s cubic-bezier(0.34,1.15,0.64,1), opacity 0.25s ease',
+                transition: 'color 0.3s ease',
               }}>{item.label}</span>
             </Link>
           )

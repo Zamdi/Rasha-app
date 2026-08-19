@@ -355,11 +355,12 @@ html.dark label {
   padding: 6px;
   border-radius: 9999px;
   isolation: isolate;
-  /* Light: warm cream-tinted frosted glass */
-  background: linear-gradient(135deg, rgba(249,246,239,0.84), rgba(255,255,255,0.64));
+  /* Light: warm cream-tinted glass — near-opaque so the bar reads clearly
+     on top of any page content, no matter how busy the background is. */
+  background: linear-gradient(135deg, rgba(249,246,239,0.98), rgba(255,255,255,0.96));
   backdrop-filter: blur(32px) saturate(180%);
   -webkit-backdrop-filter: blur(32px) saturate(180%);
-  border: 1px solid rgba(255,255,255,0.82);
+  border: 1px solid rgba(18,69,75,0.15);
   box-shadow:
     0 14px 44px rgba(18,69,75,0.20),
     0 3px 12px rgba(18,69,75,0.10),
@@ -368,11 +369,11 @@ html.dark label {
     inset 0 -1px 0 rgba(18,69,75,0.06);
 }
 html.dark .liquid-nav {
-  /* Dark: deep teal-black smoked glass */
-  background: linear-gradient(135deg, rgba(18,69,75,0.60), rgba(5,18,21,0.78));
+  /* Dark: deep teal-black glass, near-opaque for the same reason as light. */
+  background: linear-gradient(135deg, rgba(18,69,75,0.95), rgba(5,18,21,0.97));
   backdrop-filter: blur(32px) saturate(160%);
   -webkit-backdrop-filter: blur(32px) saturate(160%);
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
   box-shadow:
     0 18px 52px rgba(0,0,0,0.65),
     0 4px 18px rgba(0,0,0,0.38),

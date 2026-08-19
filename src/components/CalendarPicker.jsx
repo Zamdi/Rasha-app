@@ -71,11 +71,11 @@ export default function CalendarPicker({ value, onChange, minDate, lang = 'en' }
         </span>
       </button>
 
-      {/* Dropdown calendar */}
+      {/* Dropdown calendar — rendered inline (not absolute) so the page
+          grows to fit it on mobile, keeping the bottom rows reachable. */}
       {open && (
-        <div className="absolute left-0 right-0 z-50 mt-1 rounded-xl overflow-hidden animate-fade-in"
+        <div className="mt-1 rounded-xl overflow-hidden animate-fade-in"
           style={{
-            top: '100%',
             background: 'var(--glass-high-bg)',
             backdropFilter: 'blur(48px) saturate(1.2)',
             WebkitBackdropFilter: 'blur(48px) saturate(1.2)',

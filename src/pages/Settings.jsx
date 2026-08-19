@@ -178,8 +178,8 @@ export default function Settings() {
           {/* Mobile top nav — sidebar is hidden on mobile */}
         <div className="md:hidden flex gap-2 px-4 pt-4 pb-2">
           {[
-            { to: '/loyalty', icon: 'loyalty', label: t('Membership', 'العضوية') },
             { to: '/wallet', icon: 'account_balance_wallet', label: t('Wallet', 'المحفظة') },
+            { to: '/contact', icon: 'support_agent', label: t('Support', 'الدعم') },
           ].map(item => (
             <Link key={item.to} to={item.to}
               className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-on-surface-variant transition-all"
@@ -331,6 +331,26 @@ export default function Settings() {
                 <div className="px-6 py-4 flex items-center gap-2">
                   <span className="material-symbols-outlined text-on-surface-variant text-base">schedule</span>
                   <p className="text-xs text-on-surface-variant">{t('Member ID:', 'رقم العضو:')} <span className="font-bold text-secondary-fixed" dir="ltr">{customer.customer_uid}</span></p>
+                </div>
+              </div>
+
+              {/* Support */}
+              <div style={card} className="overflow-hidden">
+                <div className="px-6 py-4 flex items-center gap-2" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                  <span className="material-symbols-outlined text-secondary-fixed text-xl">support_agent</span>
+                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{t('Support', 'الدعم')}</p>
+                </div>
+                <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-on-surface">{t('Need help?', 'تحتاج مساعدة؟')}</p>
+                    <p className="text-xs text-on-surface-variant mt-0.5">{t('Get in touch with our team for any questions or issues.', 'تواصل مع فريقنا لأي أسئلة أو مشاكل.')}</p>
+                  </div>
+                  <Link to="/contact"
+                    className="shrink-0 text-sm font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2"
+                    style={{ background: 'var(--color-primary-container)', color: 'white' }}>
+                    <span className="material-symbols-outlined text-base">chat</span>
+                    {t('Contact Support', 'اتصل بالدعم')}
+                  </Link>
                 </div>
               </div>
 
