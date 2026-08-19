@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.rashasd.carwash",
+    "sha256_cert_fingerprints": [
+      "38:C0:27:EE:B3:C0:5F:CE:D8:81:38:F9:9A:93:11:87:3B:5F:21:DC:41:8A:6A:94:25:87:0A:A1:5C:F6:92:0D"
+    ]
+  }
+}]
