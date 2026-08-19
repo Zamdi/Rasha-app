@@ -15,8 +15,9 @@ function DesktopNavPill({ pathname, customer, t, lang }) {
     ...(customer ? [
       { to: '/loyalty', label: t('My Card', 'بطاقتي') },
       { to: '/wallet', label: t('Wallet', 'المحفظة') },
-    ] : []),
-    { to: '/contact', label: t('Support', 'الدعم') },
+    ] : [
+      { to: '/contact', label: t('Support', 'الدعم') },
+    ]),
   ]
 
   const activeIdx = navItems.findIndex(item => item.to === pathname || item.to === state?.returnTo)

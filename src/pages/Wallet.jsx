@@ -26,51 +26,13 @@ export default function Wallet() {
   if (!customer) return null
 
 
-  const navItems = [
-    { id: 'profile', icon: 'person', label: t('Profile', 'الملف الشخصي'), href: '/settings' },
-    { id: 'membership', icon: 'loyalty', label: t('Membership', 'العضوية'), href: '/loyalty' },
-    { id: 'wallet', icon: 'account_balance_wallet', label: t('Wallet', 'المحفظة'), href: '/wallet' },
-  ]
-
   const card = { background: 'var(--color-surface-container-low)', border: '1px solid var(--color-outline-variant)', boxShadow: '0 4px 24px rgba(21,80,88,0.06)', borderRadius: '1rem' }
 
   return (
     <div className="pt-14 min-h-screen pb-24 md:pb-0" style={{ background: 'var(--color-background)' }}>
-      <div className="flex max-w-7xl mx-auto">
-
-        {/* Sidebar */}
-        <aside className="hidden md:flex flex-col w-56 shrink-0 min-h-[calc(100vh-56px)] py-8 px-4"
-          style={{ borderRight: '1px solid var(--color-outline-variant)' }}>
-          <div className="mb-8 px-4">
-            <p className="text-base font-bold text-secondary-fixed font-display">{t('Rasha Member Portal', 'بوابة رشة')}</p>
-            <p className="text-xs text-on-surface-variant mt-0.5">{t('Premium Hydro Care', 'رعاية هيدرو متميزة')}</p>
-          </div>
-          <nav className="space-y-1 flex-1">
-            {navItems.map(item => {
-              const active = item.id === 'wallet'
-              return (
-                <Link key={item.id} to={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${active ? 'text-secondary-fixed' : 'text-on-surface-variant hover:text-on-surface'}`}
-                  style={active ? { background: 'rgba(var(--color-secondary-fixed-rgb),0.08)', border: '1px solid rgba(var(--color-secondary-fixed-rgb),0.15)' } : {}}>
-                  <span className={`material-symbols-outlined text-xl ${active ? 'fill-icon' : ''}`}>{item.icon}</span>
-                  {item.label}
-                </Link>
-              )
-            })}
-          </nav>
-          <Link to="/book"
-            className="flex items-center gap-2 mx-4 mb-4 py-3 px-4 rounded-xl text-sm font-bold text-white justify-center hydro-gradient hover:opacity-90">
-            <span className="material-symbols-outlined text-base">local_car_wash</span>
-            {t('Book Wash', 'احجز غسيل')}
-          </Link>
-          <Link to="/contact" className="flex items-center gap-2 px-4 py-3 text-on-surface-variant hover:text-secondary-fixed text-sm font-semibold">
-            <span className="material-symbols-outlined text-xl">help</span>
-            {t('Help?', 'مساعدة؟')}
-          </Link>
-        </aside>
-
+      <div className="max-w-5xl mx-auto">
         {/* Main */}
-        <main className="flex-1 px-4 md:px-10 py-8 pb-28 md:pb-10 space-y-6">
+        <main className="px-4 md:px-8 pt-4 pb-28 md:pt-8 md:pb-10 space-y-6">
           {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 text-xs text-on-surface-variant mb-1">
             <Link to="/loyalty" className="hover:text-secondary-fixed">{t('Dashboard', 'لوحة التحكم')}</Link>
