@@ -110,7 +110,7 @@ export default function Navbar() {
   const handleLogout = () => { logout(); navigate('/'); setMenuOpen(false) }
 
   return (
-    <nav className="fixed top-0 w-full z-20 transition-all duration-300 safe-top"
+    <nav className="fixed top-0 w-full z-20 transition-all duration-300"
       style={{
         background: scrolled ? 'var(--navbar-bg)' : 'transparent',
         backdropFilter: scrolled ? 'blur(24px)' : 'none',
