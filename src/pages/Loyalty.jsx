@@ -161,26 +161,48 @@ export default function Loyalty() {
               <div className="p-4 border-b border-outline-variant/20">
                 <h3 className="font-bold text-on-surface">{t('Recent Activity', 'النشاط الأخير')}</h3>
               </div>
-              <div className="divide-y divide-outline-variant/10">
-                {history.length === 0 ? (
-                  <div className="p-8 text-center text-on-surface-variant text-sm">{t('No washes yet. Book your first wash!', 'لا توجد غسيلات بعد.')}</div>
-                ) : history.slice(0, 10).map((v, i) => (
-                  <div key={i} className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${v.is_free_wash ? 'bg-secondary-fixed/20 border border-secondary-fixed/40' : 'bg-surface-container-high'}`}>
-                        <span className={`material-symbols-outlined text-base ${v.is_free_wash ? 'fill-icon text-secondary-fixed' : 'text-on-surface-variant'}`}>water_drop</span>
+              {history.length === 0 ? (
+                /* An empty state that only states the emptiness leaves the
+                   customer nowhere to go — give it the action it implies. */
+                <div className="p-8 flex flex-col items-center gap-3 text-center">
+                  <span className="material-symbols-outlined text-on-surface-variant text-4xl" aria-hidden="true">local_car_wash</span>
+                  <p className="text-sm font-semibold text-on-surface">{t('No washes yet', 'لا توجد غسيلات بعد')}</p>
+                  <p className="text-xs text-on-surface-variant max-w-xs">
+                    {t('Every wash earns a stamp. Collect enough and your next one is on us.',
+                       'كل غسيل يمنحك طابعاً. اجمع ما يكفي والغسيل التالي على حسابنا.')}
+                  </p>
+                  <Link to="/book" className="btn-primary px-5 py-2.5 rounded-xl text-sm mt-1">
+                    {t('Book your first wash', 'احجز أول غسيل')}
+                  </Link>
+                </div>
+              ) : (
+                <ul className="divide-y divide-outline-variant/10">
+                  {history.slice(0, 10).map((v, i) => (
+                    <li key={i} className="flex items-center justify-between p-4 gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${v.is_free_wash ? 'bg-secondary-fixed/20 border border-secondary-fixed/40' : 'bg-surface-container-high'}`}>
+                          <span className={`material-symbols-outlined text-base ${v.is_free_wash ? 'fill-icon text-secondary-fixed' : 'text-on-surface-variant'}`}
+                            aria-hidden="true">
+                            {v.is_free_wash ? 'redeem' : 'water_drop'}
+                          </span>
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-sm text-on-surface font-semibold truncate">
+                            {v.is_free_wash ? t('Free Wash', 'غسيل مجاني') : t('Wash', 'غسيل')}
+                          </p>
+                          <p className="text-xs text-on-surface-variant">
+                            {new Date(v.visited_at).toLocaleDateString(t('en-US','ar-EG'),{year:'numeric',month:'short',day:'numeric'})}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-on-surface font-semibold">
-                          {v.is_free_wash ? `${t('Free Wash', 'غسيل مجاني')} 🎉` : t('Wash', 'غسيل')}
-                        </p>
-                        <p className="text-xs text-on-surface-variant">{new Date(v.visited_at).toLocaleDateString(t('en-US','ar-EG'),{year:'numeric',month:'short',day:'numeric'})}</p>
-                      </div>
-                    </div>
-                    <span className="text-xs text-secondary-fixed font-bold" dir="ltr" style={{unicodeBidi:'embed'}}>{v.stamps_before} → {v.stamps_after}</span>
-                  </div>
-                ))}
-              </div>
+                      <span className="text-xs text-secondary-fixed font-bold shrink-0" dir="ltr"
+                        style={{ unicodeBidi: 'embed', fontVariantNumeric: 'tabular-nums' }}>
+                        {v.stamps_before} → {v.stamps_after}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
 
