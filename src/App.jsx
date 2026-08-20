@@ -1,9 +1,11 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
 import Navbar from './components/Navbar'
 import MobileNav from './components/MobileNav'
 import Toast from './components/Toast'
 import ErrorModal from './components/ErrorModal'
+import { hideSplash } from './utils/splash'
 import ScrollToTop from './components/ScrollToTop'
 import Home from './pages/Home'
 import Booking from './pages/Booking'
@@ -22,6 +24,11 @@ import NotFound from './pages/NotFound'
 
 function AppShell() {
   const { theme, customer } = useApp()
+
+  // Take the HTML splash down on commit. Tied to an effect rather than a
+  // rAF/timer in main.jsx so it still runs when the tab isn't compositing.
+  useEffect(() => { hideSplash() }, [])
+
   return (
     <div style={{
       minHeight: '100vh',

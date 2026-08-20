@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useApp, API } from '../context/AppContext'
 import { formatTime, bookingStatus, bookingStatusLabel } from '../utils/format'
+import { fetchWithTimeout, isTimeout } from '../utils/fetchWithTimeout'
+import BootScreen from '../components/BootScreen'
 
 export default function Loyalty() {
   const { t, token, lang, logout } = useApp()
@@ -23,10 +25,14 @@ export default function Loyalty() {
     setLoading(true)
     setError(null)
     try {
+      // 60s rather than the default 20s: this is the request most likely to be
+      // the one that wakes a sleeping instance, and giving up before the cold
+      // start finishes would turn a slow load into a failed one.
+      const auth = { headers: { Authorization: 'Bearer ' + token }, timeout: 60000 }
       const [loyRes, histRes, bkRes] = await Promise.all([
-        fetch(`${API}/api/loyalty`, { headers: { Authorization: 'Bearer ' + token } }),
-        fetch(`${API}/api/loyalty/history`, { headers: { Authorization: 'Bearer ' + token } }),
-        fetch(`${API}/api/bookings/my`, { headers: { Authorization: 'Bearer ' + token } }),
+        fetchWithTimeout(`${API}/api/loyalty`, auth),
+        fetchWithTimeout(`${API}/api/loyalty/history`, auth),
+        fetchWithTimeout(`${API}/api/bookings/my`, auth),
       ])
       // Token expired or invalid — log out cleanly
       if (loyRes.status === 401) {
@@ -57,19 +63,18 @@ export default function Loyalty() {
         })
         .sort((a, b) => String(a.booking_date).localeCompare(String(b.booking_date)) || a.booking_time.localeCompare(b.booking_time))
       setNextBooking(relevant[0] || null)
-    } catch {
-      setError(t('Connection error. The server may be starting up — please wait a moment and retry.', 'خطأ في الاتصال. قد يكون الخادم في وضع السكون — انتظر لحظة وحاول مجدداً.'))
+    } catch (e) {
+      setError(isTimeout(e)
+        ? t('The server is taking longer than usual to wake up. Please try again.',
+            'الخادم يستغرق وقتاً أطول من المعتاد. يرجى المحاولة مجدداً.')
+        : t('Connection error. The server may be starting up — please wait a moment and retry.',
+            'خطأ في الاتصال. قد يكون الخادم في وضع السكون — انتظر لحظة وحاول مجدداً.'))
     } finally {
       setLoading(false)
     }
   }
 
-  if (loading) return (
-    <div className="pt-14 min-h-screen flex flex-col items-center justify-center gap-4">
-      <div className="loader" />
-      <p className="text-on-surface-variant text-sm">{t('Loading your card...', 'جارٍ تحميل بطاقتك...')}</p>
-    </div>
-  )
+  if (loading) return <BootScreen onRetry={loadAll} />
 
   if (error) return (
     <div className="pt-14 min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center">

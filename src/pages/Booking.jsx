@@ -5,6 +5,7 @@ import { formatTime } from '../utils/format'
 import CalendarPicker from '../components/CalendarPicker'
 import FieldError from '../components/FieldError'
 import { apiError, isSlotConflict, isRateLimited, isSessionDead } from '../utils/apiErrors'
+import { fetchWithTimeout } from '../utils/fetchWithTimeout'
 
 const today = () => {
   // Use Khartoum local time (UTC+3) so the minimum date is never yesterday
@@ -55,7 +56,7 @@ export default function Booking() {
   }
 
   useEffect(() => {
-    fetch(`${API}/api/bookings/pricing`)
+    fetchWithTimeout(`${API}/api/bookings/pricing`, { timeout: 60000 })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(d => setServicePrices({ full: Number(d.full) || 0, outside: Number(d.outside) || 0 }))
       .catch(() => {}) // keep the fallback values
@@ -67,7 +68,8 @@ export default function Booking() {
     setSlotsLoading(true)
     setSelectedSlot('')
     try {
-      const res = await fetch(`${API}/api/bookings/slots?date=${date}`)
+      // Generous window — this is often the first call after a cold start.
+      const res = await fetchWithTimeout(`${API}/api/bookings/slots?date=${date}`, { timeout: 60000 })
       const data = await res.json()
       setSlots({ available: data.available || [], booked: data.booked || [] })
     } catch { showToast(t('Could not load slots', 'تعذر تحميل المواعيد'), 'error') }

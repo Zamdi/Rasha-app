@@ -19,6 +19,67 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   </head>
   <body>
+    <!--
+      Painted from HTML alone, before the JS bundle has downloaded or parsed.
+      Without it a cold visit (or the first load after clearing the cache, when
+      the service worker is also re-fetching its precache) shows an empty page
+      for as long as that takes. Removed by main.jsx once React has rendered.
+    -->
+    <div id="app-splash">
+      <span id="app-splash-mark">Rasha</span>
+      <div id="app-splash-spinner"></div>
+    </div>
+    <style>
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: #f8fffe;
+        transition: opacity 0.25s ease;
+      }
+      #app-splash.is-hiding { opacity: 0; pointer-events: none; }
+      #app-splash-mark {
+        font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+        font-weight: 800;
+        font-size: 2rem;
+        letter-spacing: -0.02em;
+        color: #155058;
+      }
+      #app-splash-spinner {
+        width: 22px;
+        height: 22px;
+        border: 2.5px solid rgba(21, 80, 88, 0.15);
+        border-top-color: #155058;
+        border-radius: 50%;
+        animation: app-splash-spin 0.75s linear infinite;
+      }
+      @keyframes app-splash-spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) {
+        #app-splash-spinner { animation-duration: 2s; }
+      }
+    </style>
+    <script>
+      // Match the saved theme before first paint, so returning customers on
+      // dark mode don't get a white flash while the bundle loads.
+      (function () {
+        try {
+          var dark = localStorage.getItem('rasha_theme') === 'dark'
+          if (dark) {
+            var s = document.getElementById('app-splash')
+            s.style.background = '#0a1628'
+            document.getElementById('app-splash-mark').style.color = '#74f5ff'
+            var sp = document.getElementById('app-splash-spinner')
+            sp.style.borderColor = 'rgba(116,245,255,0.18)'
+            sp.style.borderTopColor = '#74f5ff'
+          }
+        } catch (e) {}
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

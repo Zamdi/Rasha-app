@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { warmUp } from '../utils/fetchWithTimeout'
 const AppContext = createContext(null)
 export const API = 'https://rasha-backend.onrender.com'
 export function AppProvider({ children }) {
@@ -151,8 +152,13 @@ export function AppProvider({ children }) {
 
   // Keep the Render free-tier server warm — ping every 14 minutes so new
   // visitors don't hit a 30-50 second cold-start timeout on their first request.
+  //
+  // This only runs while the app is open, so it cannot prevent the cold start a
+  // customer hits when they come back hours later; the first ping fires on
+  // mount so that wake-up at least starts in parallel with whatever the page
+  // itself is fetching. Capped so pings can't pile up unresolved.
   useEffect(() => {
-    const ping = () => fetch(`${API}/health`).catch(() => {})
+    const ping = () => warmUp(API)
     ping()
     const id = setInterval(ping, 14 * 60 * 1000)
     return () => clearInterval(id)
