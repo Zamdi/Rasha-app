@@ -71,7 +71,8 @@
           var dark = localStorage.getItem('rasha_theme') === 'dark'
           if (dark) {
             var s = document.getElementById('app-splash')
-            s.style.background = '#0a1628'
+            // Must equal --color-background (dark) in index.css.
+            s.style.background = '#070d1a'
             document.getElementById('app-splash-mark').style.color = '#74f5ff'
             var sp = document.getElementById('app-splash-spinner')
             sp.style.borderColor = 'rgba(116,245,255,0.18)'

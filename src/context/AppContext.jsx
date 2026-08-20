@@ -39,11 +39,16 @@ export function AppProvider({ children }) {
       root.classList.add('light')
     }
 
-    // Set explicit colors — Chrome Android needs this to repaint GPU layers
-    const bg = isDarkMode ? '#0a1628' : 'transparent'
+    // Chrome Android needs an explicit colour to repaint its GPU layers, but
+    // the value has to be the same one the stylesheet uses. Read it from the
+    // token rather than hardcoding a fourth opinion — the class change above
+    // has already applied, and getComputedStyle forces the recalc.
+    const pageBg = getComputedStyle(root).getPropertyValue('--color-background').trim()
+      || (isDarkMode ? '#070d1a' : '#f8fffe')
     const fg = isDarkMode ? '#e8f0fe' : '#0d1825'
-    root.style.backgroundColor = bg
+    root.style.backgroundColor = pageBg
     root.style.color = fg
+    // Transparent so html's ground shows through unbroken.
     body.style.backgroundColor = 'transparent'
     body.style.color = fg
 
@@ -51,7 +56,7 @@ export function AppProvider({ children }) {
     // the iOS status-bar and bottom safe-area paint a different color from
     // the app surface and you see a visible seam at both edges.
     const metaTheme = document.getElementById('theme-meta')
-    if (metaTheme) metaTheme.setAttribute('content', isDarkMode ? '#0a1628' : '#f8fffe')
+    if (metaTheme) metaTheme.setAttribute('content', pageBg)
 
     // Force mobile browsers to repaint CSS variable changes
     body.style.willChange = 'background-color, color'

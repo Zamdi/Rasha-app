@@ -87,13 +87,19 @@ html.dark {
 }
 
 /* ── Full-page background ────────────────────────────────────── */
+/* One source of truth for the page ground: the token, which already flips
+   with the theme. Previously html, main.jsx and AppContext each hardcoded a
+   different value (#f2f5f9 / #f8fffe / transparent in light, #070d1a /
+   #080c14 / #0a1628 in dark), so whichever won painted a slightly different
+   colour from the page content — visible as a band below short pages and
+   under the safe area.
+
+   html's background is what the browser propagates to the canvas, so setting
+   it here is what covers the full viewport and any overscroll. */
 html {
   min-height: 100%;
-  background: #f2f5f9;
+  background: var(--color-background);
   scroll-behavior: smooth;
-}
-html.dark {
-  background: #070d1a;
 }
 body {
   background: transparent;
