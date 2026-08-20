@@ -3,12 +3,14 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import OtpInput from '../components/OtpInput'
 import PhoneInput from '../components/PhoneInput'
+import FieldError, { invalidClass } from '../components/FieldError'
 import { passwordStrength } from '../utils/passwordStrength'
+import { apiError, isRateLimited } from '../utils/apiErrors'
 
 const OTP_SECONDS = 60
 
 export default function Register() {
-  const { t, login, showToast } = useApp()
+  const { t, lang, login, showToast, showError } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
   const returnTo = location.state?.returnTo || '/loyalty'
@@ -20,10 +22,16 @@ export default function Register() {
   const [maskedEmail, setMaskedEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [timer, setTimer] = useState(0)
-  const [dupError, setDupError] = useState(null) // popup error
+  // One entry per input. Errors sit under the field they belong to rather than
+  // in a toast that covers the form the customer is trying to correct.
+  const [errors, setErrors] = useState({})
   const timerRef = useRef(null)
 
-  const set = (k, v) => setForm(f => ({...f, [k]: v}))
+  // Editing a field clears its error — the message described the old value.
+  const set = (k, v) => {
+    setForm(f => ({...f, [k]: v}))
+    setErrors(e => (e[k] ? { ...e, [k]: null } : e))
+  }
   const buildPhone = () => {
     let p = form.phone
     if (p.startsWith('00')) p = p.slice(2)
@@ -43,11 +51,24 @@ export default function Register() {
 
   useEffect(() => () => clearInterval(timerRef.current), [])
 
+  const validate = () => {
+    const next = {}
+    const required = t('Required', 'مطلوب')
+    if (!form.firstName.trim()) next.firstName = required
+    if (!form.lastName.trim())  next.lastName  = required
+    if (!form.email.trim())     next.email     = required
+    else if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
+      next.email = t('Enter a valid email address', 'أدخل بريداً إلكترونياً صحيحاً')
+    if (!form.phone.trim())     next.phone     = required
+    if (!form.password)         next.password  = required
+    else if (form.password.length < 8)
+      next.password = t('At least 8 characters', '8 أحرف على الأقل')
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
   const submit = async () => {
-    if (!form.firstName||!form.lastName||!form.email||!form.phone||!form.password) {
-      showToast(t('Please fill all fields','يرجى ملء جميع الحقول'),'error'); return
-    }
-    if (form.password.length < 8) { showToast(t('Password must be at least 8 characters','كلمة المرور 8 أحرف على الأقل'),'error'); return }
+    if (!validate()) return
     setLoading(true)
     let retries = 0
     const attempt = async () => {
@@ -59,8 +80,38 @@ export default function Register() {
         const data = await res.json()
         setLoading(false)
         if (!res.ok) {
-          if (res.status === 409) { setDupError(data.error); return }
-          showToast(data.error||t('Error','خطأ'),'error'); return
+          const msg = apiError(data.error, lang, t('Could not create your account', 'تعذر إنشاء حسابك'))
+          // A duplicate belongs on the field that's duplicated, with a route to
+          // sign in — that's what the customer almost certainly wants next.
+          if (res.status === 409) {
+            const onPhone = /phone/i.test(data.error || '')
+            setErrors(e => ({ ...e, [onPhone ? 'phone' : 'email']: msg }))
+            showError({
+              icon: 'person_off',
+              title: t('Account already exists', 'الحساب موجود بالفعل'),
+              message: msg,
+              actions: [
+                { label: t('Edit details', 'تعديل البيانات') },
+                { label: t('Sign In', 'تسجيل الدخول'), primary: true, to: '/login' },
+              ],
+            })
+            return
+          }
+          if (isRateLimited(data.error)) {
+            showError({
+              icon: 'hourglass_top',
+              title: t('Too many attempts', 'محاولات كثيرة'),
+              message: msg,
+            })
+            return
+          }
+          // Field-specific rejections from the API land on their field.
+          if (/first name/i.test(data.error || ''))      setErrors(e => ({ ...e, firstName: msg }))
+          else if (/last name/i.test(data.error || ''))  setErrors(e => ({ ...e, lastName: msg }))
+          else if (/email/i.test(data.error || ''))      setErrors(e => ({ ...e, email: msg }))
+          else if (/phone/i.test(data.error || ''))      setErrors(e => ({ ...e, phone: msg }))
+          else showToast(msg, 'error')
+          return
         }
         setMaskedEmail(data.maskedEmail)
         setStep('otp')
@@ -81,7 +132,10 @@ export default function Register() {
 
   const verify = async (codeOverride) => {
     const code = (codeOverride ?? otp).trim()
-    if (code.length < 6) { showToast(t('Enter the full code','أدخل الرمز كاملاً'),'error'); return }
+    if (code.length < 6) {
+      setErrors(e => ({ ...e, otp: t('Enter the full code','أدخل الرمز كاملاً') })); return
+    }
+    setErrors(e => ({ ...e, otp: null }))
     setLoading(true)
     try {
       const res = await fetch(`${API}/api/auth/verify-register`, {
@@ -89,7 +143,22 @@ export default function Register() {
         body: JSON.stringify({ firstName:form.firstName, lastName:form.lastName, email:form.email, phone:buildPhone(), password:form.password, otp: code })
       })
       const data = await res.json()
-      if (!res.ok) { showToast(data.error||t('Invalid or expired code','رمز غير صحيح أو منتهي الصلاحية'),'error'); setLoading(false); return }
+      if (!res.ok) {
+        const msg = apiError(data.error, lang, t('Invalid or expired code','رمز غير صحيح أو منتهي الصلاحية'))
+        // The attempt limit kills the code on screen — that needs stopping for,
+        // not a message that fades while they retype the same digits.
+        if (isRateLimited(data.error)) {
+          showError({
+            icon: 'hourglass_top',
+            title: t('Too many attempts', 'محاولات كثيرة'),
+            message: msg,
+            actions: [{ label: t('Request a new code', 'طلب رمز جديد'), primary: true, onClick: resend }],
+          })
+        } else {
+          setErrors(e => ({ ...e, otp: msg }))
+        }
+        setLoading(false); return
+      }
       login(data.token, data.customer)
       showToast(t('Account created!','تم إنشاء حسابك!'))
       navigate(returnTo)
@@ -116,17 +185,20 @@ export default function Register() {
           <div className="glass p-6 rounded-2xl space-y-4 animate-fade-in">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('First Name','الاسم الأول')}</label>
-                <input className="rasha-input" autoComplete="given-name" name="given-name" value={form.firstName} onChange={e=>set('firstName',e.target.value)}/>
+                <label htmlFor="reg-first" className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('First Name','الاسم الأول')}</label>
+                <input id="reg-first" className={'rasha-input' + invalidClass(errors.firstName)} aria-invalid={!!errors.firstName} autoComplete="given-name" name="given-name" value={form.firstName} onChange={e=>set('firstName',e.target.value)}/>
+                <FieldError>{errors.firstName}</FieldError>
               </div>
               <div>
-                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Last Name','اسم العائلة')}</label>
-                <input className="rasha-input" autoComplete="family-name" name="family-name" value={form.lastName} onChange={e=>set('lastName',e.target.value)}/>
+                <label htmlFor="reg-last" className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Last Name','اسم العائلة')}</label>
+                <input id="reg-last" className={'rasha-input' + invalidClass(errors.lastName)} aria-invalid={!!errors.lastName} autoComplete="family-name" name="family-name" value={form.lastName} onChange={e=>set('lastName',e.target.value)}/>
+                <FieldError>{errors.lastName}</FieldError>
               </div>
             </div>
             <div>
-              <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Email','البريد الإلكتروني')}</label>
-              <input type="email" className="rasha-input" autoComplete="email" name="email" placeholder="you@example.com" value={form.email} onChange={e=>set('email',e.target.value)}/>
+              <label htmlFor="reg-email" className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Email','البريد الإلكتروني')}</label>
+              <input id="reg-email" type="email" className={'rasha-input' + invalidClass(errors.email)} aria-invalid={!!errors.email} autoComplete="email" name="email" placeholder="you@example.com" value={form.email} onChange={e=>set('email',e.target.value)}/>
+              <FieldError>{errors.email}</FieldError>
             </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Phone','الهاتف')}</label>
@@ -136,11 +208,12 @@ export default function Register() {
                 dialCode={dialCode}
                 onDialChange={setDialCode}
               />
+              <FieldError>{errors.phone}</FieldError>
             </div>
             <div>
-              <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Password','كلمة المرور')}</label>
+              <label htmlFor="reg-pw" className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Password','كلمة المرور')}</label>
               <div className="relative">
-                <input type={showPw?'text':'password'} placeholder={t('Min 8 characters','8 أحرف على الأقل')} autoComplete="new-password" name="new-password" className="rasha-input pe-12" value={form.password} onChange={e=>set('password',e.target.value)}/>
+                <input id="reg-pw" type={showPw?'text':'password'} placeholder={t('Min 8 characters','8 أحرف على الأقل')} autoComplete="new-password" name="new-password" className={'rasha-input pe-12' + invalidClass(errors.password)} aria-invalid={!!errors.password} value={form.password} onChange={e=>set('password',e.target.value)}/>
                 <button type="button" onClick={()=>setShowPw(p=>!p)} className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary-fixed">
                   <span className="material-symbols-outlined text-xl">{showPw?'visibility_off':'visibility'}</span>
                 </button>
@@ -161,6 +234,7 @@ export default function Register() {
                   </div>
                 )
               })()}
+              <FieldError>{errors.password}</FieldError>
             </div>
             <button onClick={submit} disabled={loading} className="btn-primary w-full py-4 rounded-xl">
               {loading ? <div className="loader"/> : t('Create Account','إنشاء الحساب')}
@@ -181,7 +255,10 @@ export default function Register() {
                 </button>
               </p>
             </div>
-            <OtpInput value={otp} onChange={setOtp} onComplete={code => verify(code)} />
+            <div>
+              <OtpInput value={otp} onChange={v => { setOtp(v); setErrors(e => (e.otp ? { ...e, otp: null } : e)) }} onComplete={code => verify(code)} />
+              <FieldError>{errors.otp}</FieldError>
+            </div>
             {/* Timer */}
             <div className="text-center">
               {timer > 0 ? (
@@ -202,27 +279,6 @@ export default function Register() {
           </div>
         )}
       </div>
-
-      {/* Duplicate error popup */}
-      {dupError && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.6)', backdropFilter:'blur(4px)'}}>
-          <div className="w-full max-w-sm rounded-2xl p-6 animate-fade-in text-center" style={{background:'var(--color-surface-container)', border:'1px solid var(--color-outline-variant)'}}>
-            <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style={{background:'rgba(179,38,30,0.1)'}}>
-              <span className="material-symbols-outlined text-error text-3xl">person_off</span>
-            </div>
-            <h3 className="font-bold text-on-surface text-lg mb-2">{t('Account Already Exists','الحساب موجود بالفعل')}</h3>
-            <p className="text-on-surface-variant text-sm mb-6">{dupError}</p>
-            <div className="flex gap-3">
-              <button onClick={() => setDupError(null)} className="flex-1 py-3 rounded-xl text-sm font-bold text-on-surface-variant" style={{background:'var(--input-bg)', border:'1px solid var(--input-border)'}}>
-                {t('Try Again','حاول مجدداً')}
-              </button>
-              <Link to="/login" state={{ returnTo }} onClick={() => setDupError(null)} className="flex-1 py-3 rounded-xl text-sm font-bold text-white text-center hydro-gradient">
-                {t('Sign In','تسجيل الدخول')}
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

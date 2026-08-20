@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
+import FieldError, { invalidClass } from '../components/FieldError'
+import { apiError, isRateLimited } from '../utils/apiErrors'
 import { passwordStrength } from '../utils/passwordStrength'
 
 // step 1 = enter email → send OTP
 // step 2 = enter 6-digit code
 // step 3 = enter new password
 export default function ForgotPassword() {
-  const { t } = useApp()
+  const { t, lang, showToast, showError } = useApp()
   const [step, setStep]         = useState(1)
   const [email, setEmail]       = useState('')
   const [otp, setOtp]           = useState('')
@@ -17,46 +19,61 @@ export default function ForgotPassword() {
   const [showCf, setShowCf]     = useState(false)
   const [loading, setLoading]   = useState(false)
   const [done, setDone]         = useState(false)
-  const [error, setError]       = useState('')
+  // One key per input across all three steps, so each message can sit under
+  // the field it describes instead of stacking at the top of the card.
+  const [errors, setErrors]     = useState({})
   const [resent, setResent]     = useState(false)
 
+  const clearError = (k) => setErrors(e => (e[k] ? { ...e, [k]: null } : e))
+
   const sendCode = async () => {
-    if (!email.trim()) { setError(t('Please enter your email', 'يرجى إدخال بريدك الإلكتروني')); return }
-    setError(''); setLoading(true)
+    const value = email.trim()
+    if (!value) { setErrors({ email: t('Please enter your email', 'يرجى إدخال بريدك الإلكتروني') }); return }
+    if (!/^\S+@\S+\.\S+$/.test(value)) {
+      setErrors({ email: t('Enter a valid email address', 'أدخل بريداً إلكترونياً صحيحاً') }); return
+    }
+    setErrors({}); setLoading(true)
     try {
       await fetch(`${API}/api/auth/forgot-password`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        body: JSON.stringify({ email: value.toLowerCase() }),
       })
       // Always advance (don't reveal if email exists)
       setStep(2)
-    } catch { setError(t('Connection error. Please try again.', 'خطأ في الاتصال. حاول مجدداً.')) }
+    } catch {
+      showToast(t('Connection error. Please try again.', 'خطأ في الاتصال. حاول مجدداً.'), 'error')
+    }
     finally { setLoading(false) }
   }
 
   const resendCode = async () => {
-    setResent(false); setError('')
+    setResent(false); setErrors({})
     try {
       await fetch(`${API}/api/auth/forgot-password`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim().toLowerCase() }),
       })
       setResent(true)
-    } catch { setError(t('Could not resend. Try again.', 'تعذر الإرسال. حاول مجدداً.')) }
+    } catch {
+      showToast(t('Could not resend. Try again.', 'تعذر الإرسال. حاول مجدداً.'), 'error')
+    }
   }
 
   const verifyCode = async () => {
-    if (otp.trim().length !== 6) { setError(t('Enter the 6-digit code', 'أدخل الرمز المكوّن من 6 أرقام')); return }
+    if (otp.trim().length !== 6) { setErrors({ otp: t('Enter the 6-digit code', 'أدخل الرمز المكوّن من 6 أرقام') }); return }
     // The code is verified server-side when the password is submitted.
     // Move to step 3 immediately to avoid an extra round-trip.
-    setError('')
+    setErrors({})
     setStep(3)
   }
 
   const submitReset = async () => {
-    if (password.length < 8) { setError(t('Password must be at least 8 characters', 'كلمة المرور 8 أحرف على الأقل')); return }
-    if (password !== confirm) { setError(t('Passwords do not match', 'كلمتا المرور غير متطابقتين')); return }
-    setError(''); setLoading(true)
+    const next = {}
+    if (password.length < 8) next.password = t('Password must be at least 8 characters', 'كلمة المرور 8 أحرف على الأقل')
+    if (password !== confirm) next.confirm = t('Passwords do not match', 'كلمتا المرور غير متطابقتين')
+    setErrors(next)
+    if (Object.keys(next).length) return
+    setLoading(true)
     try {
       const res = await fetch(`${API}/api/auth/reset-password`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -64,15 +81,31 @@ export default function ForgotPassword() {
       })
       const data = await res.json()
       if (!res.ok) {
-        if (data.error?.toLowerCase().includes('code') || data.error?.toLowerCase().includes('expired')) {
-          setError(data.error); setStep(2) // send them back to re-enter the code
+        const msg = apiError(data.error, lang, t('Could not reset password', 'تعذرت إعادة التعيين'))
+        if (isRateLimited(data.error)) {
+          showError({
+            icon: 'hourglass_top',
+            title: t('Too many attempts', 'محاولات كثيرة'),
+            message: msg,
+            actions: [{ label: t('Start over', 'ابدأ من جديد'), primary: true, onClick: () => { setStep(1); setOtp('') } }],
+          })
+          return
+        }
+        // A bad or expired code is a step-2 problem — send them back to the
+        // input that has to change, with the error attached to it.
+        if (/code|expired/i.test(data.error || '')) {
+          setErrors({ otp: msg }); setStep(2)
+        } else if (/password/i.test(data.error || '')) {
+          setErrors({ password: msg })
         } else {
-          setError(data.error || t('Could not reset password', 'تعذرت إعادة التعيين'))
+          setErrors({ password: msg })
         }
         return
       }
       setDone(true)
-    } catch { setError(t('Connection error. Please try again.', 'خطأ في الاتصال. حاول مجدداً.')) }
+    } catch {
+      showToast(t('Connection error. Please try again.', 'خطأ في الاتصال. حاول مجدداً.'), 'error')
+    }
     finally { setLoading(false) }
   }
 
@@ -127,13 +160,6 @@ export default function ForgotPassword() {
         </div>
 
         <div className="glass p-6 rounded-2xl space-y-4 animate-fade-in">
-          {error && (
-            <div className="p-3 rounded-xl text-sm text-center font-semibold"
-              style={{ background: 'rgba(179,38,30,0.08)', border: '1px solid rgba(179,38,30,0.25)', color: 'var(--color-error)' }}>
-              {error}
-            </div>
-          )}
-
           {/* Step 1: Email */}
           {step === 1 && (
             <>
@@ -144,9 +170,11 @@ export default function ForgotPassword() {
                 <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">
                   {t('Email Address', 'البريد الإلكتروني')}
                 </label>
-                <input type="email" className="rasha-input" placeholder="you@example.com"
-                  value={email} onChange={e => { setEmail(e.target.value); setError('') }}
+                <input type="email" className={'rasha-input' + invalidClass(errors.email)} placeholder="you@example.com"
+                  aria-invalid={!!errors.email}
+                  value={email} onChange={e => { setEmail(e.target.value); clearError('email') }}
                   onKeyDown={e => e.key === 'Enter' && sendCode()} />
+                <FieldError>{errors.email}</FieldError>
               </div>
               <button onClick={sendCode} disabled={loading} className="btn-primary w-full py-4 rounded-xl">
                 {loading ? <div className="loader" /> : t('Send Code', 'إرسال الرمز')}
@@ -166,10 +194,12 @@ export default function ForgotPassword() {
                 <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">
                   {t('6-Digit Code', 'الرمز المكوّن من 6 أرقام')}
                 </label>
-                <input type="text" inputMode="numeric" maxLength={6} className="rasha-input text-center text-xl tracking-widest font-bold"
-                  placeholder="• • • • • •"
-                  value={otp} onChange={e => { setOtp(e.target.value.replace(/\D/g, '')); setError('') }}
+                <input type="text" inputMode="numeric" maxLength={6}
+                  className={'rasha-input text-center text-xl tracking-widest font-bold' + invalidClass(errors.otp)}
+                  placeholder="• • • • • •" aria-invalid={!!errors.otp}
+                  value={otp} onChange={e => { setOtp(e.target.value.replace(/\D/g, '')); clearError('otp') }}
                   onKeyDown={e => e.key === 'Enter' && verifyCode()} />
+                <FieldError>{errors.otp}</FieldError>
               </div>
               {resent && (
                 <p className="text-xs text-center" style={{ color: 'var(--color-secondary-fixed)' }}>
@@ -201,9 +231,9 @@ export default function ForgotPassword() {
                   {t('New Password', 'كلمة المرور الجديدة')}
                 </label>
                 <div className="relative">
-                  <input type={showPw ? 'text' : 'password'} className="rasha-input pe-12"
-                    placeholder={t('Min 8 characters', '8 أحرف على الأقل')}
-                    value={password} onChange={e => { setPassword(e.target.value); setError('') }} />
+                  <input type={showPw ? 'text' : 'password'} className={'rasha-input pe-12' + invalidClass(errors.password)}
+                    placeholder={t('Min 8 characters', '8 أحرف على الأقل')} aria-invalid={!!errors.password}
+                    value={password} onChange={e => { setPassword(e.target.value); clearError('password') }} />
                   <button type="button" onClick={() => setShowPw(p => !p)}
                     className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary-fixed">
                     <span className="material-symbols-outlined text-xl">{showPw ? 'visibility_off' : 'visibility'}</span>
@@ -223,21 +253,23 @@ export default function ForgotPassword() {
                     </div>
                   )
                 })()}
+                <FieldError>{errors.password}</FieldError>
               </div>
               <div>
                 <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">
                   {t('Confirm Password', 'تأكيد كلمة المرور')}
                 </label>
                 <div className="relative">
-                  <input type={showCf ? 'text' : 'password'} className="rasha-input pe-12"
-                    placeholder={t('Re-enter password', 'أعد إدخال كلمة المرور')}
-                    value={confirm} onChange={e => { setConfirm(e.target.value); setError('') }}
+                  <input type={showCf ? 'text' : 'password'} className={'rasha-input pe-12' + invalidClass(errors.confirm)}
+                    placeholder={t('Re-enter password', 'أعد إدخال كلمة المرور')} aria-invalid={!!errors.confirm}
+                    value={confirm} onChange={e => { setConfirm(e.target.value); clearError('confirm') }}
                     onKeyDown={e => e.key === 'Enter' && submitReset()} />
                   <button type="button" onClick={() => setShowCf(p => !p)}
                     className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary-fixed">
                     <span className="material-symbols-outlined text-xl">{showCf ? 'visibility_off' : 'visibility'}</span>
                   </button>
                 </div>
+                <FieldError>{errors.confirm}</FieldError>
               </div>
               <button onClick={submitReset} disabled={loading} className="btn-primary w-full py-4 rounded-xl">
                 {loading ? <div className="loader" /> : t('Reset Password', 'إعادة تعيين كلمة المرور')}

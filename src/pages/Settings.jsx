@@ -1,9 +1,11 @@
 import { useState, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
+import FieldError from '../components/FieldError'
+import { apiError } from '../utils/apiErrors'
 
 export default function Settings() {
-  const { t, customer, token, login, logout, lang } = useApp()
+  const { t, customer, token, login, logout, lang, showToast, showError } = useApp()
   const navigate = useNavigate()
   const fileRef = useRef(null)
 
@@ -26,6 +28,7 @@ export default function Settings() {
   const [resetSent, setResetSent] = useState(false)
   const [showDeletePopup, setShowDeletePopup] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [errors, setErrors] = useState({})
 
   const hdrs = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }
   if (!customer) { navigate('/login'); return null }
@@ -80,15 +83,27 @@ export default function Settings() {
   }
 
   const removeAvatar = async () => {
+    const previous = avatar
     setAvatar(null); setAvatarFile(null)
     try {
-      await fetch(`${API}/api/auth/me`, { method: 'PATCH', headers: hdrs, body: JSON.stringify({ avatar: null }) })
+      const res = await fetch(`${API}/api/auth/me`, { method: 'PATCH', headers: hdrs, body: JSON.stringify({ avatar: null }) })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        // Put the photo back — the server still has it, and leaving the UI
+        // blank would tell the customer it was removed when it wasn't.
+        setAvatar(previous)
+        showToast(apiError(data.error, lang, t('Could not remove your photo', 'تعذرت إزالة صورتك')), 'error')
+        return
+      }
       login(token, { ...customer, avatar_url: null })
-    } catch {}
+    } catch {
+      setAvatar(previous)
+      showToast(t('Connection error. Please try again.', 'خطأ في الاتصال. حاول مجدداً.'), 'error')
+    }
   }
 
   const saveProfile = async () => {
-    setProfileLoading(true); setProfileSuccess(false)
+    setProfileLoading(true); setProfileSuccess(false); setErrors({})
     try {
       const res = await fetch(`${API}/api/auth/me`, {
         method: 'PATCH', headers: hdrs,
@@ -100,7 +115,16 @@ export default function Settings() {
         })
       })
       const data = await res.json()
-      if (!res.ok) { console.error('[SAVE-PROFILE]', data.error); return }
+      if (!res.ok) {
+        const msg = apiError(data.error, lang, t('Could not save your changes', 'تعذر حفظ التغييرات'))
+        // Route the rejection to the field it's about; anything general goes
+        // to a toast. Either way the customer now sees that nothing saved.
+        if (/name/i.test(data.error || ''))       setErrors({ name: msg })
+        else if (/phone/i.test(data.error || '')) setErrors({ phone: msg })
+        else if (/image|avatar/i.test(data.error || '')) setErrors({ avatar: msg })
+        else showToast(msg, 'error')
+        return
+      }
       // Use server response + merge avatar since server strips it from response
       const updatedCustomer = {
         ...data.customer,
@@ -112,24 +136,67 @@ export default function Settings() {
       setAvatarFile(null)
       setProfileSuccess(true)
       setTimeout(() => setProfileSuccess(false), 3000)
-    } catch (e) { console.error('[SAVE-PROFILE]', e) } finally { setProfileLoading(false) }
+    } catch {
+      showToast(t('Connection error. Please try again.', 'خطأ في الاتصال. حاول مجدداً.'), 'error')
+    } finally { setProfileLoading(false) }
   }
 
   const sendResetLink = async () => {
-    await fetch(`${API}/api/auth/forgot-password`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: customer.email })
-    })
-    setResetSent(true)
-    setTimeout(() => setResetSent(false), 5000)
+    try {
+      const res = await fetch(`${API}/api/auth/forgot-password`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: customer.email })
+      })
+      // The tick used to appear unconditionally, so a failed send looked
+      // identical to a successful one and the customer waited for an email
+      // that was never going to arrive.
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        showToast(apiError(data.error, lang, t('Could not send the code', 'تعذر إرسال الرمز')), 'error')
+        return
+      }
+      setResetSent(true)
+      setTimeout(() => setResetSent(false), 5000)
+    } catch {
+      showToast(t('Connection error. Please try again.', 'خطأ في الاتصال. حاول مجدداً.'), 'error')
+    }
   }
 
   const deleteAccount = async () => {
     setDeleteLoading(true)
     try {
-      await fetch(`${API}/api/auth/me`, { method: 'DELETE', headers: hdrs })
+      const res = await fetch(`${API}/api/auth/me`, { method: 'DELETE', headers: hdrs })
+      // Signing out regardless of the outcome made a failed deletion look
+      // exactly like a successful one, with the account still live.
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setShowDeletePopup(false)
+        showError({
+          icon: 'delete_forever',
+          title: t('Account not deleted', 'لم يتم حذف الحساب'),
+          message: apiError(data.error, lang, t('We could not delete your account. Your account is still active.',
+                                                'تعذر حذف حسابك. حسابك لا يزال نشطاً.')),
+          actions: [
+            { label: t('Contact Support', 'اتصل بالدعم'), to: '/contact' },
+            { label: t('Try Again', 'حاول مجدداً'), primary: true, onClick: () => setShowDeletePopup(true) },
+          ],
+        })
+        return
+      }
       logout(); navigate('/')
-    } catch {} finally { setDeleteLoading(false) }
+    } catch {
+      setShowDeletePopup(false)
+      showError({
+        icon: 'delete_forever',
+        title: t('Account not deleted', 'لم يتم حذف الحساب'),
+        message: t('We could not reach the server. Your account is still active.',
+                   'تعذر الوصول إلى الخادم. حسابك لا يزال نشطاً.'),
+        actions: [
+          { label: t('Contact Support', 'اتصل بالدعم'), to: '/contact' },
+          { label: t('Try Again', 'حاول مجدداً'), primary: true, onClick: () => setShowDeletePopup(true) },
+        ],
+      })
+    } finally { setDeleteLoading(false) }
   }
 
   const navItems = [
@@ -206,10 +273,11 @@ export default function Settings() {
                   </div>
                 </div>
                 {avatar && (
-                  <button onClick={removeAvatar} className="text-xs font-semibold hover:underline transition-colors" style={{color:'var(--color-error)'}}>
+                  <button onClick={removeAvatar} className="text-xs font-semibold hover:underline transition-colors cursor-pointer" style={{color:'var(--color-error)'}}>
                     {t('Remove photo', 'إزالة الصورة')}
                   </button>
                 )}
+                <FieldError>{errors.avatar}</FieldError>
                 <div>
                   <p className="text-lg font-bold text-on-surface font-display">{customer.first_name} {customer.last_name}</p>
                   <p className="text-sm text-on-surface-variant">{customer.email}</p>
@@ -242,9 +310,10 @@ export default function Settings() {
                       <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 block">{t('Display Name', 'الاسم الظاهر')}</label>
                       <p className="text-sm font-semibold text-on-surface mb-2">{customer.first_name} {customer.last_name}</p>
                       <div className="grid grid-cols-2 gap-2">
-                        <input className="rasha-input text-sm" placeholder={t('First', 'الأول')} value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} />
-                        <input className="rasha-input text-sm" placeholder={t('Last', 'الأخير')} value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} />
+                        <input className="rasha-input text-sm" aria-invalid={!!errors.name} placeholder={t('First', 'الأول')} value={form.firstName} onChange={e => { setForm(f => ({ ...f, firstName: e.target.value })); setErrors({}) }} />
+                        <input className="rasha-input text-sm" aria-invalid={!!errors.name} placeholder={t('Last', 'الأخير')} value={form.lastName} onChange={e => { setForm(f => ({ ...f, lastName: e.target.value })); setErrors({}) }} />
                       </div>
+                      <FieldError>{errors.name}</FieldError>
                     </div>
                     <div>
                       <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 block">{t('Phone Number', 'رقم الهاتف')}</label>
@@ -252,8 +321,10 @@ export default function Settings() {
                         <span className="rounded-l-xl px-3 py-3 text-sm text-on-surface-variant flex items-center shrink-0"
                           style={{ background: 'var(--color-surface-container-high)', border: '1px solid var(--color-outline-variant)', borderRight: 'none' }}>+249</span>
                         <input type="tel" className="rasha-input text-sm" style={{ borderRadius: '0 0.75rem 0.75rem 0' }}
-                          value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '') }))} />
+                          aria-invalid={!!errors.phone}
+                          value={form.phone} onChange={e => { setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '') })); setErrors({}) }} />
                       </div>
+                      <FieldError>{errors.phone}</FieldError>
                     </div>
                     <div className="md:col-span-2">
                       <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 block">{t('Email Address', 'البريد الإلكتروني')}</label>
@@ -326,7 +397,7 @@ export default function Settings() {
 
       {/* Crop Avatar Popup */}
       {showCrop && cropSrc && (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.85)', backdropFilter:'blur(6px)'}}>
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.85)', backdropFilter:'blur(6px)'}}>
           <div className="w-full max-w-sm rounded-2xl overflow-hidden animate-fade-in" style={{background:'var(--color-surface-container)', border:'1px solid var(--color-outline-variant)'}}>
             <div className="px-5 py-4 flex items-center justify-between" style={{borderBottom:'1px solid var(--color-outline-variant)'}}>
               <h3 className="font-bold text-on-surface">{t('Adjust Photo', 'ضبط الصورة')}</h3>
@@ -386,7 +457,7 @@ export default function Settings() {
 
       {/* Delete Account Popup */}
       {showDeletePopup && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
           <div className="w-full max-w-sm rounded-2xl p-6 animate-fade-in" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
             <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(179,38,30,0.1)' }}>
               <span className="material-symbols-outlined text-error text-3xl">delete_forever</span>

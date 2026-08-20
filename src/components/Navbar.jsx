@@ -110,7 +110,7 @@ export default function Navbar() {
   const handleLogout = () => { logout(); navigate('/'); setMenuOpen(false) }
 
   return (
-    <nav className="fixed top-0 w-full z-50 transition-all duration-300"
+    <nav className="fixed top-0 w-full z-20 transition-all duration-300"
       style={{
         background: scrolled ? 'var(--navbar-bg)' : 'transparent',
         backdropFilter: scrolled ? 'blur(24px)' : 'none',
@@ -159,7 +159,7 @@ export default function Navbar() {
                 <span className="material-symbols-outlined" style={{fontSize:'14px', transition:'transform 0.2s', transform: menuOpen ? 'rotate(180deg)' : 'rotate(0deg)'}}>expand_more</span>
               </button>
               {menuOpen && (
-                <div className="glass-popup absolute end-0 mt-2 w-48 rounded-2xl py-2 animate-fade-in z-50">
+                <div className="glass-popup absolute end-0 mt-2 w-48 rounded-2xl py-2 animate-fade-in z-20">
                   <div className="px-4 py-2 border-b" style={{borderColor: 'var(--color-outline-variant)'}}>
                     <p className="text-xs font-bold text-on-surface">{customer.first_name} {customer.last_name}</p>
                     <p className="text-xs text-on-surface-variant truncate">{customer.email}</p>

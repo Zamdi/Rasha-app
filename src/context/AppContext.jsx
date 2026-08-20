@@ -7,6 +7,8 @@ export function AppProvider({ children }) {
     || (navigator.language?.toLowerCase().startsWith('ar') ? 'ar' : 'en')
   )
   const [toast, setToast] = useState(null)
+  // Blocking error dialog — for failures the customer can't scroll past.
+  const [errorModal, setErrorModal] = useState(null)
 
   // Sync dir/lang on mount and whenever lang changes, not only inside
   // toggleLang — otherwise a returning Arabic-speaking customer sees an
@@ -96,6 +98,13 @@ export function AppProvider({ children }) {
   const showToast = useCallback((msg, type = 'success') => {
     setToast({ msg, type, id: Date.now() })
   }, [])
+  /**
+   * Raise a blocking dialog. Pass { title, message, icon, actions } where each
+   * action is { label, primary?, to?, onClick? }. Reserved for failures that
+   * leave the customer stuck or misinformed — everything transient is a toast.
+   */
+  const showError = useCallback((config) => setErrorModal(config), [])
+  const closeError = useCallback(() => setErrorModal(null), [])
   const login = (tok, cust) => {
     setToken(tok)
     setCustomer(cust)
@@ -149,7 +158,7 @@ export function AppProvider({ children }) {
     return () => clearInterval(id)
   }, [])
   return (
-    <AppContext.Provider value={{ lang, toggleLang, t, toast, showToast, customer, token, login, logout, staffToken, setStaffToken, staffRole, staffPermissions, isSuperAdmin, hasPerm, theme, toggleTheme, isDark }}>
+    <AppContext.Provider value={{ lang, toggleLang, t, toast, showToast, errorModal, showError, closeError, customer, token, login, logout, staffToken, setStaffToken, staffRole, staffPermissions, isSuperAdmin, hasPerm, theme, toggleTheme, isDark }}>
       {children}
     </AppContext.Provider>
   )

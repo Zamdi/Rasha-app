@@ -3,11 +3,13 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import OtpInput from '../components/OtpInput'
 import PhoneInput from '../components/PhoneInput'
+import FieldError, { invalidClass } from '../components/FieldError'
+import { apiError, isRateLimited } from '../utils/apiErrors'
 
 const OTP_SECONDS = 60
 
 export default function Login() {
-  const { t, login, showToast } = useApp()
+  const { t, lang, login, showToast, showError } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
   const returnTo = location.state?.returnTo || '/loyalty'
@@ -23,7 +25,10 @@ export default function Login() {
   const [maskedEmail, setMaskedEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [timer, setTimer] = useState(0)
+  const [errors, setErrors] = useState({})
   const timerRef = useRef(null)
+
+  const clearError = (k) => setErrors(e => (e[k] ? { ...e, [k]: null } : e))
 
   const startTimer = () => {
     setTimer(OTP_SECONDS)
@@ -49,12 +54,45 @@ export default function Login() {
 
   const submit = async () => {
     const id = buildIdentifier()
-    if (!id||!password) { showToast(t('Please fill all fields','يرجى ملء جميع الحقول'),'error'); return }
+    const next = {}
+    const required = t('Required', 'مطلوب')
+    if (!id) next.identifier = required
+    if (!password) next.password = required
+    setErrors(next)
+    if (Object.keys(next).length) return
     setLoading(true)
     try {
       const res = await fetch(`${API}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier:id,password})})
       const data = await res.json()
-      if (!res.ok) { showToast(data.error||t('Invalid credentials','بيانات غير صحيحة'),'error'); return }
+      if (!res.ok) {
+        const msg = apiError(data.error, lang, t('Invalid credentials','بيانات الدخول غير صحيحة'))
+        // A 15-minute lockout outlives a toast several times over.
+        if (isRateLimited(data.error)) {
+          showError({
+            icon: 'lock_clock',
+            title: t('Too many attempts', 'محاولات كثيرة'),
+            message: msg,
+          })
+        } else if (data.error === 'Account suspended.') {
+          showError({
+            icon: 'block',
+            title: t('Account suspended', 'تم إيقاف الحساب'),
+            message: t('This account has been suspended. Please contact support.',
+                       'تم إيقاف هذا الحساب. يرجى التواصل مع الدعم.'),
+            actions: [
+              { label: t('Close', 'إغلاق') },
+              { label: t('Contact Support', 'اتصل بالدعم'), primary: true, to: '/contact' },
+            ],
+          })
+        } else if (/not found/i.test(data.error || '')) {
+          setErrors({ identifier: msg })
+        } else {
+          // Wrong password belongs on the password field, not floating at the
+          // bottom of the screen away from the input they need to retype.
+          setErrors({ password: msg })
+        }
+        return
+      }
       setLoginEmail(data.email)
       setMaskedEmail(data.maskedEmail)
       setStep('otp')
@@ -65,12 +103,26 @@ export default function Login() {
 
   const verify = async (codeOverride) => {
     const code = (codeOverride ?? otp).trim()
-    if (code.length < 6) { showToast(t('Enter the full code','أدخل الرمز كاملاً'),'error'); return }
+    if (code.length < 6) { setErrors({ otp: t('Enter the full code','أدخل الرمز كاملاً') }); return }
+    clearError('otp')
     setLoading(true)
     try {
       const res = await fetch(`${API}/api/auth/verify-login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:loginEmail, otp: code})})
       const data = await res.json()
-      if (!res.ok) { showToast(data.error||t('Invalid or expired code','رمز غير صحيح أو منتهي الصلاحية'),'error'); setLoading(false); return }
+      if (!res.ok) {
+        const msg = apiError(data.error, lang, t('Invalid or expired code','رمز غير صحيح أو منتهي الصلاحية'))
+        if (isRateLimited(data.error)) {
+          showError({
+            icon: 'hourglass_top',
+            title: t('Too many attempts', 'محاولات كثيرة'),
+            message: msg,
+            actions: [{ label: t('Request a new code', 'طلب رمز جديد'), primary: true, onClick: resend }],
+          })
+        } else {
+          setErrors({ otp: msg })
+        }
+        setLoading(false); return
+      }
       login(data.token, data.customer)
       showToast(t('Welcome back!','مرحباً بك!'))
       navigate(returnTo)
@@ -112,10 +164,11 @@ export default function Login() {
                 </div>
               </div>
               {loginMode === 'email' ? (
-                <input className="rasha-input" autoComplete="username" name="username" placeholder="email@example.com" value={identifier} onChange={e=>setIdentifier(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
+                <input className={'rasha-input' + invalidClass(errors.identifier)} aria-invalid={!!errors.identifier} autoComplete="username" name="username" placeholder="email@example.com" value={identifier} onChange={e=>{setIdentifier(e.target.value); clearError('identifier')}} onKeyDown={e=>e.key==='Enter'&&submit()}/>
               ) : (
-                <PhoneInput value={phone} onChange={setPhone} dialCode={dialCode} onDialChange={setDialCode} />
+                <PhoneInput value={phone} onChange={v=>{setPhone(v); clearError('identifier')}} dialCode={dialCode} onDialChange={setDialCode} />
               )}
+              <FieldError>{errors.identifier}</FieldError>
             </div>
             <div>
               <div className="flex justify-between mb-2">
@@ -123,11 +176,12 @@ export default function Login() {
                 <Link to="/forgot-password" className="text-xs text-secondary-fixed hover:underline">{t('Forgot password?','نسيت كلمة المرور؟')}</Link>
               </div>
               <div className="relative">
-                <input type={showPw?'text':'password'} autoComplete="current-password" name="current-password" className="rasha-input pe-12" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
+                <input type={showPw?'text':'password'} autoComplete="current-password" name="current-password" className={'rasha-input pe-12' + invalidClass(errors.password)} aria-invalid={!!errors.password} value={password} onChange={e=>{setPassword(e.target.value); clearError('password')}} onKeyDown={e=>e.key==='Enter'&&submit()}/>
                 <button type="button" onClick={()=>setShowPw(p=>!p)} className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary-fixed">
                   <span className="material-symbols-outlined text-xl">{showPw?'visibility_off':'visibility'}</span>
                 </button>
               </div>
+              <FieldError>{errors.password}</FieldError>
             </div>
             <button onClick={submit} disabled={loading} className="btn-primary w-full py-4 rounded-xl">
               {loading ? <div className="loader"/> : t('Sign In','تسجيل الدخول')}
@@ -148,7 +202,10 @@ export default function Login() {
                 </button>
               </p>
             </div>
-            <OtpInput value={otp} onChange={setOtp} onComplete={code => verify(code)}/>
+            <div>
+              <OtpInput value={otp} onChange={v => { setOtp(v); clearError('otp') }} onComplete={code => verify(code)}/>
+              <FieldError>{errors.otp}</FieldError>
+            </div>
             <div className="text-center">
               {timer > 0 ? (
                 <p className="text-sm text-on-surface-variant">

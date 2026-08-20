@@ -3,6 +3,8 @@ import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import { formatTime } from '../utils/format'
 import CalendarPicker from '../components/CalendarPicker'
+import FieldError from '../components/FieldError'
+import { apiError, isSlotConflict, isRateLimited, isSessionDead } from '../utils/apiErrors'
 
 const today = () => {
   // Use Khartoum local time (UTC+3) so the minimum date is never yesterday
@@ -11,7 +13,7 @@ const today = () => {
 }
 
 export default function Booking() {
-  const { t, lang, customer, token, showToast, login } = useApp()
+  const { t, lang, customer, token, showToast, showError, login } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -40,6 +42,17 @@ export default function Booking() {
   const [servicePrices, setServicePrices] = useState({ full: 8500, outside: 5000 })
   const price = servicePrices[form.service] || 0
   const [loading, setLoading] = useState(false)
+  // Errors that belong to a step's own control — the date picker, the slot
+  // grid, the wallet option — rather than to the page as a whole.
+  const [errors, setErrors] = useState({})
+
+  /** Send them back to pick a different time, with the grid freshly loaded. */
+  const backToSlots = () => {
+    setStep(2)
+    setSelectedSlot('')
+    loadSlots(form.date)
+    window.scrollTo(0, 0)
+  }
 
   useEffect(() => {
     fetch(`${API}/api/bookings/pricing`)
@@ -63,32 +76,38 @@ export default function Booking() {
 
   const goToStep2 = () => {
     if (!form.date) {
-      showToast(t('Please select a date', 'يرجى اختيار تاريخ'), 'error'); return
+      setErrors({ date: t('Please select a date', 'يرجى اختيار تاريخ') }); return
     }
     if (form.date < today()) {
-      showToast(t('Please choose today or a future date', 'يرجى اختيار تاريخ اليوم أو تاريخ لاحق'), 'error')
+      setErrors({ date: t('Please choose today or a future date', 'يرجى اختيار تاريخ اليوم أو تاريخ لاحق') })
       setForm(f => ({ ...f, date: today() }))
       return
     }
+    setErrors({})
     setStep(2); window.scrollTo(0, 0)
   }
 
   const goToStep3 = () => {
-    if (!selectedSlot) { showToast(t('Please select a time slot', 'اختر موعداً'), 'error'); return }
+    if (!selectedSlot) { setErrors({ slot: t('Please select a time slot', 'اختر موعداً') }); return }
+    setErrors({})
     setStep(3); window.scrollTo(0, 0)
   }
 
   const submitBooking = async () => {
     if (form.date < today()) {
-      showToast(t('Please choose today or a future date', 'يرجى اختيار تاريخ اليوم أو تاريخ لاحق'), 'error')
+      setErrors({ date: t('Please choose today or a future date', 'يرجى اختيار تاريخ اليوم أو تاريخ لاحق') })
       setForm(f => ({ ...f, date: today() }))
       setStep(1)
       return
     }
     if (payFromWallet && walletBalance < price) {
-      showToast(t(`Wallet balance insufficient. You have ${walletBalance.toLocaleString()} SDG, need ${price.toLocaleString()} SDG.`, `رصيد المحفظة غير كافٍ. لديك ${walletBalance.toLocaleString()} SDG، تحتاج ${price.toLocaleString()} SDG.`), 'error')
+      setErrors({ wallet: t(
+        `You have ${walletBalance.toLocaleString()} SDG, need ${price.toLocaleString()} SDG.`,
+        `لديك ${walletBalance.toLocaleString()} SDG، تحتاج ${price.toLocaleString()} SDG.`
+      ) })
       return
     }
+    setErrors({})
     setLoading(true)
     const headers = { 'Content-Type': 'application/json' }
     if (token) headers['Authorization'] = 'Bearer ' + token
@@ -108,11 +127,49 @@ export default function Booking() {
       })
       const data = await res.json()
       if (!res.ok) {
+        const msg = apiError(data.error, lang, t('Booking failed', 'فشل الحجز'))
+
         if (data.code === 'INSUFFICIENT_WALLET') {
-          showToast(t('Wallet balance insufficient', 'رصيد المحفظة غير كافٍ'), 'error')
-        } else {
-          showToast(data.error || t('Booking failed', 'فشل الحجز'), 'error')
+          setErrors({ wallet: t('Wallet balance insufficient', 'رصيد المحفظة غير كافٍ') })
+          return
         }
+        // Their slot went while they were on the review step. They have to
+        // choose again, so send them back rather than flash a toast over a
+        // Confirm button they'll only press again.
+        if (isSlotConflict(data.error)) {
+          showError({
+            icon: 'event_busy',
+            title: t('That time is no longer available', 'لم يعد هذا الموعد متاحاً'),
+            message: msg,
+            actions: [{ label: t('Pick another time', 'اختر موعداً آخر'), primary: true, onClick: backToSlots }],
+          })
+          return
+        }
+        if (isSessionDead(data.error)) {
+          showError({
+            icon: 'lock',
+            title: t('Your session has ended', 'انتهت جلستك'),
+            message: t('Please sign in again to finish your booking.',
+                       'يرجى تسجيل الدخول مجدداً لإكمال حجزك.'),
+            actions: [{ label: t('Sign In', 'تسجيل الدخول'), primary: true, to: '/login' }],
+          })
+          return
+        }
+        if (isRateLimited(data.error)) {
+          showError({ icon: 'hourglass_top', title: t('Too many attempts', 'محاولات كثيرة'), message: msg })
+          return
+        }
+        // Anything else: the wash is NOT booked, and they are one tap from
+        // walking away believing it is. This one has to stop them.
+        showError({
+          icon: 'error',
+          title: t('Booking not completed', 'لم يكتمل الحجز'),
+          message: msg,
+          actions: [
+            { label: t('Contact Support', 'اتصل بالدعم'), to: '/contact' },
+            { label: t('Try Again', 'حاول مجدداً'), primary: true },
+          ],
+        })
         return
       }
       // Update wallet balance in context if paid from wallet
@@ -196,14 +253,16 @@ export default function Booking() {
                 value={form.date}
                 onChange={picked => {
                   if (picked < today()) {
-                    showToast(t('You cannot book a date in the past.', 'لا يمكنك الحجز في تاريخ سابق.'), 'error')
+                    setErrors({ date: t('You cannot book a date in the past.', 'لا يمكنك الحجز في تاريخ سابق.') })
                     return
                   }
+                  setErrors({})
                   setForm(f => ({ ...f, date: picked }))
                 }}
                 minDate={today()}
                 lang={lang}
               />
+              <FieldError>{errors.date}</FieldError>
             </div>
             <button onClick={goToStep2} className="btn-primary w-full py-4 rounded-xl">
               {t('Choose Time Slot', 'اختر الموعد')}
@@ -233,7 +292,7 @@ export default function Booking() {
                     return (
                       <button
                         key={slot}
-                        onClick={() => setSelectedSlot(slot)}
+                        onClick={() => { setSelectedSlot(slot); setErrors({}) }}
                         className={`py-2 px-1 text-xs font-semibold rounded-xl transition-all ${selected ? 'slot-selected' : 'slot-available'}`}
                         dir="ltr"
                       >
@@ -243,6 +302,7 @@ export default function Booking() {
                   })}
                 </div>
               )}
+              <FieldError>{errors.slot}</FieldError>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStep(1)} className="btn-glass flex-1 py-4 rounded-xl">{t('Back', 'رجوع')}</button>
@@ -282,7 +342,7 @@ export default function Booking() {
                 <h3 className="font-bold text-on-surface text-sm">{t('Payment Method', 'طريقة الدفع')}</h3>
                 <div className="space-y-2">
                   {/* Pay at location */}
-                  <button onClick={() => setPayFromWallet(false)}
+                  <button onClick={() => { setPayFromWallet(false); setErrors({}) }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${!payFromWallet ? 'text-secondary-fixed' : 'text-on-surface-variant'}`}
                     style={!payFromWallet
                       ? {background:'rgba(var(--color-secondary-fixed-rgb),0.08)', border:'1px solid rgba(var(--color-secondary-fixed-rgb),0.3)'}
@@ -321,6 +381,9 @@ export default function Booking() {
                     </div>
                     {payFromWallet && <span className="material-symbols-outlined fill-icon">check_circle</span>}
                   </div>
+                  {/* Sits with the wallet option and its top-up link, where the
+                      customer is actually looking when the balance is short. */}
+                  <FieldError>{errors.wallet}</FieldError>
                 </div>
 
                 {/* Price summary */}

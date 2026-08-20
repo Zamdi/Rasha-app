@@ -126,7 +126,7 @@ export default function Confirmation() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-background)' }}>
-      <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[200]" />
+      <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-30" />
 
       <main className="flex flex-col items-center justify-center flex-grow px-6 py-12 pb-24 md:pb-12">
         <div className="w-full max-w-2xl flex flex-col items-center animate-fade-in">

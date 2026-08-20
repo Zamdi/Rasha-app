@@ -3,6 +3,7 @@ import { AppProvider, useApp } from './context/AppContext'
 import Navbar from './components/Navbar'
 import MobileNav from './components/MobileNav'
 import Toast from './components/Toast'
+import ErrorModal from './components/ErrorModal'
 import ScrollToTop from './components/ScrollToTop'
 import Home from './pages/Home'
 import Booking from './pages/Booking'
@@ -32,6 +33,8 @@ function AppShell() {
         <ScrollToTop />
         <Navbar />
         <Toast />
+        {/* Inside BrowserRouter — its recovery actions navigate. */}
+        <ErrorModal />
         <Routes>
           <Route path="/" element={customer ? <Navigate to="/loyalty" replace /> : <Home />} />
           <Route path="/book" element={<Booking />} />

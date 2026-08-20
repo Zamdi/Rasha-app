@@ -184,6 +184,20 @@ body {
   }
   .rasha-input::placeholder { color: var(--color-on-surface-variant); opacity: 0.7; }
 
+  /* Invalid field — pairs with the message FieldError renders underneath.
+     Authored here rather than composed from Tailwind utilities: the class is
+     applied from a runtime expression, which the JIT scanner never sees, so a
+     utility would simply never be generated. !important overrides both the
+     `border` shorthand on .rasha-input and its :focus rule, so the field keeps
+     reading as invalid while the customer is typing the correction. */
+  .field-invalid,
+  .field-invalid:focus {
+    border-color: var(--color-error) !important;
+  }
+  .field-invalid:focus {
+    box-shadow: 0 0 0 3px var(--color-error-container) !important;
+  }
+
   /* Primary button */
   .btn-primary {
     @apply hydro-gradient text-white font-bold text-sm px-6 py-3 rounded-xl

@@ -79,7 +79,7 @@ export default function PhoneInput({ value, onChange, dialCode, onDialChange }) 
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute top-full left-0 mt-1 z-[500] rounded-xl overflow-hidden animate-fade-in"
+          className="absolute top-full left-0 mt-1 z-20 rounded-xl overflow-hidden animate-fade-in"
           style={{
             width: '260px',
             background: 'var(--glass-high-bg)',

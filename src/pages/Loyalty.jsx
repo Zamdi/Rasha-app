@@ -73,9 +73,9 @@ export default function Loyalty() {
 
   if (error) return (
     <div className="pt-14 min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center">
-      <span className="material-symbols-outlined text-error text-5xl">wifi_off</span>
-      <p className="text-on-surface text-base font-semibold">{error}</p>
-      <button onClick={loadAll} className="btn-primary px-6 py-3 rounded-xl">
+      <span className="material-symbols-outlined text-error text-5xl" aria-hidden="true">wifi_off</span>
+      <p role="alert" className="text-on-surface text-base font-semibold">{error}</p>
+      <button onClick={loadAll} className="btn-primary px-6 py-3 rounded-xl cursor-pointer">
         <span className="material-symbols-outlined text-base">refresh</span>
         {t('Retry', 'إعادة المحاولة')}
       </button>
@@ -255,7 +255,7 @@ export default function Loyalty() {
       {/* QR Fullscreen Modal */}
       {qrExpanded && (
         <div
-          className="fixed inset-0 z-[500] flex items-center justify-center p-6 animate-fade-in"
+          className="fixed inset-0 z-40 flex items-center justify-center p-6 animate-fade-in"
           style={{ background: 'rgba(0,0,0,0.92)' }}
           onClick={() => setQrExpanded(false)}
         >

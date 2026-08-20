@@ -1,21 +1,35 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
+import FieldError from '../components/FieldError'
+import { apiError, isRateLimited } from '../utils/apiErrors'
 
 const WHATSAPP_NUMBER = '249900088989'
 const WHATSAPP_DISPLAY = '+249 9000 88989'
 
 export default function Contact() {
-  const { t, token, showToast } = useApp()
+  const { t, lang, token, showToast, showError } = useApp()
   const [form, setForm] = useState({ name: '', email: '', subject: 'General Inquiry', message: '' })
   const [sent, setSent] = useState(false)
   const [reference, setReference] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState({})
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k, v) => {
+    setForm(f => ({ ...f, [k]: v }))
+    setErrors(e => (e[k] ? { ...e, [k]: null } : e))
+  }
 
   const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.message) return
+    const next = {}
+    const required = t('Required', 'مطلوب')
+    if (!form.name.trim()) next.name = required
+    if (!form.email.trim()) next.email = required
+    else if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
+      next.email = t('Enter a valid email address', 'أدخل بريداً إلكترونياً صحيحاً')
+    if (!form.message.trim()) next.message = required
+    setErrors(next)
+    if (Object.keys(next).length) return
     setLoading(true)
     try {
       const headers = { 'Content-Type': 'application/json' }
@@ -27,8 +41,13 @@ export default function Contact() {
       })
       const data = await res.json()
       if (!res.ok) {
-        // Show the real backend error
-        showToast(data.error || t('Failed to send message. Please try again.', 'تعذر إرسال الرسالة. حاول مرة أخرى.'), 'error')
+        const msg = apiError(data.error, lang, t('Failed to send message. Please try again.', 'تعذر إرسال الرسالة. حاول مرة أخرى.'))
+        if (isRateLimited(data.error)) {
+          showError({ icon: 'hourglass_top', title: t('Too many messages', 'رسائل كثيرة'), message: msg })
+        } else if (/name/i.test(data.error || ''))    setErrors({ name: msg })
+        else if (/email/i.test(data.error || ''))     setErrors({ email: msg })
+        else if (/message/i.test(data.error || ''))   setErrors({ message: msg })
+        else showToast(msg, 'error')
         return
       }
       if (data.reference) setReference(data.reference)
@@ -103,22 +122,24 @@ export default function Contact() {
                       {t('Full Name', 'الاسم الكامل')}
                     </label>
                     <input type="text" placeholder={t('John Doe', 'محمد أحمد')} value={form.name}
-                      onChange={e => set('name', e.target.value)}
+                      onChange={e => set('name', e.target.value)} aria-invalid={!!errors.name}
                       className="w-full px-4 py-3 rounded-lg text-on-surface text-sm placeholder:text-outline focus:outline-none transition-all"
-                      style={{ background: 'var(--input-bg)', border: '1px solid var(--input-border)' }}
+                      style={{ background: 'var(--input-bg)', border: `1px solid ${errors.name ? 'var(--color-error)' : 'var(--input-border)'}` }}
                       onFocus={e => { e.target.style.borderColor = 'var(--color-secondary-fixed)'; e.target.style.boxShadow = '0 0 0 1px var(--color-secondary-fixed)' }}
-                      onBlur={e => { e.target.style.borderColor = 'var(--input-border)'; e.target.style.boxShadow = 'none' }} />
+                      onBlur={e => { e.target.style.borderColor = errors.name ? 'var(--color-error)' : 'var(--input-border)'; e.target.style.boxShadow = 'none' }} />
+                    <FieldError>{errors.name}</FieldError>
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">
                       {t('Email Address', 'البريد الإلكتروني')}
                     </label>
                     <input type="email" placeholder="john@example.com" value={form.email}
-                      onChange={e => set('email', e.target.value)}
+                      onChange={e => set('email', e.target.value)} aria-invalid={!!errors.email}
                       className="w-full px-4 py-3 rounded-lg text-on-surface text-sm placeholder:text-outline focus:outline-none transition-all"
-                      style={{ background: 'var(--input-bg)', border: '1px solid var(--input-border)' }}
+                      style={{ background: 'var(--input-bg)', border: `1px solid ${errors.email ? 'var(--color-error)' : 'var(--input-border)'}` }}
                       onFocus={e => { e.target.style.borderColor = 'var(--color-secondary-fixed)'; e.target.style.boxShadow = '0 0 0 1px var(--color-secondary-fixed)' }}
-                      onBlur={e => { e.target.style.borderColor = 'var(--input-border)'; e.target.style.boxShadow = 'none' }} />
+                      onBlur={e => { e.target.style.borderColor = errors.email ? 'var(--color-error)' : 'var(--input-border)'; e.target.style.boxShadow = 'none' }} />
+                    <FieldError>{errors.email}</FieldError>
                   </div>
                 </div>
                 <div>
@@ -138,20 +159,19 @@ export default function Contact() {
                     {t('How can we help?', 'كيف يمكننا مساعدتك؟')}
                   </label>
                   <textarea rows={6} placeholder={t('Describe your request in detail...', 'صف طلبك بالتفصيل...')}
-                    value={form.message} onChange={e => set('message', e.target.value)}
+                    value={form.message} onChange={e => set('message', e.target.value)} aria-invalid={!!errors.message}
                     className="w-full px-4 py-3 rounded-lg text-on-surface text-sm placeholder:text-outline focus:outline-none transition-all resize-none"
-                    style={{ background: 'var(--input-bg)', border: '1px solid var(--input-border)' }}
+                    style={{ background: 'var(--input-bg)', border: `1px solid ${errors.message ? 'var(--color-error)' : 'var(--input-border)'}` }}
                     onFocus={e => { e.target.style.borderColor = 'var(--color-secondary-fixed)'; e.target.style.boxShadow = '0 0 0 1px var(--color-secondary-fixed)' }}
-                    onBlur={e => { e.target.style.borderColor = 'var(--input-border)'; e.target.style.boxShadow = 'none' }} />
+                    onBlur={e => { e.target.style.borderColor = errors.message ? 'var(--color-error)' : 'var(--input-border)'; e.target.style.boxShadow = 'none' }} />
+                  <FieldError>{errors.message}</FieldError>
                 </div>
-                <button onClick={handleSubmit} disabled={loading || !form.name || !form.email || !form.message}
-                  className="w-full h-14 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                  style={{
-                    background: form.name && form.email && form.message ? 'var(--color-secondary-container)' : 'var(--input-bg)',
-                    color: form.name && form.email && form.message ? '#002022' : 'var(--color-outline)',
-                    cursor: !form.name || !form.email || !form.message ? 'not-allowed' : 'pointer',
-                  }}
-                  onMouseEnter={e => { if (form.name && form.email && form.message) e.currentTarget.style.boxShadow = '0 0 20px rgba(var(--color-secondary-fixed-rgb), 0.4)' }}
+                {/* Always enabled — a dead button tells the customer nothing
+                    about which field is missing. Submitting shows them. */}
+                <button onClick={handleSubmit} disabled={loading}
+                  className="w-full h-14 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer"
+                  style={{ background: 'var(--color-secondary-container)', color: '#002022' }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 20px rgba(var(--color-secondary-fixed-rgb), 0.4)' }}
                   onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}>
                   {loading
                     ? <><div className="loader" style={{ borderTopColor: '#002022' }} />{t('Sending...', 'جارٍ الإرسال...')}</>

@@ -146,7 +146,7 @@ export default function MobileNav() {
     : 'none'
 
   return (
-    <div className="md:hidden fixed bottom-5 left-0 right-0 z-50 flex justify-center px-3 pointer-events-none">
+    <div className="md:hidden fixed bottom-5 left-0 right-0 z-20 flex justify-center px-3 pointer-events-none">
       <nav ref={navRef} className="liquid-nav pointer-events-auto">
 
         {/* Decorative layers — clipped to the pill, behind the buttons */}
