@@ -28,7 +28,7 @@ export default function BootScreen({ onRetry }) {
             'ما زال قيد التشغيل — قد يستغرق ذلك دقيقة بعد فترة من الخمول.')
 
   return (
-    <div className="pt-14 min-h-screen flex flex-col items-center justify-center gap-5 px-6 text-center">
+    <div className="pt-14 min-h-dvh flex flex-col items-center justify-center gap-5 px-6 text-center">
       <div className="flex flex-col items-center gap-3">
         <span className="font-display font-extrabold text-4xl tracking-tight text-secondary-fixed">
           Rasha

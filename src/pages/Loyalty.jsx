@@ -77,7 +77,7 @@ export default function Loyalty() {
   if (loading) return <BootScreen onRetry={loadAll} />
 
   if (error) return (
-    <div className="pt-14 min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center">
+    <div className="pt-14 min-h-dvh flex flex-col items-center justify-center gap-4 px-6 text-center">
       <span className="material-symbols-outlined text-error text-5xl" aria-hidden="true">wifi_off</span>
       <p role="alert" className="text-on-surface text-base font-semibold">{error}</p>
       <button onClick={loadAll} className="btn-primary px-6 py-3 rounded-xl cursor-pointer">

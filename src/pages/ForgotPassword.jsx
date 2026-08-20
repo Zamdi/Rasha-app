@@ -116,7 +116,7 @@ export default function ForgotPassword() {
   )
 
   if (done) return (
-    <div className="pt-14 pb-24 md:pb-10 min-h-screen flex items-center justify-center px-4 py-10">
+    <div className="pt-14 pb-24 md:pb-10 min-h-dvh flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md glass p-8 rounded-2xl text-center animate-fade-in space-y-4">
         <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center" style={{ background: 'rgba(34,197,94,0.1)' }}>
           <span className="material-symbols-outlined fill-icon text-3xl" style={{ color: '#22c55e' }}>check_circle</span>
@@ -134,7 +134,7 @@ export default function ForgotPassword() {
   )
 
   return (
-    <div className="pt-14 pb-24 md:pb-10 min-h-screen flex items-center justify-center px-4 py-10">
+    <div className="pt-14 pb-24 md:pb-10 min-h-dvh flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           {icon}

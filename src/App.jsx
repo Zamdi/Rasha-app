@@ -31,7 +31,7 @@ function AppShell() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '100dvh',
       background: theme === 'light' ? 'transparent' : 'transparent',
       color: theme === 'light' ? '#1a1a18' : '#e0e3e5',
       transition: 'background 0.3s, color 0.3s',

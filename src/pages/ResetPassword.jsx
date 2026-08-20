@@ -13,7 +13,7 @@ export default function ResetPassword() {
   }, [navigate])
 
   return (
-    <div className="pt-14 min-h-screen flex items-center justify-center px-4">
+    <div className="pt-14 min-h-dvh flex items-center justify-center px-4">
       <div className="glass p-8 rounded-2xl text-center max-w-sm space-y-4 animate-fade-in">
         <span className="material-symbols-outlined text-secondary-fixed text-4xl block">lock_reset</span>
         <p className="text-on-surface font-bold">{t('Reset links have been replaced with codes', 'تم استبدال روابط إعادة التعيين برموز')}</p>

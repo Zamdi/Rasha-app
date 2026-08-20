@@ -105,7 +105,7 @@ body {
   background: transparent;
   color: var(--color-on-surface);
   font-family: 'IBM Plex Sans', 'IBM Plex Sans Arabic', sans-serif;
-  min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
 }
 

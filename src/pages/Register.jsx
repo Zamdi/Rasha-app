@@ -174,7 +174,7 @@ export default function Register() {
   }
 
   return (
-    <div className="pt-14 pb-24 md:pb-10 min-h-screen flex items-center justify-center px-4 py-10">
+    <div className="pt-14 pb-24 md:pb-10 min-h-dvh flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-on-surface font-display">{t('Create Account','إنشاء حساب')}</h1>

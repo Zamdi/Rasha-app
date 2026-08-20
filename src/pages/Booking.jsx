@@ -192,7 +192,7 @@ export default function Booking() {
   )
 
   return (
-    <div className="pt-14 pb-24 md:pb-10 min-h-screen">
+    <div className="pt-14 pb-24 md:pb-10 min-h-dvh">
       <div className="max-w-xl mx-auto px-4 md:px-6 pt-4 pb-8 md:pt-8">
         <button onClick={() => step > 1 ? setStep(s => s-1) : navigate(-1)} className="flex items-center gap-2 text-on-surface-variant hover:text-secondary-fixed transition-colors text-sm mb-6">
           <span className="material-symbols-outlined rtl-flip text-base">arrow_back</span>

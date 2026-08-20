@@ -209,14 +209,14 @@ export default function Settings() {
   const secRow = { borderBottom: '1px solid var(--color-outline-variant)' }
 
   return (
-    <div className="pt-14 min-h-screen pb-24 md:pb-0" style={{ background: 'var(--color-background)' }}>
+    <div className="pt-14 min-h-dvh pb-24 md:pb-0" style={{ background: 'var(--color-background)' }}>
       {/* Hidden file input */}
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
 
       <div className="flex max-w-7xl mx-auto">
 
         {/* Sidebar */}
-        <aside className="hidden md:flex flex-col w-56 shrink-0 min-h-[calc(100vh-56px)] py-8 px-4"
+        <aside className="hidden md:flex flex-col w-56 shrink-0 min-h-[calc(100dvh-56px)] py-8 px-4"
           style={{ borderRight: '1px solid var(--color-outline-variant)' }}>
 
           <nav className="space-y-1 flex-1">

@@ -61,7 +61,7 @@ export default function Wallet() {
   const card = { background: 'var(--color-surface-container-low)', border: '1px solid var(--color-outline-variant)', boxShadow: '0 4px 24px rgba(21,80,88,0.06)', borderRadius: '1rem' }
 
   return (
-    <div className="pt-14 min-h-screen pb-24 md:pb-0" style={{ background: 'var(--color-background)' }}>
+    <div className="pt-14 min-h-dvh pb-24 md:pb-0" style={{ background: 'var(--color-background)' }}>
       <div className="max-w-5xl mx-auto">
         {/* Main */}
         <main className="px-4 md:px-8 pt-4 pb-28 md:pt-8 md:pb-10 space-y-6">
