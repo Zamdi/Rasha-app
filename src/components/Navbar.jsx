@@ -88,14 +88,36 @@ export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
+  const [hidden, setHidden] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
+  const lastY = useRef(0)
 
+  // Slide the bar away when reading down the page, bring it straight back on
+  // any upward scroll — the moment someone scrolls up they're usually heading
+  // for navigation.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
+    const onScroll = () => {
+      const y = Math.max(0, window.scrollY)
+      setScrolled(y > 20)
+
+      const delta = y - lastY.current
+      // Ignore sub-pixel jitter and rubber-band bounce, which would otherwise
+      // flicker the bar in and out on every touch.
+      if (Math.abs(delta) < 6) return
+      lastY.current = y
+
+      // Near the top there is nothing to gain by hiding it.
+      if (y < 80) { setHidden(false); return }
+      setHidden(delta > 0)
+    }
+    lastY.current = Math.max(0, window.scrollY)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // A dropdown anchored to a bar that slid off-screen would go with it.
+  useEffect(() => { if (menuOpen) setHidden(false) }, [menuOpen])
 
   // Close menu on outside click
   useEffect(() => {
@@ -110,13 +132,17 @@ export default function Navbar() {
   const handleLogout = () => { logout(); navigate('/'); setMenuOpen(false) }
 
   return (
-    <nav className="fixed top-0 w-full z-20 transition-all duration-300"
+    <nav className="fixed top-0 w-full z-20"
       style={{
         background: scrolled ? 'var(--navbar-bg)' : 'transparent',
         backdropFilter: scrolled ? 'blur(24px)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(24px)' : 'none',
         borderBottom: scrolled ? '1px solid var(--glass-border)' : 'none',
         boxShadow: scrolled ? 'var(--glass-shadow-card)' : 'none',
+        // translateY rather than top/height so the browser can composite it
+        // without laying the page out again on every scroll event.
+        transform: hidden ? 'translateY(-100%)' : 'translateY(0)',
+        transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1), background 0.3s, box-shadow 0.3s, border-color 0.3s',
       }}>
       <div className="max-w-7xl mx-auto flex justify-between items-center h-14 px-4 md:px-6">
         {/* Logo */}

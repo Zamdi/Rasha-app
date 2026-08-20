@@ -13,6 +13,15 @@ export default function MobileNav() {
   const glareRef = useRef(null)
   const [pillStyle, setPillStyle] = useState({ left: 0, top: 0, width: 0, height: 0, opacity: 0 })
 
+  // Compact mode: the bar draws itself smaller so it takes less of the screen
+  // while reading, and returns to full size the moment it's wanted again.
+  const [compact, setCompact] = useState(false)
+  const idleTimer = useRef(null)
+  const lastY = useRef(0)
+  // The pill eases only when the active tab actually changes. See the effect
+  // below for why it must not ease during a resize.
+  const [pillEased, setPillEased] = useState(false)
+
   // NOTE: no early return above this point. Every hook below must run on every
   // render, otherwise React sees a different hook count when this component
   // hides itself on /forgot-password, /confirmation etc. and throws, blanking
@@ -99,6 +108,73 @@ export default function MobileNav() {
     }
   }, [activeIdx, items.length, hidden])
 
+  // Shrink while scrolling down or after a second of stillness; return to full
+  // size on any touch or upward scroll.
+  //
+  // Size is changed through padding and font-size, not transform: scale. The
+  // sliding pill is positioned from getBoundingClientRect offsets measured
+  // inside this same element, and a scaled parent would have the pill's own
+  // coordinates scaled a second time, throwing it off the active tab. Real
+  // layout changes keep those measurements honest, and the ResizeObserver
+  // above already re-runs them.
+  useEffect(() => {
+    if (hidden) return
+
+    const goCompact = () => setCompact(true)
+
+    const wake = () => {
+      setCompact(false)
+      clearTimeout(idleTimer.current)
+      idleTimer.current = setTimeout(goCompact, 1000)
+    }
+
+    const onScroll = () => {
+      const y = Math.max(0, window.scrollY)
+      const delta = y - lastY.current
+      if (Math.abs(delta) < 6) return   // ignore jitter / rubber-band
+      lastY.current = y
+      if (delta > 0) {
+        clearTimeout(idleTimer.current)
+        goCompact()
+      } else {
+        wake()
+      }
+    }
+
+    lastY.current = Math.max(0, window.scrollY)
+    wake() // start full size, then let the idle timer shrink it
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('touchstart', wake, { passive: true })
+    window.addEventListener('pointerdown', wake, { passive: true })
+
+    return () => {
+      clearTimeout(idleTimer.current)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('touchstart', wake)
+      window.removeEventListener('pointerdown', wake)
+    }
+  }, [hidden])
+
+  // Ease the pill only while it is travelling to a newly selected tab.
+  //
+  // Two things move it, and they want opposite behaviour. A tab change should
+  // glide. A resize should not: compacting animates the bar's padding over
+  // 250ms and the ResizeObserver re-measures every frame of that, so an eased
+  // pill spends the whole animation chasing a value that has already moved and
+  // visibly slides sideways.
+  //
+  // Keying this on activeIdx rather than on the resize is what makes both
+  // work. Tapping a tab also wakes the bar out of compact, so a flag keyed on
+  // the resize would switch easing OFF at exactly the moment the pill was
+  // meant to travel — it jumped straight to the new tab instead of sliding.
+  useEffect(() => {
+    if (activeIdx < 0) return
+    setPillEased(true)
+    const id = setTimeout(() => setPillEased(false), 460) // slide 420ms + margin
+    return () => clearTimeout(id)
+  }, [activeIdx])
+
   // Specular highlight follows the finger. Written straight to the node so a
   // touchmove never triggers a React render.
   useEffect(() => {
@@ -147,7 +223,12 @@ export default function MobileNav() {
 
   return (
     <div className="md:hidden fixed bottom-5 left-0 right-0 z-20 flex justify-center px-3 pointer-events-none">
-      <nav ref={navRef} className="liquid-nav pointer-events-auto">
+      <nav ref={navRef}
+        className="liquid-nav pointer-events-auto"
+        style={{
+          padding: compact ? '3px' : '6px',
+          transition: 'padding 0.25s cubic-bezier(0.4,0,0.2,1)',
+        }}>
 
         {/* Decorative layers — clipped to the pill, behind the buttons */}
         <div className="liquid-layer">
@@ -165,7 +246,9 @@ export default function MobileNav() {
             width: pillStyle.width,
             height: pillStyle.height,
             opacity: pillStyle.opacity,
-            transition: 'left 0.42s cubic-bezier(0.34,1.15,0.64,1), width 0.42s cubic-bezier(0.34,1.15,0.64,1), opacity 0.2s ease',
+            transition: pillEased
+              ? 'left 0.42s cubic-bezier(0.34,1.15,0.64,1), width 0.42s cubic-bezier(0.34,1.15,0.64,1), opacity 0.2s ease'
+              : 'opacity 0.2s ease',
           }} />
         )}
 
@@ -177,35 +260,38 @@ export default function MobileNav() {
               aria-current={isActive ? 'page' : undefined}
               className="relative z-10 flex items-center justify-center gap-1.5 rounded-full"
               style={{
-                padding: '8px 12px',
+                padding: compact ? '5px 9px' : '8px 12px',
                 textDecoration: 'none',
+                transition: 'padding 0.25s cubic-bezier(0.4,0,0.2,1)',
               }}>
               {item.avatar ? (
                 <img src={item.avatar} alt="" style={{
-                  width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover',
+                  width: compact ? '17px' : '20px', height: compact ? '17px' : '20px',
+                  borderRadius: '50%', objectFit: 'cover',
                   border: isActive ? `2px solid ${activeColor}` : '2px solid transparent',
-                  flexShrink: 0, transition: 'border-color 0.3s ease',
+                  flexShrink: 0,
+                  transition: 'border-color 0.3s ease, width 0.25s ease, height 0.25s ease',
                 }} />
               ) : (
                 <span className="material-symbols-outlined" style={{
-                  fontSize: '20px',
+                  fontSize: compact ? '17px' : '20px',
                   lineHeight: 1,
                   color: isActive ? activeColor : inactiveColor,
                   textShadow: glyphShadow,
                   fontVariationSettings: isActive ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400",
-                  transition: 'color 0.3s ease',
+                  transition: 'color 0.3s ease, font-size 0.25s ease',
                   flexShrink: 0,
                 }}>{item.icon}</span>
               )}
 
               {/* Labels always visible so users can read every tab. */}
               <span style={{
-                fontSize: '12px',
+                fontSize: compact ? '11px' : '12px',
                 fontWeight: 700,
                 color: isActive ? activeColor : inactiveColor,
                 textShadow: glyphShadow,
                 whiteSpace: 'nowrap',
-                transition: 'color 0.3s ease',
+                transition: 'color 0.3s ease, font-size 0.25s ease',
               }}>{item.label}</span>
             </Link>
           )
