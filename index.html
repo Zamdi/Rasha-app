@@ -2,7 +2,11 @@
 <html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit=cover lets the page paint into the status-bar and
+         gesture-bar insets instead of the OS filling them with its own colour.
+         index.css then pads the fixed chrome by env(safe-area-inset-*) so
+         nothing actually sits under them. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#f8fffe" id="theme-meta" />
     <meta name="description" content="Book a car wash online in Khartoum, Sudan. Professional care, loyalty rewards, and easy scheduling with Rasha." />
     <meta property="og:title" content="Rasha Car Wash" />

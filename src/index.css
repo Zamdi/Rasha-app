@@ -107,7 +107,16 @@ body {
   font-family: 'IBM Plex Sans', 'IBM Plex Sans Arabic', sans-serif;
   min-height: 100dvh;
   position: relative;
+  /* With viewport-fit=cover the page now extends under the status bar, so
+     shift normal flow down past it. Fixed chrome ignores this and pads itself
+     (see .safe-top / .safe-bottom below), which is what lets the navbar's
+     background fill the inset while its contents stay clear of the clock. */
+  padding-top: env(safe-area-inset-top, 0px);
 }
+
+/* Applied to position:fixed chrome, which body padding doesn't reach. */
+.safe-top    { padding-top: env(safe-area-inset-top, 0px); }
+.safe-bottom { bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px)); }
 
 /* ── Base ────────────────────────────────────────────────────── */
 @layer base {
