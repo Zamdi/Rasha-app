@@ -27,3 +27,8 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Claude Code local tooling — installed skills and dev-server config are
+# per-machine, not part of the app.
+.claude/skills/
+.claude/launch.json
