@@ -3,17 +3,27 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import FieldError from '../components/FieldError'
 import { apiError } from '../utils/apiErrors'
+import PhoneInput from '../components/PhoneInput'
+import { buildE164, splitE164, isPlausibleLength } from '../utils/phone'
 
 export default function Settings() {
   const { t, customer, token, login, logout, lang, showToast, showError } = useApp()
   const navigate = useNavigate()
   const fileRef = useRef(null)
 
+  // Splitting the stored E.164 number back into its dial code and national
+  // digits — rather than assuming +249 — is what makes this show the
+  // customer's actual country. Before, this field always displayed a
+  // hardcoded "+249" badge regardless of what they registered with, and
+  // saving rewrote the number onto Sudan's country code even when it never
+  // was one, corrupting it.
+  const initialPhone = splitE164(customer?.phone)
   const [form, setForm] = useState({
     firstName: customer?.first_name || '',
     lastName: customer?.last_name || '',
-    phone: (customer?.phone || '').replace('+249', ''),
+    phone: initialPhone.national,
   })
+  const [dialCode, setDialCode] = useState(initialPhone.dialCode)
   const [avatar, setAvatar] = useState(customer?.avatar_url || null)
   const [avatarFile, setAvatarFile] = useState(null)
   const [showCrop, setShowCrop] = useState(false)
@@ -103,6 +113,10 @@ export default function Settings() {
   }
 
   const saveProfile = async () => {
+    if (!isPlausibleLength(dialCode, form.phone)) {
+      setErrors({ phone: t('Enter a complete phone number', 'أدخل رقم هاتف كاملاً') })
+      return
+    }
     setProfileLoading(true); setProfileSuccess(false); setErrors({})
     try {
       const res = await fetch(`${API}/api/auth/me`, {
@@ -110,7 +124,10 @@ export default function Settings() {
         body: JSON.stringify({
           firstName: form.firstName,
           lastName: form.lastName,
-          phone: '+249' + form.phone,
+          // Built from the country the customer actually selected — this
+          // used to hardcode '+249', silently rewriting any non-Sudan
+          // number onto Sudan's country code on every save.
+          phone: buildE164(dialCode, form.phone),
           ...(avatarFile !== null ? { avatar: avatarFile } : {})
         })
       })
@@ -317,13 +334,12 @@ export default function Settings() {
                     </div>
                     <div>
                       <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 block">{t('Phone Number', 'رقم الهاتف')}</label>
-                      <div className="flex" dir="ltr">
-                        <span className="rounded-l-xl px-3 py-3 text-sm text-on-surface-variant flex items-center shrink-0"
-                          style={{ background: 'var(--color-surface-container-high)', border: '1px solid var(--color-outline-variant)', borderRight: 'none' }}>+249</span>
-                        <input type="tel" className="rasha-input text-sm" style={{ borderRadius: '0 0.75rem 0.75rem 0' }}
-                          aria-invalid={!!errors.phone}
-                          value={form.phone} onChange={e => { setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '') })); setErrors({}) }} />
-                      </div>
+                      <PhoneInput
+                        value={form.phone}
+                        onChange={v => { setForm(f => ({ ...f, phone: v })); setErrors({}) }}
+                        dialCode={dialCode}
+                        onDialChange={v => { setDialCode(v); setErrors({}) }}
+                      />
                       <FieldError>{errors.phone}</FieldError>
                     </div>
                     <div className="md:col-span-2">

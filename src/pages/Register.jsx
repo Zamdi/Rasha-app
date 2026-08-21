@@ -6,6 +6,7 @@ import PhoneInput from '../components/PhoneInput'
 import FieldError, { invalidClass } from '../components/FieldError'
 import { passwordStrength } from '../utils/passwordStrength'
 import { apiError, isRateLimited } from '../utils/apiErrors'
+import { buildE164, isPlausibleLength } from '../utils/phone'
 
 const OTP_SECONDS = 60
 
@@ -32,14 +33,7 @@ export default function Register() {
     setForm(f => ({...f, [k]: v}))
     setErrors(e => (e[k] ? { ...e, [k]: null } : e))
   }
-  const buildPhone = () => {
-    let p = form.phone
-    if (p.startsWith('00')) p = p.slice(2)
-    const dialDigits = dialCode.replace('+', '')
-    if (p.startsWith(dialDigits)) p = p.slice(dialDigits.length)
-    if (p.startsWith('0')) p = p.slice(1)
-    return dialCode + p
-  }
+  const buildPhone = () => buildE164(dialCode, form.phone)
 
   const startTimer = () => {
     setTimer(OTP_SECONDS)
@@ -60,6 +54,8 @@ export default function Register() {
     else if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
       next.email = t('Enter a valid email address', 'أدخل بريداً إلكترونياً صحيحاً')
     if (!form.phone.trim())     next.phone     = required
+    else if (!isPlausibleLength(dialCode, form.phone))
+      next.phone = t('Enter a complete phone number', 'أدخل رقم هاتف كاملاً')
     if (!form.password)         next.password  = required
     else if (form.password.length < 8)
       next.password = t('At least 8 characters', '8 أحرف على الأقل')

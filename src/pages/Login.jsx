@@ -5,6 +5,7 @@ import OtpInput from '../components/OtpInput'
 import PhoneInput from '../components/PhoneInput'
 import FieldError, { invalidClass } from '../components/FieldError'
 import { apiError, isRateLimited } from '../utils/apiErrors'
+import { buildE164 } from '../utils/phone'
 
 const OTP_SECONDS = 60
 
@@ -40,17 +41,7 @@ export default function Login() {
 
   useEffect(() => () => clearInterval(timerRef.current), [])
 
-  const buildIdentifier = () => {
-    if (loginMode === 'phone') {
-      let p = phone
-      if (p.startsWith('00')) p = p.slice(2)       // 00249… → 249…
-      const dialDigits = dialCode.replace('+', '')
-      if (p.startsWith(dialDigits)) p = p.slice(dialDigits.length) // 249912… → 912…
-      if (p.startsWith('0')) p = p.slice(1)         // 0912… → 912…
-      return dialCode + p
-    }
-    return identifier
-  }
+  const buildIdentifier = () => (loginMode === 'phone' ? buildE164(dialCode, phone) : identifier)
 
   const submit = async () => {
     const id = buildIdentifier()

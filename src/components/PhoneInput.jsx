@@ -1,31 +1,37 @@
 import { useState, useRef, useEffect } from 'react'
 
+// len = { min, max } digits in the national number, after the dial code and
+// any leading trunk zero. A range rather than one figure because real
+// numbering plans vary within a country (e.g. Germany's mobile vs landline
+// lengths differ) — still narrow enough to catch a number that's obviously
+// too short or has extra digits typed onto the end, which was accepted
+// unconditionally before.
 const COUNTRIES = [
-  { code: 'SD', name: 'Sudan',          dial: '+249', flag: '🇸🇩' },
-  { code: 'SA', name: 'Saudi Arabia',   dial: '+966', flag: '🇸🇦' },
-  { code: 'AE', name: 'UAE',            dial: '+971', flag: '🇦🇪' },
-  { code: 'EG', name: 'Egypt',          dial: '+20',  flag: '🇪🇬' },
-  { code: 'QA', name: 'Qatar',          dial: '+974', flag: '🇶🇦' },
-  { code: 'KW', name: 'Kuwait',         dial: '+965', flag: '🇰🇼' },
-  { code: 'BH', name: 'Bahrain',        dial: '+973', flag: '🇧🇭' },
-  { code: 'OM', name: 'Oman',           dial: '+968', flag: '🇴🇲' },
-  { code: 'JO', name: 'Jordan',         dial: '+962', flag: '🇯🇴' },
-  { code: 'LB', name: 'Lebanon',        dial: '+961', flag: '🇱🇧' },
-  { code: 'SS', name: 'South Sudan',    dial: '+211', flag: '🇸🇸' },
-  { code: 'ET', name: 'Ethiopia',       dial: '+251', flag: '🇪🇹' },
-  { code: 'LY', name: 'Libya',          dial: '+218', flag: '🇱🇾' },
-  { code: 'MA', name: 'Morocco',        dial: '+212', flag: '🇲🇦' },
-  { code: 'DZ', name: 'Algeria',        dial: '+213', flag: '🇩🇿' },
-  { code: 'TN', name: 'Tunisia',        dial: '+216', flag: '🇹🇳' },
-  { code: 'US', name: 'United States',  dial: '+1',   flag: '🇺🇸' },
-  { code: 'GB', name: 'United Kingdom', dial: '+44',  flag: '🇬🇧' },
-  { code: 'DE', name: 'Germany',        dial: '+49',  flag: '🇩🇪' },
-  { code: 'FR', name: 'France',         dial: '+33',  flag: '🇫🇷' },
-  { code: 'TR', name: 'Turkey',         dial: '+90',  flag: '🇹🇷' },
-  { code: 'IN', name: 'India',          dial: '+91',  flag: '🇮🇳' },
-  { code: 'PK', name: 'Pakistan',       dial: '+92',  flag: '🇵🇰' },
-  { code: 'CN', name: 'China',          dial: '+86',  flag: '🇨🇳' },
-  { code: 'AU', name: 'Australia',      dial: '+61',  flag: '🇦🇺' },
+  { code: 'SD', name: 'Sudan',          dial: '+249', flag: '🇸🇩', len: { min: 9,  max: 9  } },
+  { code: 'SA', name: 'Saudi Arabia',   dial: '+966', flag: '🇸🇦', len: { min: 9,  max: 9  } },
+  { code: 'AE', name: 'UAE',            dial: '+971', flag: '🇦🇪', len: { min: 9,  max: 9  } },
+  { code: 'EG', name: 'Egypt',          dial: '+20',  flag: '🇪🇬', len: { min: 10, max: 10 } },
+  { code: 'QA', name: 'Qatar',          dial: '+974', flag: '🇶🇦', len: { min: 8,  max: 8  } },
+  { code: 'KW', name: 'Kuwait',         dial: '+965', flag: '🇰🇼', len: { min: 8,  max: 8  } },
+  { code: 'BH', name: 'Bahrain',        dial: '+973', flag: '🇧🇭', len: { min: 8,  max: 8  } },
+  { code: 'OM', name: 'Oman',           dial: '+968', flag: '🇴🇲', len: { min: 8,  max: 8  } },
+  { code: 'JO', name: 'Jordan',         dial: '+962', flag: '🇯🇴', len: { min: 9,  max: 9  } },
+  { code: 'LB', name: 'Lebanon',        dial: '+961', flag: '🇱🇧', len: { min: 7,  max: 8  } },
+  { code: 'SS', name: 'South Sudan',    dial: '+211', flag: '🇸🇸', len: { min: 9,  max: 9  } },
+  { code: 'ET', name: 'Ethiopia',       dial: '+251', flag: '🇪🇹', len: { min: 9,  max: 9  } },
+  { code: 'LY', name: 'Libya',          dial: '+218', flag: '🇱🇾', len: { min: 9,  max: 9  } },
+  { code: 'MA', name: 'Morocco',        dial: '+212', flag: '🇲🇦', len: { min: 9,  max: 9  } },
+  { code: 'DZ', name: 'Algeria',        dial: '+213', flag: '🇩🇿', len: { min: 9,  max: 9  } },
+  { code: 'TN', name: 'Tunisia',        dial: '+216', flag: '🇹🇳', len: { min: 8,  max: 8  } },
+  { code: 'US', name: 'United States',  dial: '+1',   flag: '🇺🇸', len: { min: 10, max: 10 } },
+  { code: 'GB', name: 'United Kingdom', dial: '+44',  flag: '🇬🇧', len: { min: 10, max: 10 } },
+  { code: 'DE', name: 'Germany',        dial: '+49',  flag: '🇩🇪', len: { min: 10, max: 11 } },
+  { code: 'FR', name: 'France',         dial: '+33',  flag: '🇫🇷', len: { min: 9,  max: 9  } },
+  { code: 'TR', name: 'Turkey',         dial: '+90',  flag: '🇹🇷', len: { min: 10, max: 10 } },
+  { code: 'IN', name: 'India',          dial: '+91',  flag: '🇮🇳', len: { min: 10, max: 10 } },
+  { code: 'PK', name: 'Pakistan',       dial: '+92',  flag: '🇵🇰', len: { min: 10, max: 10 } },
+  { code: 'CN', name: 'China',          dial: '+86',  flag: '🇨🇳', len: { min: 11, max: 11 } },
+  { code: 'AU', name: 'Australia',      dial: '+61',  flag: '🇦🇺', len: { min: 9,  max: 9  } },
 ]
 
 export { COUNTRIES }
@@ -147,6 +153,10 @@ export default function PhoneInput({ value, onChange, dialCode, onDialChange }) 
         onChange={e => {
           let v = e.target.value.replace(/\D/g, '')
           if (v.startsWith('0')) v = v.slice(1)
+          // Stop accepting digits once the selected country's number is full,
+          // rather than letting extra digits pile up and only rejecting them
+          // at submit time.
+          v = v.slice(0, selected.len.max)
           onChange(v)
         }}
       />
