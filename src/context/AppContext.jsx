@@ -7,7 +7,10 @@ export function AppProvider({ children }) {
     localStorage.getItem('rasha_lang')
     || (navigator.language?.toLowerCase().startsWith('ar') ? 'ar' : 'en')
   )
-  const [toast, setToast] = useState(null)
+  // A stack rather than a single slot — two errors in quick succession (e.g.
+  // a slots fetch and a pricing fetch both timing out) now queue instead of
+  // the second silently discarding the first.
+  const [toasts, setToasts] = useState([])
   // Blocking error dialog — for failures the customer can't scroll past.
   const [errorModal, setErrorModal] = useState(null)
 
@@ -101,9 +104,14 @@ export function AppProvider({ children }) {
   })
   const toggleLang = () => setLang(l => l === 'en' ? 'ar' : 'en')
   const t = (en, ar) => lang === 'ar' ? ar : en
-  const showToast = useCallback((msg, type = 'success') => {
-    setToast({ msg, type, id: Date.now() })
+  const dismissToast = useCallback((id) => {
+    setToasts(list => list.filter(t2 => t2.id !== id))
   }, [])
+  const showToast = useCallback((msg, type = 'success', title) => {
+    const id = Date.now() + Math.random()
+    setToasts(list => [...list, { msg, type, title, id }])
+    setTimeout(() => dismissToast(id), 3500)
+  }, [dismissToast])
   /**
    * Raise a blocking dialog. Pass { title, message, icon, actions } where each
    * action is { label, primary?, to?, onClick? }. Reserved for failures that
@@ -149,11 +157,6 @@ export function AppProvider({ children }) {
   }
   const isSuperAdmin = staffRole === 'super_admin'
   const hasPerm = (perm) => isSuperAdmin || !!staffPermissions[perm]
-  useEffect(() => {
-    if (!toast) return
-    const id = setTimeout(() => setToast(null), 3500)
-    return () => clearTimeout(id)
-  }, [toast])
 
   // Keep the Render free-tier server warm — ping every 14 minutes so new
   // visitors don't hit a 30-50 second cold-start timeout on their first request.
@@ -169,7 +172,7 @@ export function AppProvider({ children }) {
     return () => clearInterval(id)
   }, [])
   return (
-    <AppContext.Provider value={{ lang, toggleLang, t, toast, showToast, errorModal, showError, closeError, customer, token, login, logout, staffToken, setStaffToken, staffRole, staffPermissions, isSuperAdmin, hasPerm, theme, toggleTheme, isDark }}>
+    <AppContext.Provider value={{ lang, toggleLang, t, toasts, showToast, dismissToast, errorModal, showError, closeError, customer, token, login, logout, staffToken, setStaffToken, staffRole, staffPermissions, isSuperAdmin, hasPerm, theme, toggleTheme, isDark }}>
       {children}
     </AppContext.Provider>
   )
