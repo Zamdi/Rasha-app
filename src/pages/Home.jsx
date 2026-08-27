@@ -28,7 +28,7 @@ export default function Home() {
           background: 'radial-gradient(ellipse 55% 80% at 68% 55%, rgba(240,255,255,0.18) 0%, transparent 65%)',
         }} />
 
-        {/* Mustang — right side, sits on the light zone */}
+        {/* Mustang — desktop */}
         <img
           src="/hero-mustang.png"
           alt=""
@@ -43,6 +43,25 @@ export default function Home() {
               ? `brightness(1.15) contrast(1.1) drop-shadow(${isAr ? '12px' : '-12px'} 0 50px rgba(126,206,202,0.25))`
               : `brightness(1.0) contrast(1.08) drop-shadow(${isAr ? '12px' : '-12px'} 0 40px rgba(21,80,88,0.5))`,
             mixBlendMode: 'normal',
+            transform: isAr ? 'scaleX(-1)' : 'none',
+            zIndex: 1,
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}
+        />
+        {/* Mustang — mobile: full-width, anchored to bottom */}
+        <img
+          src="/hero-mustang.png"
+          alt=""
+          aria-hidden="true"
+          className="absolute block md:hidden"
+          style={{
+            bottom: 0,
+            left: '-5%',
+            width: '110%',
+            filter: isDark
+              ? 'brightness(1.1) contrast(1.05) drop-shadow(-8px 0 30px rgba(126,206,202,0.2))'
+              : 'brightness(1.0) contrast(1.05) drop-shadow(-8px 0 24px rgba(21,80,88,0.4))',
             transform: isAr ? 'scaleX(-1)' : 'none',
             zIndex: 1,
             pointerEvents: 'none',
