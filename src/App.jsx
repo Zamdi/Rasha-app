@@ -20,6 +20,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Settings from './pages/Settings'
 import Wallet from './pages/Wallet'
+import Bookings from './pages/Bookings'
 import NotFound from './pages/NotFound'
 
 function AppShell() {
@@ -56,6 +57,7 @@ function AppShell() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/wallet" element={<Wallet />} />
+          <Route path="/bookings" element={<Bookings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <MobileNav />

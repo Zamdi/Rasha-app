@@ -244,7 +244,7 @@ export default function Loyalty() {
             {/* Next booking */}
             {nextBooking && (
               <div className="glass p-4 rounded-2xl">
-                <p className="text-xs font-bold text-on-surface-variant uppercase mb-3">{t('Your Booking', 'حجزك')}</p>
+                <p className="text-xs font-bold text-on-surface-variant uppercase mb-3">{t('Upcoming Booking', 'الحجز القادم')}</p>
                 <div className="flex items-center gap-3">
                   <div className="bg-secondary-fixed/10 p-2 rounded-lg">
                     <span className="material-symbols-outlined text-secondary-fixed text-base">calendar_month</span>
