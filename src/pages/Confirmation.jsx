@@ -43,7 +43,7 @@ export default function Confirmation() {
   }, [])
 
   if (!state) return null
-  const { ref, service, date, time, name, phone, vehicle } = state
+  const { ref, service, date, time, name, phone, vehicle, paidFromWallet, amount } = state
   const svcLabel = service === 'full' ? t('Full Wash', 'غسيل كامل') : t('Exterior Only', 'خارجي فقط')
   const formattedDate = date ? new Date(date.slice(0,10) + 'T12:00:00').toLocaleDateString(t('en-US', 'ar-EG'), { year: 'numeric', month: 'long', day: 'numeric' }) : ''
 
@@ -109,8 +109,10 @@ export default function Confirmation() {
         : `<div class="detail"><div class="detail-icon">📍</div><div><div class="detail-label">Location</div><div class="detail-value">Rasha Car Wash, Khartoum</div></div></div>`
       }
       ${phone ? `<div class="detail"><div class="detail-icon">📞</div><div><div class="detail-label">Phone</div><div class="detail-value">${esc(phone)}</div></div></div>` : ''}
+      <div class="detail"><div class="detail-icon">${paidFromWallet ? '💳' : '💵'}</div><div><div class="detail-label">Payment</div><div class="detail-value" style="color:${paidFromWallet ? '#155058' : '#111'}">${paidFromWallet ? 'Paid via Wallet' : 'Pay at location (Cash)'}</div></div></div>
     </div>
   </div>
+  ${paidFromWallet ? `<div class="notice" style="border-left-color:#22c55e;background:#f0fdf4">✅ This booking has been <strong>paid in full</strong> via your Rasha wallet.</div>` : `<div class="notice">💵 Payment is due <strong>at the location</strong>. Please have cash ready upon arrival.</div>`}
   <div class="notice">⏱ Please arrive <strong>15 minutes early</strong> for a pre-wash inspection with our lead detailer.</div>
   <div class="footer">© 2025 Rasha Car Wash · All rights reserved · rasha.sd</div>
 </div>
@@ -187,6 +189,9 @@ export default function Confirmation() {
                 vehicle
                   ? ['directions_car', t('Vehicle', 'السيارة'), vehicle, false]
                   : ['person',         t('Customer', 'العميل'), name || 'N/A', false],
+                paidFromWallet
+                  ? ['account_balance_wallet', t('Payment', 'الدفع'), t('Paid via Wallet', 'مدفوع من المحفظة'), false]
+                  : ['payments', t('Payment', 'الدفع'), t('Pay at location (Cash)', 'الدفع عند الوصول (نقداً)'), false],
               ].map(([icon, label, value, ltr]) => (
                 <div key={label} className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"

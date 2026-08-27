@@ -40,6 +40,15 @@ export default function Settings() {
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [errors, setErrors] = useState({})
 
+  // Email change flow
+  const [showEmailModal, setShowEmailModal] = useState(false)
+  const [emailStep, setEmailStep] = useState('input') // 'input' | 'otp'
+  const [newEmail, setNewEmail] = useState('')
+  const [emailOtp, setEmailOtp] = useState('')
+  const [maskedEmail, setMaskedEmail] = useState('')
+  const [emailLoading, setEmailLoading] = useState(false)
+  const [emailError, setEmailError] = useState('')
+
   const hdrs = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }
   if (!customer) { navigate('/login'); return null }
 
@@ -216,6 +225,39 @@ export default function Settings() {
     } finally { setDeleteLoading(false) }
   }
 
+  const openEmailModal = () => {
+    setNewEmail(''); setEmailOtp(''); setEmailStep('input'); setEmailError(''); setShowEmailModal(true)
+  }
+
+  const requestEmailChange = async () => {
+    setEmailLoading(true); setEmailError('')
+    try {
+      const res = await fetch(`${API}/api/auth/request-email-change`, {
+        method: 'POST', headers: hdrs, body: JSON.stringify({ newEmail })
+      })
+      const data = await res.json()
+      if (!res.ok) { setEmailError(data.error || t('Could not send code', 'تعذر إرسال الرمز')); return }
+      setMaskedEmail(data.maskedEmail)
+      setEmailStep('otp')
+    } catch { setEmailError(t('Connection error', 'خطأ في الاتصال')) }
+    finally { setEmailLoading(false) }
+  }
+
+  const verifyEmailChange = async () => {
+    setEmailLoading(true); setEmailError('')
+    try {
+      const res = await fetch(`${API}/api/auth/verify-email-change`, {
+        method: 'POST', headers: hdrs, body: JSON.stringify({ newEmail, otp: emailOtp })
+      })
+      const data = await res.json()
+      if (!res.ok) { setEmailError(data.error || t('Invalid code', 'رمز غير صحيح')); return }
+      login(token, { ...customer, ...data.customer, stamps: customer.stamps, totalWashes: customer.totalWashes })
+      setShowEmailModal(false)
+      showToast(t('Email updated!', 'تم تحديث البريد الإلكتروني!'))
+    } catch { setEmailError(t('Connection error', 'خطأ في الاتصال')) }
+    finally { setEmailLoading(false) }
+  }
+
   const navItems = [
     { id: 'profile', icon: 'person', label: t('Profile', 'الملف الشخصي'), href: '/settings' },
     { id: 'wallet', icon: 'account_balance_wallet', label: t('Wallet', 'المحفظة'), href: '/wallet' },
@@ -344,8 +386,14 @@ export default function Settings() {
                     </div>
                     <div className="md:col-span-2">
                       <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 block">{t('Email Address', 'البريد الإلكتروني')}</label>
-                      <input className="rasha-input text-sm" value={customer.email} readOnly style={{ opacity: 0.5, cursor: 'not-allowed' }} />
-                      <p className="text-xs text-on-surface-variant mt-1 opacity-60">{t('Email cannot be changed', 'لا يمكن تغيير البريد الإلكتروني')}</p>
+                      <div className="flex gap-2 items-center">
+                        <input className="rasha-input text-sm flex-1" value={customer.email} readOnly style={{ opacity: 0.7, cursor: 'default' }} />
+                        <button onClick={openEmailModal}
+                          className="shrink-0 text-xs font-bold px-4 py-2.5 rounded-xl transition-all whitespace-nowrap"
+                          style={{ border: '1px solid var(--color-outline-variant)', color: 'var(--color-on-surface-variant)', background: 'var(--color-surface-container)' }}>
+                          {t('Change', 'تغيير')}
+                        </button>
+                      </div>
                     </div>
                   </div>
                   {profileSuccess && (
@@ -466,6 +514,53 @@ export default function Settings() {
                 className="flex-1 py-3 rounded-xl text-sm font-bold hydro-gradient text-white hover:opacity-90">
                 {t('Apply', 'تطبيق')}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Change Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-full max-w-sm rounded-2xl overflow-hidden animate-fade-in" style={{ background: 'var(--color-surface-container)', border: '1px solid var(--color-outline-variant)' }}>
+            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+              <h3 className="font-bold text-on-surface">{t('Change Email', 'تغيير البريد الإلكتروني')}</h3>
+              <button onClick={() => setShowEmailModal(false)}>
+                <span className="material-symbols-outlined text-on-surface-variant">close</span>
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              {emailStep === 'input' ? (
+                <>
+                  <p className="text-sm text-on-surface-variant">{t("Enter your new email address. We'll send a verification code to confirm it.", 'أدخل بريدك الإلكتروني الجديد. سنرسل رمز تحقق للتأكيد.')}</p>
+                  <div>
+                    <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 block">{t('New Email', 'البريد الجديد')}</label>
+                    <input type="email" className="rasha-input text-sm w-full" value={newEmail} onChange={e => { setNewEmail(e.target.value); setEmailError('') }} placeholder="you@example.com" />
+                  </div>
+                  {emailError && <p className="text-xs font-semibold" style={{ color: 'var(--color-error)' }}>{emailError}</p>}
+                  <div className="flex gap-3 pt-1">
+                    <button onClick={() => setShowEmailModal(false)} className="flex-1 py-3 rounded-xl text-sm font-bold text-on-surface-variant" style={{ background: 'var(--input-bg)', border: '1px solid var(--input-border)' }}>{t('Cancel', 'إلغاء')}</button>
+                    <button onClick={requestEmailChange} disabled={emailLoading || !newEmail.trim()} className="flex-1 py-3 rounded-xl text-sm font-bold hydro-gradient text-white hover:opacity-90 flex items-center justify-center gap-2">
+                      {emailLoading ? <div className="loader" /> : t('Send Code', 'إرسال الرمز')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-on-surface-variant">{t('A 6-digit code was sent to', 'تم إرسال رمز مكون من 6 أرقام إلى')} <span className="font-bold text-on-surface" dir="ltr">{maskedEmail}</span></p>
+                  <div>
+                    <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 block">{t('Verification Code', 'رمز التحقق')}</label>
+                    <input type="text" inputMode="numeric" maxLength={6} className="rasha-input text-sm w-full text-center font-mono tracking-widest" value={emailOtp} onChange={e => { setEmailOtp(e.target.value.replace(/\D/g,'')); setEmailError('') }} placeholder="• • • • • •" />
+                  </div>
+                  {emailError && <p className="text-xs font-semibold" style={{ color: 'var(--color-error)' }}>{emailError}</p>}
+                  <div className="flex gap-3 pt-1">
+                    <button onClick={() => setEmailStep('input')} className="flex-1 py-3 rounded-xl text-sm font-bold text-on-surface-variant" style={{ background: 'var(--input-bg)', border: '1px solid var(--input-border)' }}>{t('Back', 'رجوع')}</button>
+                    <button onClick={verifyEmailChange} disabled={emailLoading || emailOtp.length < 6} className="flex-1 py-3 rounded-xl text-sm font-bold hydro-gradient text-white hover:opacity-90 flex items-center justify-center gap-2">
+                      {emailLoading ? <div className="loader" /> : t('Confirm', 'تأكيد')}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
