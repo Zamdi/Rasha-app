@@ -48,74 +48,159 @@ export default function Confirmation() {
   const formattedDate = date ? new Date(date.slice(0,10) + 'T12:00:00').toLocaleDateString(t('en-US', 'ar-EG'), { year: 'numeric', month: 'long', day: 'numeric' }) : ''
 
   const downloadPDF = () => {
-    // The receipt is written as raw HTML, so escape any value the customer
-    // typed (name, vehicle, phone) before it goes in.
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+    const svcDesc = service === 'full' ? 'Interior &amp; Exterior Detailed Cleaning' : 'Exterior Body Wash &amp; Rinse'
+    const payLabel = paidFromWallet ? 'Paid via Wallet' : 'Pay at Location (Cash)'
+    const qrData = esc(ref) + '|' + esc(name || '') + '|' + esc(date || '') + '|' + esc(time || '') + '|' + esc(service || '')
     const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>Rasha Booking Receipt - ${esc(ref)}</title>
+  <title>Rasha - Booking Confirmation ${esc(ref)}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', 'IBM Plex Sans', sans-serif; background: #fff; color: #111; }
-    .page { max-width: 600px; margin: 0 auto; padding: 48px 40px; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid #155058; }
-    .logo { font-size: 26px; font-weight: 900; letter-spacing: 4px; color: #155058; }
-    .logo-sub { font-size: 11px; color: #888; letter-spacing: 1px; margin-top: 4px; }
-    .badge { background: #eef6f5; border: 1px solid #155058; border-radius: 6px; padding: 8px 14px; text-align: right; }
-    .badge-label { font-size: 10px; color: #155058; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-    .badge-ref { font-size: 20px; font-weight: 800; color: #155058; letter-spacing: 1px; }
-    .confirmed-section { text-align: center; margin-bottom: 32px; }
-    .check { width: 56px; height: 56px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 28px; }
-    h1 { font-size: 24px; font-weight: 800; color: #111; margin-bottom: 6px; }
-    .subtitle { font-size: 13px; color: #666; }
-    .card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 24px; margin-bottom: 24px; }
-    .card-header { display: flex; justify-content: space-between; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb; }
-    .card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; margin-bottom: 4px; }
-    .card-value { font-size: 18px; font-weight: 700; color: #111; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .detail { display: flex; align-items: flex-start; gap: 10px; }
-    .detail-icon { width: 36px; height: 36px; background: #e6f2f1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-    .detail-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; margin-bottom: 3px; }
-    .detail-value { font-size: 14px; font-weight: 600; color: #111; }
-    .notice { background: #eef6f5; border-left: 4px solid #155058; border-radius: 4px; padding: 12px 16px; margin-bottom: 32px; font-size: 12px; color: #444; line-height: 1.6; }
-    .footer { text-align: center; font-size: 11px; color: #aaa; padding-top: 24px; border-top: 1px solid #eee; }
-    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #e8e6e3; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .doc { background: #fff; width: 100%; max-width: 820px; margin: 0 auto; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.18); }
+    .top-bar { height: 5px; background: #12454B; }
+    .inner { padding: 48px; position: relative; }
+    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 280px; opacity: 0.03; pointer-events: none; color: #12454B; font-family: 'Montserrat', sans-serif; font-weight: 800; line-height: 1; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 28px; margin-bottom: 32px; border-bottom: 1px solid #d8d4cc; position: relative; z-index: 1; }
+    .brand-name { font-family: 'Montserrat', sans-serif; font-size: 34px; font-weight: 800; color: #12454B; letter-spacing: -0.02em; }
+    .brand-sub { font-size: 10px; font-weight: 600; color: #12454B; opacity: 0.6; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 5px; }
+    .header-right { text-align: right; }
+    .doc-title { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.06em; }
+    .ref-num { font-size: 12px; color: #777; letter-spacing: 0.04em; margin-top: 6px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; padding: 4px 12px; background: #E8F2F1; border-radius: 100px; font-size: 10px; font-weight: 700; color: #12454B; letter-spacing: 0.06em; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #12454B; }
+    .body-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; position: relative; z-index: 1; }
+    .left { display: flex; flex-direction: column; gap: 26px; }
+    .right { display: flex; flex-direction: column; gap: 26px; }
+    .sec-label { font-size: 10px; font-weight: 700; color: #12454B; letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 10px; }
+    .card { background: #F9F6EF; padding: 18px 20px; border-radius: 10px; border: 1px solid rgba(18,69,75,0.1); }
+    .cust-name { font-family: 'Montserrat', sans-serif; font-size: 19px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px; }
+    .cust-phone { font-size: 13px; color: #555; }
+    .appt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .appt-lbl { font-size: 9px; font-weight: 700; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+    .appt-val { font-size: 15px; font-weight: 700; color: #1a1a1a; line-height: 1.3; }
+    .appt-val.accent { color: #12454B; }
+    .svc-name { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+    .svc-desc { font-size: 12px; color: #666; margin-bottom: 12px; }
+    .svc-badge { font-size: 9px; font-weight: 700; color: #12454B; letter-spacing: 0.09em; text-transform: uppercase; }
+    .pay-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; background: ${paidFromWallet ? '#f0fdf8' : '#F9F6EF'}; border: 1px solid ${paidFromWallet ? 'rgba(34,197,94,0.25)' : 'rgba(18,69,75,0.1)'}; }
+    .pay-icon { font-size: 20px; }
+    .pay-lbl { font-size: 9px; font-weight: 700; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; }
+    .pay-val { font-size: 13px; font-weight: 700; color: ${paidFromWallet ? '#15803d' : '#1a1a1a'}; }
+    .qr-box { flex: 1; background: #F9F6EF; border-radius: 12px; border: 1px solid rgba(18,69,75,0.1); padding: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .qr-lbl { font-size: 9px; font-weight: 700; color: #12454B; letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 18px; text-align: center; }
+    .qr-frame { background: #fff; padding: 14px; border-radius: 8px; border: 1px solid #d8d4cc; display: inline-block; }
+    .qr-ref { font-size: 11px; font-weight: 600; color: #888; letter-spacing: 0.04em; margin-top: 14px; }
+    .loc-row { display: flex; gap: 12px; align-items: flex-start; }
+    .loc-icon { width: 38px; height: 38px; border-radius: 50%; background: #E8F2F1; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .loc-name { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+    .loc-addr { font-size: 12px; color: #666; line-height: 1.55; }
+    .notice { background: #E8F2F1; border-left: 3px solid #12454B; border-radius: 5px; padding: 11px 14px; font-size: 12px; color: #444; line-height: 1.65; margin-top: 28px; position: relative; z-index: 1; }
+    .footer { margin-top: 28px; padding-top: 22px; border-top: 1px solid rgba(18,69,75,0.12); text-align: center; position: relative; z-index: 1; }
+    .footer-main { font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+    .footer-sub { font-size: 12px; color: #888; }
+    .footer-copy { font-size: 10px; color: #bbb; margin-top: 14px; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .doc { box-shadow: none; border-radius: 0; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
   </style>
 </head>
 <body>
-<div class="page">
-  <div class="header">
-    <div><div class="logo">RASHA</div><div class="logo-sub">Premium Car Wash · Khartoum, Sudan</div></div>
-    <div class="badge"><div class="badge-label">Confirmation</div><div class="badge-ref">${esc(ref)}</div></div>
-  </div>
-  <div class="confirmed-section">
-    <div class="check">✓</div>
-    <h1>Booking Confirmed</h1>
-    <div class="subtitle">Your car wash is scheduled. See you soon!</div>
-  </div>
-  <div class="card">
-    <div class="card-header">
-      <div><div class="card-label">Service</div><div class="card-value">${svcLabel}</div></div>
-      <div style="text-align:right"><div class="card-label">Reference</div><div class="card-value" style="color:#155058">${esc(ref)}</div></div>
+<div class="doc">
+  <div class="top-bar"></div>
+  <div class="inner">
+    <div class="watermark">✦</div>
+    <div class="header">
+      <div>
+        <div class="brand-name">Rasha</div>
+        <div class="brand-sub">Premium Carwash · Khartoum</div>
+      </div>
+      <div class="header-right">
+        <div class="doc-title">Booking Confirmation</div>
+        <div class="ref-num">REF: ${esc(ref)}</div>
+        <div class="status-pill"><div class="status-dot"></div> CONFIRMED</div>
+      </div>
     </div>
-    <div class="grid">
-      <div class="detail"><div class="detail-icon">📅</div><div><div class="detail-label">Date</div><div class="detail-value">${formattedDate}</div></div></div>
-      <div class="detail"><div class="detail-icon">⏰</div><div><div class="detail-label">Time</div><div class="detail-value">${esc(time)}</div></div></div>
-      <div class="detail"><div class="detail-icon">👤</div><div><div class="detail-label">Customer</div><div class="detail-value">${esc(name || 'N/A')}</div></div></div>
-      ${vehicle
-        ? `<div class="detail"><div class="detail-icon">🚗</div><div><div class="detail-label">Vehicle</div><div class="detail-value">${esc(vehicle)}</div></div></div>`
-        : `<div class="detail"><div class="detail-icon">📍</div><div><div class="detail-label">Location</div><div class="detail-value">Rasha Car Wash, Khartoum</div></div></div>`
-      }
-      ${phone ? `<div class="detail"><div class="detail-icon">📞</div><div><div class="detail-label">Phone</div><div class="detail-value">${esc(phone)}</div></div></div>` : ''}
-      <div class="detail"><div class="detail-icon">${paidFromWallet ? '💳' : '💵'}</div><div><div class="detail-label">Payment</div><div class="detail-value" style="color:${paidFromWallet ? '#155058' : '#111'}">${paidFromWallet ? 'Paid via Wallet' : 'Pay at location (Cash)'}</div></div></div>
+    <div class="body-grid">
+      <div class="left">
+        <div>
+          <div class="sec-label">👤 Customer Details</div>
+          <div class="card">
+            <div class="cust-name">${esc(name || 'N/A')}</div>
+            ${phone ? `<div class="cust-phone">📞 ${esc(phone)}</div>` : ''}
+          </div>
+        </div>
+        <div>
+          <div class="sec-label">📅 Appointment</div>
+          <div class="card">
+            <div class="appt-grid">
+              <div><div class="appt-lbl">Date</div><div class="appt-val">${formattedDate}</div></div>
+              <div><div class="appt-lbl">Time</div><div class="appt-val accent">${esc(time)}</div></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sec-label">🧼 Service Summary</div>
+          <div class="card">
+            <div class="svc-name">${svcLabel}</div>
+            <div class="svc-desc">${svcDesc}</div>
+            <div class="svc-badge">💧 Rasha Premium Service</div>
+          </div>
+        </div>
+        <div>
+          <div class="sec-label">${paidFromWallet ? '💳' : '💵'} Payment</div>
+          <div class="pay-row">
+            <div class="pay-icon">${paidFromWallet ? '💳' : '💵'}</div>
+            <div><div class="pay-lbl">Status</div><div class="pay-val">${payLabel}</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="qr-box">
+          <div class="qr-lbl">Scan at Service Bay</div>
+          <div class="qr-frame"><div id="qrcode"></div></div>
+          <div class="qr-ref">${esc(ref)}</div>
+        </div>
+        <div>
+          <div class="sec-label">📍 Location</div>
+          <div class="card">
+            <div class="loc-row">
+              <div class="loc-icon">📌</div>
+              <div>
+                <div class="loc-name">Rasha Main Center</div>
+                <div class="loc-addr">Al-Amarat, Street 15<br/>Khartoum, Sudan</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notice">⏱ Please arrive <strong>15 minutes early</strong> for a pre-wash inspection. Present this slip or the QR code at the service bay. ${paidFromWallet ? '✅ This booking has been <strong>paid in full</strong> via your Rasha wallet.' : '💵 Payment is due <strong>at the location</strong>. Please have cash ready upon arrival.'}</div>
+    <div class="footer">
+      <div class="footer-main">Thank you for choosing Rasha.</div>
+      <div class="footer-sub">Please present this confirmation upon arrival at the service bay.</div>
+      <div class="footer-copy">© 2025 Rasha Car Wash · All rights reserved · Khartoum, Sudan</div>
     </div>
   </div>
-  ${paidFromWallet ? `<div class="notice" style="border-left-color:#22c55e;background:#f0fdf4">✅ This booking has been <strong>paid in full</strong> via your Rasha wallet.</div>` : `<div class="notice">💵 Payment is due <strong>at the location</strong>. Please have cash ready upon arrival.</div>`}
-  <div class="notice">⏱ Please arrive <strong>15 minutes early</strong> for a pre-wash inspection with our lead detailer.</div>
-  <div class="footer">© 2025 Rasha Car Wash · All rights reserved · rasha.sd</div>
 </div>
+<script>
+  new QRCode(document.getElementById('qrcode'), {
+    text: '${qrData}',
+    width: 160,
+    height: 160,
+    colorDark: '#12454B',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+  window.addEventListener('load', function() { setTimeout(function() { window.print(); }, 900); });
+<\/script>
 </body>
 </html>`
     const win = window.open('', '_blank')
@@ -123,7 +208,6 @@ export default function Confirmation() {
     win.document.write(html)
     win.document.close()
     win.focus()
-    setTimeout(() => { win.print() }, 600)
   }
 
   return (
