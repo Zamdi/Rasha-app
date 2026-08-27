@@ -62,10 +62,6 @@ export default function Home() {
         {/* Content */}
         <div className="relative w-full max-w-7xl mx-auto px-5 pt-20 pb-16 md:py-24" style={{ zIndex: 3 }}>
           <div className="max-w-xl space-y-5 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 text-white/70" style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
-              <span className="material-symbols-outlined fill-icon text-sm" style={{ color: '#74f5ff' }}>auto_awesome</span>
-              <span className="text-xs font-bold uppercase tracking-wide">{t("Sudan's Premier Car Wash", 'أفضل غسيل سيارات في السودان')}</span>
-            </div>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight font-display">
               {t('Drive Clean.', 'اقد نظيفاً.')}<br />
