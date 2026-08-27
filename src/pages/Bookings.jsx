@@ -101,7 +101,7 @@ export default function Bookings() {
 
   return (
     <div className="min-h-dvh" style={{ background: 'var(--color-background)' }}>
-      <main className="max-w-4xl mx-auto px-4 py-8 pb-28 md:pb-10">
+      <main className="max-w-4xl mx-auto px-4 pt-16 pb-28 md:pb-10">
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
