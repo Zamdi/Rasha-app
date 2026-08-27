@@ -51,7 +51,8 @@ export default function Confirmation() {
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
     const svcDesc = service === 'full' ? 'Interior &amp; Exterior Detailed Cleaning' : 'Exterior Body Wash &amp; Rinse'
     const payLabel = paidFromWallet ? 'Paid via Wallet' : 'Pay at Location (Cash)'
-    const qrData = esc(ref) + '|' + esc(name || '') + '|' + esc(date || '') + '|' + esc(time || '') + '|' + esc(service || '')
+    const bookingUid = ref.replace('#RSH-', 'BK-')
+    const qrData = bookingUid
     const html = `<!DOCTYPE html>
 <html>
 <head>
