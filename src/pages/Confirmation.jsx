@@ -58,56 +58,69 @@ export default function Confirmation() {
 <head>
   <meta charset="utf-8"/>
   <title>Rasha - Booking Confirmation ${esc(ref)}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #e8e6e3; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #e5e2e1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .msi { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap; word-wrap: normal; direction: ltr; -webkit-font-smoothing: antialiased; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .msi-f { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
     .doc { background: #fff; width: 100%; max-width: 820px; margin: 0 auto; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.18); }
-    .top-bar { height: 5px; background: #12454B; }
-    .inner { padding: 48px; position: relative; }
-    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 280px; opacity: 0.03; pointer-events: none; color: #12454B; font-family: 'Montserrat', sans-serif; font-weight: 800; line-height: 1; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 28px; margin-bottom: 32px; border-bottom: 1px solid #d8d4cc; position: relative; z-index: 1; }
-    .brand-name { font-family: 'Montserrat', sans-serif; font-size: 34px; font-weight: 800; color: #12454B; letter-spacing: -0.02em; }
-    .brand-sub { font-size: 10px; font-weight: 600; color: #12454B; opacity: 0.6; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 5px; }
+    .top-bar { height: 8px; background: #003f87; }
+    .inner { padding: 48px; position: relative; min-height: 1000px; }
+    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); opacity: 0.03; pointer-events: none; color: #003f87; font-size: 400px; line-height: 1; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 28px; margin-bottom: 32px; border-bottom: 1px solid #c2c6d4; position: relative; z-index: 1; }
+    .brand-name { font-family: 'Montserrat', sans-serif; font-size: 34px; font-weight: 700; color: #003f87; letter-spacing: -0.02em; }
+    .brand-sub { font-size: 10px; font-weight: 600; color: #00677d; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 5px; }
     .header-right { text-align: right; }
-    .doc-title { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.06em; }
-    .ref-num { font-size: 12px; color: #777; letter-spacing: 0.04em; margin-top: 6px; }
-    .status-pill { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; padding: 4px 12px; background: #E8F2F1; border-radius: 100px; font-size: 10px; font-weight: 700; color: #12454B; letter-spacing: 0.06em; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #12454B; }
-    .body-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; position: relative; z-index: 1; }
-    .left { display: flex; flex-direction: column; gap: 26px; }
-    .right { display: flex; flex-direction: column; gap: 26px; }
-    .sec-label { font-size: 10px; font-weight: 700; color: #12454B; letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 10px; }
-    .card { background: #F9F6EF; padding: 18px 20px; border-radius: 10px; border: 1px solid rgba(18,69,75,0.1); }
-    .cust-name { font-family: 'Montserrat', sans-serif; font-size: 19px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px; }
-    .cust-phone { font-size: 13px; color: #555; }
-    .appt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .appt-lbl { font-size: 9px; font-weight: 700; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
-    .appt-val { font-size: 15px; font-weight: 700; color: #1a1a1a; line-height: 1.3; }
-    .appt-val.accent { color: #12454B; }
-    .svc-name { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
-    .svc-desc { font-size: 12px; color: #666; margin-bottom: 12px; }
-    .svc-badge { font-size: 9px; font-weight: 700; color: #12454B; letter-spacing: 0.09em; text-transform: uppercase; }
-    .pay-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; background: ${paidFromWallet ? '#f0fdf8' : '#F9F6EF'}; border: 1px solid ${paidFromWallet ? 'rgba(34,197,94,0.25)' : 'rgba(18,69,75,0.1)'}; }
-    .pay-icon { font-size: 20px; }
-    .pay-lbl { font-size: 9px; font-weight: 700; color: #999; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; }
-    .pay-val { font-size: 13px; font-weight: 700; color: ${paidFromWallet ? '#15803d' : '#1a1a1a'}; }
-    .qr-box { flex: 1; background: #F9F6EF; border-radius: 12px; border: 1px solid rgba(18,69,75,0.1); padding: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .qr-lbl { font-size: 9px; font-weight: 700; color: #12454B; letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 18px; text-align: center; }
-    .qr-frame { background: #fff; padding: 14px; border-radius: 8px; border: 1px solid #d8d4cc; display: inline-block; }
-    .qr-ref { font-size: 11px; font-weight: 600; color: #888; letter-spacing: 0.04em; margin-top: 14px; }
-    .loc-row { display: flex; gap: 12px; align-items: flex-start; }
-    .loc-icon { width: 38px; height: 38px; border-radius: 50%; background: #E8F2F1; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-    .loc-name { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
-    .loc-addr { font-size: 12px; color: #666; line-height: 1.55; }
-    .notice { background: #E8F2F1; border-left: 3px solid #12454B; border-radius: 5px; padding: 11px 14px; font-size: 12px; color: #444; line-height: 1.65; margin-top: 28px; position: relative; z-index: 1; }
-    .footer { margin-top: 28px; padding-top: 22px; border-top: 1px solid rgba(18,69,75,0.12); text-align: center; position: relative; z-index: 1; }
-    .footer-main { font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-    .footer-sub { font-size: 12px; color: #888; }
-    .footer-copy { font-size: 10px; color: #bbb; margin-top: 14px; }
+    .doc-title { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 600; color: #1c1b1b; text-transform: uppercase; letter-spacing: 0.06em; }
+    .ref-num { font-size: 12px; color: #727784; letter-spacing: 0.04em; margin-top: 6px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; padding: 3px 12px; background: #E0F2F7; border-radius: 100px; font-size: 10px; font-weight: 700; color: #003f87; letter-spacing: 0.06em; }
+    .status-pill .msi { font-size: 14px; color: #003f87; }
+    .body-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; position: relative; z-index: 1; }
+    .left { display: flex; flex-direction: column; gap: 28px; }
+    .right { display: flex; flex-direction: column; gap: 28px; }
+    .sec-label { font-size: 11px; font-weight: 600; color: #00677d; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .sec-label .msi { font-size: 18px; }
+    .card { background: #f6f3f2; padding: 20px; border-radius: 8px; border: 1px solid rgba(194,198,212,0.4); box-shadow: 0 4px 20px rgba(0,63,135,0.03); }
+    .cust-name { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 600; color: #1c1b1b; margin-bottom: 6px; }
+    .cust-phone { font-size: 14px; color: #424752; display: flex; align-items: center; gap: 6px; }
+    .cust-phone .msi { font-size: 14px; color: #727784; }
+    .appt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .appt-lbl { font-size: 10px; font-weight: 600; color: #727784; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+    .appt-val { font-size: 16px; font-weight: 600; color: #1c1b1b; line-height: 1.3; }
+    .appt-val.accent { color: #003f87; }
+    .svc-divider { border: none; border-top: 1px solid rgba(194,198,212,0.4); margin: 12px 0; }
+    .svc-name { font-size: 16px; font-weight: 600; color: #1c1b1b; margin-bottom: 3px; }
+    .svc-desc { font-size: 13px; color: #424752; margin-bottom: 14px; }
+    .svc-badge { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; color: #00677d; letter-spacing: 0.08em; text-transform: uppercase; }
+    .svc-badge .msi { font-size: 14px; }
+    .pay-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; background: ${paidFromWallet ? 'rgba(240,253,248,1)' : '#f6f3f2'}; border: 1px solid ${paidFromWallet ? 'rgba(34,197,94,0.25)' : 'rgba(194,198,212,0.4)'}; }
+    .pay-row .msi { font-size: 22px; color: ${paidFromWallet ? '#15803d' : '#727784'}; }
+    .pay-lbl { font-size: 10px; font-weight: 600; color: #727784; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; }
+    .pay-val { font-size: 13px; font-weight: 600; color: ${paidFromWallet ? '#15803d' : '#424752'}; }
+    .qr-box { flex: 1; background: #f6f3f2; border-radius: 12px; border: 1px solid rgba(194,198,212,0.4); padding: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 30px rgba(0,63,135,0.06); }
+    .qr-lbl { font-size: 11px; font-weight: 600; color: #00677d; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; text-align: center; }
+    .qr-frame { background: #fff; padding: 16px; border-radius: 8px; border: 1px solid #c2c6d4; display: inline-block; position: relative; }
+    .qr-corner { position: absolute; width: 14px; height: 14px; border-color: #003f87; border-style: solid; }
+    .qr-corner.tl { top: 6px; left: 6px; border-width: 2px 0 0 2px; }
+    .qr-corner.tr { top: 6px; right: 6px; border-width: 2px 2px 0 0; }
+    .qr-corner.bl { bottom: 6px; left: 6px; border-width: 0 0 2px 2px; }
+    .qr-corner.br { bottom: 6px; right: 6px; border-width: 0 2px 2px 0; }
+    .qr-ref { font-size: 11px; font-weight: 600; color: #727784; letter-spacing: 0.05em; margin-top: 16px; font-family: monospace; }
+    .loc-row { display: flex; gap: 14px; align-items: flex-start; }
+    .loc-icon { width: 40px; height: 40px; border-radius: 50%; background: #E0F2F7; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .loc-icon .msi { font-size: 20px; color: #003f87; }
+    .loc-name { font-size: 15px; font-weight: 600; color: #1c1b1b; margin-bottom: 3px; }
+    .loc-addr { font-size: 13px; color: #424752; line-height: 1.55; }
+    .notice { background: #E0F2F7; border-left: 4px solid #003f87; border-radius: 4px; padding: 12px 16px; font-size: 12px; color: #444; line-height: 1.7; margin-top: 32px; position: relative; z-index: 1; }
+    .footer { margin-top: 28px; padding-top: 24px; border-top: 1px solid rgba(194,198,212,0.5); text-align: center; position: relative; z-index: 1; }
+    .footer-main { font-size: 14px; font-weight: 600; color: #1c1b1b; margin-bottom: 4px; }
+    .footer-sub { font-size: 12px; color: #727784; }
+    .footer-copy { font-size: 11px; color: #aaa; margin-top: 16px; }
     @media print {
-      body { background: #fff; padding: 0; }
+      body { background: white; padding: 0; }
       .doc { box-shadow: none; border-radius: 0; }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
@@ -117,29 +130,29 @@ export default function Confirmation() {
 <div class="doc">
   <div class="top-bar"></div>
   <div class="inner">
-    <div class="watermark">✦</div>
+    <div class="watermark"><span class="msi msi-f">water_drop</span></div>
     <div class="header">
       <div>
         <div class="brand-name">Rasha</div>
-        <div class="brand-sub">Premium Carwash · Khartoum</div>
+        <div class="brand-sub">Premium Carwash</div>
       </div>
       <div class="header-right">
         <div class="doc-title">Booking Confirmation</div>
         <div class="ref-num">REF: ${esc(ref)}</div>
-        <div class="status-pill"><div class="status-dot"></div> CONFIRMED</div>
+        <div class="status-pill"><span class="msi msi-f" style="font-size:14px">check_circle</span> CONFIRMED</div>
       </div>
     </div>
     <div class="body-grid">
       <div class="left">
         <div>
-          <div class="sec-label">👤 Customer Details</div>
+          <div class="sec-label"><span class="msi">person</span> Customer Details</div>
           <div class="card">
             <div class="cust-name">${esc(name || 'N/A')}</div>
-            ${phone ? `<div class="cust-phone">📞 ${esc(phone)}</div>` : ''}
+            ${phone ? `<div class="cust-phone"><span class="msi">call</span> ${esc(phone)}</div>` : ''}
           </div>
         </div>
         <div>
-          <div class="sec-label">📅 Appointment</div>
+          <div class="sec-label"><span class="msi">calendar_month</span> Appointment</div>
           <div class="card">
             <div class="appt-grid">
               <div><div class="appt-lbl">Date</div><div class="appt-val">${formattedDate}</div></div>
@@ -148,17 +161,18 @@ export default function Confirmation() {
           </div>
         </div>
         <div>
-          <div class="sec-label">🧼 Service Summary</div>
+          <div class="sec-label"><span class="msi">design_services</span> Service Summary</div>
           <div class="card">
             <div class="svc-name">${svcLabel}</div>
             <div class="svc-desc">${svcDesc}</div>
-            <div class="svc-badge">💧 Rasha Premium Service</div>
+            <hr class="svc-divider"/>
+            <div class="svc-badge"><span class="msi msi-f">water_drop</span> Hydro-Premium Service</div>
           </div>
         </div>
         <div>
-          <div class="sec-label">${paidFromWallet ? '💳' : '💵'} Payment</div>
+          <div class="sec-label"><span class="msi">${paidFromWallet ? 'account_balance_wallet' : 'payments'}</span> Payment</div>
           <div class="pay-row">
-            <div class="pay-icon">${paidFromWallet ? '💳' : '💵'}</div>
+            <span class="msi msi-f" style="font-size:24px">${paidFromWallet ? 'account_balance_wallet' : 'payments'}</span>
             <div><div class="pay-lbl">Status</div><div class="pay-val">${payLabel}</div></div>
           </div>
         </div>
@@ -166,14 +180,18 @@ export default function Confirmation() {
       <div class="right">
         <div class="qr-box">
           <div class="qr-lbl">Scan at Service Bay</div>
-          <div class="qr-frame"><div id="qrcode"></div></div>
+          <div class="qr-frame">
+            <div class="qr-corner tl"></div><div class="qr-corner tr"></div>
+            <div class="qr-corner bl"></div><div class="qr-corner br"></div>
+            <div id="qrcode"></div>
+          </div>
           <div class="qr-ref">${esc(ref)}</div>
         </div>
         <div>
-          <div class="sec-label">📍 Location</div>
+          <div class="sec-label"><span class="msi">location_on</span> Location</div>
           <div class="card">
             <div class="loc-row">
-              <div class="loc-icon">📌</div>
+              <div class="loc-icon"><span class="msi msi-f">pin_drop</span></div>
               <div>
                 <div class="loc-name">Rasha Main Center</div>
                 <div class="loc-addr">Al-Amarat, Street 15<br/>Khartoum, Sudan</div>
@@ -183,7 +201,7 @@ export default function Confirmation() {
         </div>
       </div>
     </div>
-    <div class="notice">⏱ Please arrive <strong>15 minutes early</strong> for a pre-wash inspection. Present this slip or the QR code at the service bay. ${paidFromWallet ? '✅ This booking has been <strong>paid in full</strong> via your Rasha wallet.' : '💵 Payment is due <strong>at the location</strong>. Please have cash ready upon arrival.'}</div>
+    <div class="notice">Please arrive <strong>15 minutes early</strong> for a pre-wash inspection. Present this slip or scan the QR code at the service bay. ${paidFromWallet ? 'This booking has been <strong>paid in full</strong> via your Rasha wallet.' : 'Payment is due <strong>at the location</strong>. Please have cash ready upon arrival.'}</div>
     <div class="footer">
       <div class="footer-main">Thank you for choosing Rasha.</div>
       <div class="footer-sub">Please present this confirmation upon arrival at the service bay.</div>
@@ -194,9 +212,9 @@ export default function Confirmation() {
 <script>
   new QRCode(document.getElementById('qrcode'), {
     text: '${qrData}',
-    width: 160,
-    height: 160,
-    colorDark: '#12454B',
+    width: 168,
+    height: 168,
+    colorDark: '#003f87',
     colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.H
   });
