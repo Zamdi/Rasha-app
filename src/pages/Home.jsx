@@ -111,7 +111,7 @@ export default function Home() {
             <div className="w-full h-60 overflow-hidden relative">
               <img
                 src="/full-wash.jpg"
-                alt="Full Wash — interior and exterior cleaning"
+                alt="Full Wash - interior and exterior cleaning"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />

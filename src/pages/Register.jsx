@@ -115,7 +115,7 @@ export default function Register() {
       } catch {
         if (retries < 2) {
           retries++
-          showToast(t('Server is starting up — retrying in 8 seconds…','الخادم يعمل — إعادة المحاولة خلال 8 ثوانٍ…'),'error')
+          showToast(t('Server is starting up. Retrying in 8 seconds…','الخادم يعمل. إعادة المحاولة خلال 8 ثوانٍ…'),'error')
           setTimeout(attempt, 8000)
         } else {
           setLoading(false)

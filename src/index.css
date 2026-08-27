@@ -255,16 +255,13 @@ body {
   /* Gradient button */
   .hydro-gradient {
     background: linear-gradient(135deg, #1d6b75 0%, #155058 50%, #0e383e 100%);
-    box-shadow: 0 2px 12px rgba(21,80,88,0.30);
     transition: all 0.2s;
   }
   .hydro-gradient:hover {
     background: linear-gradient(135deg, #227f8a 0%, #1a6570 50%, #124045 100%);
-    box-shadow: 0 4px 16px rgba(21,80,88,0.40);
-    transform: translateY(-1px);
   }
 
-  .teal-glow { box-shadow: 0 2px 12px rgba(21,80,88,0.30); }
+  .teal-glow { }
 
   /* Text input */
   .rasha-input {
@@ -348,7 +345,6 @@ body {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.5);
   color: #ffffff;
-  box-shadow: 0 4px 16px rgba(21,80,88,0.3);
 }
 .slot-booked {
   background: rgba(255,255,255,0.08);

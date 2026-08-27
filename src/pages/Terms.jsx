@@ -31,8 +31,8 @@ export default function Terms() {
         <div className="space-y-4">
           <Section icon="handshake" title={t('Acceptance of Terms', 'قبول الشروط')}>
             <p className="text-on-surface-variant text-sm leading-relaxed">
-              {t('By accessing and using Rasha Car Wash services — including our online booking platform, loyalty program, and mobile app — you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
-                'بالوصول إلى خدمات رشة لغسيل السيارات واستخدامها — بما في ذلك منصة الحجز الإلكترونية وبرنامج الولاء والتطبيق — فإنك توافق على الالتزام بشروط الخدمة هذه.')}
+              {t('By accessing and using Rasha Car Wash services (including our online booking platform, loyalty program, and mobile app) you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
+                'بالوصول إلى خدمات رشة لغسيل السيارات واستخدامها (بما في ذلك منصة الحجز الإلكترونية وبرنامج الولاء والتطبيق) فإنك توافق على الالتزام بشروط الخدمة هذه.')}
             </p>
           </Section>
 

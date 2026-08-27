@@ -67,8 +67,8 @@ export default function Loyalty() {
       setError(isTimeout(e)
         ? t('The server is taking longer than usual to wake up. Please try again.',
             'الخادم يستغرق وقتاً أطول من المعتاد. يرجى المحاولة مجدداً.')
-        : t('Connection error. The server may be starting up — please wait a moment and retry.',
-            'خطأ في الاتصال. قد يكون الخادم في وضع السكون — انتظر لحظة وحاول مجدداً.'))
+        : t('Connection error. The server may be starting up. Please wait a moment and retry.',
+            'خطأ في الاتصال. قد يكون الخادم في وضع السكون. انتظر لحظة وحاول مجدداً.'))
     } finally {
       setLoading(false)
     }

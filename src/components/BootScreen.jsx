@@ -24,8 +24,8 @@ export default function BootScreen({ onRetry }) {
       ? t('Loading your card…', 'جارٍ تحميل بطاقتك…')
       : elapsed < 12
         ? t('Waking the server…', 'جارٍ تشغيل الخادم…')
-        : t('Still waking up — this can take up to a minute after a quiet spell.',
-            'ما زال قيد التشغيل — قد يستغرق ذلك دقيقة بعد فترة من الخمول.')
+        : t('Still waking up. This can take up to a minute after a quiet spell.',
+            'ما زال قيد التشغيل. قد يستغرق ذلك دقيقة بعد فترة من الخمول.')
 
   return (
     <div className="pt-14 min-h-dvh flex flex-col items-center justify-center gap-5 px-6 text-center">

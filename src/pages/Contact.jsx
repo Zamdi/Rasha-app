@@ -217,9 +217,9 @@ export default function Contact() {
                 <div>
                   <p className="text-on-surface font-semibold text-sm">{t('Support Hours', 'ساعات الدعم')}</p>
                   <p className="text-on-surface-variant text-sm mt-0.5">
-                    {t('Saturday - Thursday', 'السبت - الخميس')}
+                    {t('Saturday to Thursday', 'السبت إلى الخميس')}
                     {': '}
-                    <span dir="ltr" style={{unicodeBidi:'embed'}}>11:00 AM - 12:00 AM</span>
+                    <span dir="ltr" style={{unicodeBidi:'embed'}}>11:00 AM to 12:00 AM</span>
                   </p>
                 </div>
               </div>

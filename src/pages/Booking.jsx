@@ -219,7 +219,7 @@ export default function Booking() {
           <div className="glass p-6 rounded-2xl space-y-4 animate-fade-in">
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Vehicle Info (optional)', 'السيارة (اختياري)')}</label>
-              <input className="rasha-input" placeholder={t('e.g. Toyota Camry - White', 'مثال: تويوتا كامري - أبيض')} value={form.vehicle} onChange={e => setForm(f => ({...f, vehicle: e.target.value}))} />
+              <input className="rasha-input" placeholder={t('e.g. Toyota Camry, White', 'مثال: تويوتا كامري، أبيض')} value={form.vehicle} onChange={e => setForm(f => ({...f, vehicle: e.target.value}))} />
             </div>
             <div>
               <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2 block">{t('Service Type', 'نوع الخدمة')} *</label>
