@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useApp, API } from '../context/AppContext'
 import { bookingStatus, bookingStatusLabel, formatTime } from '../utils/format'
 import { fetchWithTimeout, isTimeout } from '../utils/fetchWithTimeout'
 
-const SERVICE_OPTS = ['all', 'full', 'exterior']
-const STATUS_OPTS  = ['all', 'booked', 'scanned', 'cancelled', 'noshow']
+const PAGE_SIZE   = 10
+const STATUS_OPTS = ['all', 'booked', 'scanned', 'cancelled', 'noshow']
 
 export default function Bookings() {
   const { t, lang, customer, token } = useApp()
@@ -17,6 +17,7 @@ export default function Bookings() {
   const [search, setSearch]       = useState('')
   const [svcFilter, setSvcFilter] = useState('all')
   const [stFilter, setStFilter]   = useState('all')
+  const [page, setPage]           = useState(1)
 
   useEffect(() => {
     if (!customer) { navigate('/login'); return }
@@ -31,23 +32,34 @@ export default function Bookings() {
       .finally(() => setLoading(false))
   }, [customer, token])
 
+  // Reset to page 1 whenever filters/search change
+  useEffect(() => { setPage(1) }, [search, svcFilter, stFilter])
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return bookings.filter(b => {
       const ref = b.booking_uid?.replace('BK-', '#RSH-') ?? ''
       if (q && !ref.toLowerCase().includes(q)) return false
       if (svcFilter !== 'all' && b.service_type !== svcFilter) return false
-      if (stFilter !== 'all') {
-        const st = bookingStatus(b).key
-        if (st !== stFilter) return false
-      }
+      if (stFilter !== 'all' && bookingStatus(b).key !== stFilter) return false
       return true
     }).sort((a, b) => String(b.booking_date).localeCompare(String(a.booking_date)) || b.booking_time?.localeCompare(a.booking_time))
   }, [bookings, search, svcFilter, stFilter])
 
-  const pill = (label, active, onClick) => (
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  // Page number list: up to 5 visible, with ellipsis
+  const pageNums = useMemo(() => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1)
+    if (page <= 3) return [1, 2, 3, 4, '…', totalPages]
+    if (page >= totalPages - 2) return [1, '…', totalPages - 3, totalPages - 2, totalPages - 1, totalPages]
+    return [1, '…', page - 1, page, page + 1, '…', totalPages]
+  }, [page, totalPages])
+
+  const pill = (label, active, onClick, key) => (
     <button
-      key={label}
+      key={key ?? label}
       onClick={onClick}
       className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
       style={{
@@ -60,16 +72,32 @@ export default function Bookings() {
     </button>
   )
 
-  const svcLabel = svc => svc === 'full'
-    ? t('Full Wash', 'غسيل كامل')
-    : svc === 'exterior'
-    ? t('Exterior Only', 'خارجي فقط')
+  const svcLabel = svc =>
+    svc === 'full' ? t('Full Wash', 'غسيل كامل')
+    : svc === 'exterior' ? t('Exterior Only', 'خارجي فقط')
     : t('Unknown', 'غير معروف')
 
   const formattedDate = raw =>
     raw ? new Date(String(raw).slice(0, 10) + 'T12:00:00')
             .toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
         : '—'
+
+  const pgBtn = (label, onClick, disabled, active = false) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="flex items-center justify-center min-w-[32px] h-8 px-2 rounded-lg text-xs font-bold transition-all"
+      style={{
+        background: active ? 'var(--color-secondary-fixed)' : 'var(--glass-bg)',
+        color: active ? '#fff' : disabled ? 'var(--color-outline-variant)' : 'var(--color-on-surface)',
+        border: active ? '1px solid transparent' : '1px solid var(--color-outline-variant)',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      {label}
+    </button>
+  )
 
   return (
     <div className="min-h-dvh" style={{ background: 'var(--color-background)' }}>
@@ -94,7 +122,7 @@ export default function Bookings() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={t('Search by reference…', 'ابحث بالمرجع…')}
-            className="w-full rounded-xl ps-10 pe-4 py-2.5 text-sm text-on-surface bg-transparent outline-none"
+            className="w-full rounded-xl ps-10 pe-4 py-2.5 text-sm text-on-surface outline-none"
             style={{ background: 'var(--glass-bg)', border: '1px solid var(--color-outline-variant)' }}
           />
           {search && (
@@ -117,7 +145,8 @@ export default function Bookings() {
             {STATUS_OPTS.map(s => pill(
               s === 'all' ? t('All', 'الكل') : bookingStatusLabel(s, t),
               stFilter === s,
-              () => setStFilter(s)
+              () => setStFilter(s),
+              s
             ))}
           </div>
         </div>
@@ -153,11 +182,11 @@ export default function Bookings() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((b, i) => {
-                    const st = bookingStatus(b)
+                  {paginated.map((b, i) => {
+                    const st  = bookingStatus(b)
                     const ref = b.booking_uid?.replace('BK-', '#RSH-') ?? '—'
                     return (
-                      <tr key={b.id ?? i} style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--color-outline-variant)' : 'none', background: 'var(--color-surface, transparent)' }}>
+                      <tr key={b.id ?? i} style={{ borderBottom: i < paginated.length - 1 ? '1px solid var(--color-outline-variant)' : 'none', background: 'var(--color-surface, transparent)' }}>
                         <td className="px-4 py-3 font-bold text-xs text-secondary-fixed font-mono whitespace-nowrap">{ref}</td>
                         <td className="px-4 py-3 text-sm text-on-surface">{svcLabel(b.service_type)}</td>
                         <td className="px-4 py-3 text-sm text-on-surface whitespace-nowrap">
@@ -179,8 +208,8 @@ export default function Bookings() {
 
             {/* Mobile cards */}
             <div className="md:hidden flex flex-col gap-3">
-              {filtered.map((b, i) => {
-                const st = bookingStatus(b)
+              {paginated.map((b, i) => {
+                const st  = bookingStatus(b)
                 const ref = b.booking_uid?.replace('BK-', '#RSH-') ?? '—'
                 return (
                   <div key={b.id ?? i} className="rounded-2xl p-4 flex flex-col gap-2" style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}>
@@ -198,7 +227,34 @@ export default function Bookings() {
               })}
             </div>
 
-            <p className="text-xs text-on-surface-variant text-center mt-4">{filtered.length} {t('booking(s)', 'حجز')}</p>
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-5 gap-3 flex-wrap">
+              <p className="text-xs text-on-surface-variant">
+                {t(
+                  `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, filtered.length)} of ${filtered.length} bookings`,
+                  `عرض ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, filtered.length)} من ${filtered.length} حجز`
+                )}
+              </p>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1.5">
+                  {pgBtn(
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_left</span>,
+                    () => setPage(p => Math.max(1, p - 1)),
+                    page === 1
+                  )}
+                  {pageNums.map((n, i) =>
+                    n === '…'
+                      ? <span key={`ellipsis-${i}`} className="text-xs text-on-surface-variant px-1">…</span>
+                      : pgBtn(n, () => setPage(n), false, n === page)
+                  )}
+                  {pgBtn(
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_right</span>,
+                    () => setPage(p => Math.min(totalPages, p + 1)),
+                    page === totalPages
+                  )}
+                </div>
+              )}
+            </div>
           </>
         )}
       </main>
