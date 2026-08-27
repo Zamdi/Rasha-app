@@ -103,7 +103,7 @@ export default function Confirmation() {
     <div class="grid">
       <div class="detail"><div class="detail-icon">📅</div><div><div class="detail-label">Date</div><div class="detail-value">${formattedDate}</div></div></div>
       <div class="detail"><div class="detail-icon">⏰</div><div><div class="detail-label">Time</div><div class="detail-value">${esc(time)}</div></div></div>
-      <div class="detail"><div class="detail-icon">👤</div><div><div class="detail-label">Customer</div><div class="detail-value">${esc(name || '—')}</div></div></div>
+      <div class="detail"><div class="detail-icon">👤</div><div><div class="detail-label">Customer</div><div class="detail-value">${esc(name || 'N/A')}</div></div></div>
       ${vehicle
         ? `<div class="detail"><div class="detail-icon">🚗</div><div><div class="detail-label">Vehicle</div><div class="detail-value">${esc(vehicle)}</div></div></div>`
         : `<div class="detail"><div class="detail-icon">📍</div><div><div class="detail-label">Location</div><div class="detail-value">Rasha Car Wash, Khartoum</div></div></div>`
@@ -186,7 +186,7 @@ export default function Confirmation() {
                 ['location_on',    t('Location', 'الموقع'), t('Rasha Car Wash, Khartoum', 'رشة لغسيل السيارات، الخرطوم'), false],
                 vehicle
                   ? ['directions_car', t('Vehicle', 'السيارة'), vehicle, false]
-                  : ['person',         t('Customer', 'العميل'), name || '—', false],
+                  : ['person',         t('Customer', 'العميل'), name || 'N/A', false],
               ].map(([icon, label, value, ltr]) => (
                 <div key={label} className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"
