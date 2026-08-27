@@ -40,7 +40,7 @@ export default function Home() {
             width: '75%',
             maxWidth: '1080px',
             filter: isDark
-              ? `brightness(1.15) contrast(1.1) drop-shadow(${isAr ? '12px' : '-12px'} 0 50px rgba(116,245,255,0.25))`
+              ? `brightness(1.15) contrast(1.1) drop-shadow(${isAr ? '12px' : '-12px'} 0 50px rgba(126,206,202,0.25))`
               : `brightness(1.0) contrast(1.08) drop-shadow(${isAr ? '12px' : '-12px'} 0 40px rgba(21,80,88,0.5))`,
             mixBlendMode: 'normal',
             transform: isAr ? 'scaleX(-1)' : 'none',
@@ -65,7 +65,7 @@ export default function Home() {
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight font-display">
               {t('Drive Clean.', 'اقد نظيفاً.')}<br />
-              <span style={{ color: '#74f5ff' }}>{t('Drive Confident.', 'اقد بثقة.')}</span>
+              <span style={{ color: '#7ececa' }}>{t('Drive Confident.', 'اقد بثقة.')}</span>
             </h1>
 
             <p className="text-white/70 text-base max-w-lg leading-relaxed">
@@ -86,7 +86,7 @@ export default function Home() {
             <div className="flex gap-8 pt-2">
               {[['500+', t('Happy Customers', 'عميل سعيد')], ['4.9★', t('Rating', 'التقييم')], ['2', t('Services', 'خدمات')]].map(([v, l]) => (
                 <div key={l}>
-                  <div className="text-2xl font-extrabold font-display" style={{ color: '#74f5ff' }}>{v}</div>
+                  <div className="text-2xl font-extrabold font-display" style={{ color: '#7ececa' }}>{v}</div>
                   <div className="text-xs text-white/60">{l}</div>
                 </div>
               ))}

@@ -59,14 +59,14 @@ html.dark {
   --color-surface-variant:           rgba(8,20,44,0.50);
   --color-on-surface:                #ffffff;
   --color-on-surface-variant:        #8ab4d8;
-  --color-outline:                   rgba(116,245,255,0.1);
-  --color-outline-variant:           rgba(116,245,255,0.06);
-  --color-primary:                   #74f5ff;
+  --color-outline:                   rgba(126,206,202,0.1);
+  --color-outline-variant:           rgba(126,206,202,0.06);
+  --color-primary:                   #7ececa;
   --color-on-primary:                #003640;
   --color-primary-container:         #155058;
-  --color-secondary-fixed:           #74f5ff;
-  --color-secondary-fixed-rgb:       116,245,255;
-  --color-secondary-fixed-dim:       #00dbe7;
+  --color-secondary-fixed:           #7ececa;
+  --color-secondary-fixed-rgb:       126,206,202;
+  --color-secondary-fixed-dim:       #5aadaa;
   --color-error:                     #ff6b6b;
   --color-error-container:           rgba(255,107,107,0.15);
   --color-on-background:             #e8f0fe;
@@ -74,15 +74,15 @@ html.dark {
   --glass-bg:           rgba(8,20,44,0.58);
   --glass-bg-hover:     rgba(8,20,44,0.70);
   --glass-high-bg:      rgba(8,20,44,0.88);
-  --glass-border:       rgba(116,245,255,0.22);
-  --glass-high-border:  rgba(116,245,255,0.35);
-  --glass-shadow:       0 8px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(116,245,255,0.08) inset;
-  --glass-shadow-lg:    0 20px 60px rgba(0,0,0,0.6), 0 1px 0 rgba(116,245,255,0.10) inset;
-  --glass-shadow-card:  0 4px 24px rgba(0,0,0,0.45), 0 1px 0 rgba(116,245,255,0.06) inset;
+  --glass-border:       rgba(126,206,202,0.22);
+  --glass-high-border:  rgba(126,206,202,0.35);
+  --glass-shadow:       0 8px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(126,206,202,0.08) inset;
+  --glass-shadow-lg:    0 20px 60px rgba(0,0,0,0.6), 0 1px 0 rgba(126,206,202,0.10) inset;
+  --glass-shadow-card:  0 4px 24px rgba(0,0,0,0.45), 0 1px 0 rgba(126,206,202,0.06) inset;
 
   --input-bg:           rgba(255,255,255,0.08);
-  --input-border:       rgba(116,245,255,0.25);
-  --input-focus:        rgba(116,245,255,0.25);
+  --input-border:       rgba(126,206,202,0.25);
+  --input-focus:        rgba(126,206,202,0.25);
   --navbar-bg:          rgba(10,22,40,0.85);
 }
 
@@ -236,7 +236,7 @@ body {
   }
   html.dark .glass-popup {
     background: rgba(14,28,50,0.92);
-    border: 1px solid rgba(116,245,255,0.15);
+    border: 1px solid rgba(126,206,202,0.15);
     box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06) inset;
   }
   .glass-popup-backdrop {
@@ -346,12 +346,12 @@ body {
 }
 html.dark .slot-available {
   background: rgba(255,255,255,0.06);
-  border-color: rgba(116,245,255,0.12);
+  border-color: rgba(126,206,202,0.12);
   color: #e8f0fe;
 }
 html.dark .slot-available:hover {
-  border-color: #74f5ff;
-  color: #74f5ff;
+  border-color: #7ececa;
+  color: #7ececa;
 }
 
 /* ── Animations ──────────────────────────────────────────────── */
