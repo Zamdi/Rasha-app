@@ -160,7 +160,7 @@ export default function Confirmation() {
             <div className="flex justify-between items-start pb-4"
               style={{ borderBottom: '1px solid rgba(66,71,82,0.2)' }}>
               <div>
-                <span className="text-xs font-bold text-secondary-fixed uppercase tracking-widest mb-1 block">
+                <span className="text-xs font-bold text-secondary-fixed uppercase tracking-wide mb-1 block">
                   {t('Package', 'الباقة')}
                 </span>
                 <h2 className="text-on-surface font-bold font-display"
@@ -169,7 +169,7 @@ export default function Confirmation() {
                 </h2>
               </div>
               <div className="text-end">
-                <span className="text-xs font-bold text-secondary-fixed uppercase tracking-widest mb-1 block">
+                <span className="text-xs font-bold text-secondary-fixed uppercase tracking-wide mb-1 block">
                   {t('Confirmation', 'المرجع')}
                 </span>
                 <span className="text-on-surface font-bold font-display" dir="ltr" style={{unicodeBidi:'embed',

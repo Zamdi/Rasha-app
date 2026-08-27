@@ -130,7 +130,7 @@ export default function Loyalty() {
                 </div>
                 <div className="text-end">
                   <span className="text-2xl font-extrabold text-secondary-fixed font-display">{stamps}/5</span>
-                  <p className="text-xs text-secondary-fixed uppercase tracking-widest">{t('Progress', 'التقدم')}</p>
+                  <p className="text-xs text-secondary-fixed uppercase tracking-wide">{t('Progress', 'التقدم')}</p>
                 </div>
               </div>
               {/* Stamps grid */}
@@ -210,7 +210,7 @@ export default function Loyalty() {
           <div className="space-y-6">
             {/* Member Pass */}
             <div className="glass p-6 rounded-2xl text-center">
-              <p className="text-xs font-bold text-secondary-fixed uppercase tracking-widest mb-4">{t('Member Pass', 'بطاقة العضوية')}</p>
+              <p className="text-xs font-bold text-secondary-fixed uppercase tracking-wide mb-4">{t('Member Pass', 'بطاقة العضوية')}</p>
 
               {/* QR — tap to expand */}
               <button
@@ -236,7 +236,7 @@ export default function Loyalty() {
               <h4 className="font-bold text-on-surface font-display">{name.toUpperCase()}</h4>
               <p className="text-xs text-secondary-fixed mt-1 font-bold" dir="ltr" style={{unicodeBidi:"embed"}}>{customerId}</p>
               {memberSince && <p className="text-xs text-on-surface-variant mt-1">{t('Member since', 'عضو منذ')} {new Date(memberSince).toLocaleDateString(t('en-US','ar-EG'),{year:'numeric',month:'long'})}</p>}
-              <Link to="/book" className="btn-primary mt-4 w-full py-3 rounded-xl text-xs uppercase tracking-widest">
+              <Link to="/book" className="btn-primary mt-4 w-full py-3 rounded-xl text-xs uppercase tracking-wide">
                 {t('Book a Wash', 'احجز غسيل')}
               </Link>
             </div>
@@ -293,7 +293,7 @@ export default function Loyalty() {
               {customerId && <QRCodeCanvas value={customerId} size={260} level="M" fgColor="#000000" bgColor="#ffffff" style={{ display: 'block' }} />}
             </div>
             <div className="text-center">
-              <p className="text-secondary-fixed font-bold text-xl font-display tracking-widest" dir="ltr" style={{unicodeBidi:"embed"}}>{customerId}</p>
+              <p className="text-secondary-fixed font-bold text-xl font-display tracking-wide" dir="ltr" style={{unicodeBidi:"embed"}}>{customerId}</p>
               <p className="text-white font-bold mt-1">{name.toUpperCase()}</p>
               <p className="text-on-surface-variant text-sm mt-1">{t('Show this to staff for scanning', 'أرِ هذا للموظف للمسح')}</p>
             </div>

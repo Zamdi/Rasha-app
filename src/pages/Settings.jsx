@@ -319,7 +319,7 @@ export default function Settings() {
               {/* Personal Information */}
               <div style={card} className="overflow-hidden">
                 <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
-                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{t('Personal Information', 'المعلومات الشخصية')}</p>
+                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">{t('Personal Information', 'المعلومات الشخصية')}</p>
                 </div>
                 <div className="p-6 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -367,7 +367,7 @@ export default function Settings() {
               <div style={card} className="overflow-hidden">
                 <div className="px-6 py-4 flex items-center gap-2" style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
                   <span className="material-symbols-outlined text-secondary-fixed text-xl">shield</span>
-                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{t('Security & Account', 'الأمان والحساب')}</p>
+                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">{t('Security & Account', 'الأمان والحساب')}</p>
                 </div>
                 {/* Reset Password row */}
                 <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"

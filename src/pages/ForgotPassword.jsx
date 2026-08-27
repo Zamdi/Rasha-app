@@ -195,7 +195,7 @@ export default function ForgotPassword() {
                   {t('6-Digit Code', 'الرمز المكوّن من 6 أرقام')}
                 </label>
                 <input type="text" inputMode="numeric" maxLength={6}
-                  className={'rasha-input text-center text-xl tracking-widest font-bold' + invalidClass(errors.otp)}
+                  className={'rasha-input text-center text-xl tracking-wide font-bold' + invalidClass(errors.otp)}
                   placeholder="• • • • • •" aria-invalid={!!errors.otp}
                   value={otp} onChange={e => { setOtp(e.target.value.replace(/\D/g, '')); clearError('otp') }}
                   onKeyDown={e => e.key === 'Enter' && verifyCode()} />

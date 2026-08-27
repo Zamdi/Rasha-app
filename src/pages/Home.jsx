@@ -64,7 +64,7 @@ export default function Home() {
           <div className="max-w-xl space-y-5 animate-fade-in">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 text-white/70" style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
               <span className="material-symbols-outlined fill-icon text-sm" style={{ color: '#74f5ff' }}>auto_awesome</span>
-              <span className="text-xs font-bold uppercase tracking-widest">{t("Sudan's Premier Car Wash", 'أفضل غسيل سيارات في السودان')}</span>
+              <span className="text-xs font-bold uppercase tracking-wide">{t("Sudan's Premier Car Wash", 'أفضل غسيل سيارات في السودان')}</span>
             </div>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight font-display">
@@ -112,10 +112,10 @@ export default function Home() {
               <img
                 src="/full-wash.jpg"
                 alt="Full Wash - interior and exterior cleaning"
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-cover object-center transition-transform duration-500"
               />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />
-              <span className="absolute bottom-3 left-4 text-white text-xs font-bold uppercase tracking-widest opacity-90">Interior + Exterior</span>
+              <span className="absolute bottom-3 left-4 text-white text-xs font-semibold opacity-90">Interior + Exterior</span>
             </div>
             <div className="p-8 flex flex-col flex-1">
             <div className="flex justify-between items-start mb-6">
@@ -142,10 +142,10 @@ export default function Home() {
               <img
                 src="/external-wash.jpg"
                 alt="Exterior Wash, foam and water cleaning"
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-cover object-center transition-transform duration-500"
               />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />
-              <span className="absolute bottom-3 left-4 text-white text-xs font-bold uppercase tracking-widest opacity-90">Exterior Cleaning</span>
+              <span className="absolute bottom-3 left-4 text-white text-xs font-semibold opacity-90">Exterior Cleaning</span>
             </div>
             <div className="p-8 flex flex-col flex-1">
             <div className="flex justify-between items-start mb-6">
@@ -190,14 +190,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 md:px-10 pt-14 pb-10 flex flex-col md:flex-row justify-between gap-10">
           {/* Brand blurb */}
           <div className="max-w-xs">
-            <p className="text-xs font-bold uppercase tracking-widest text-secondary-fixed mb-3">{t('Rasha Car Wash', 'رشة لغسيل السيارات')}</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-secondary-fixed mb-3">{t('Rasha Car Wash', 'رشة لغسيل السيارات')}</p>
             <p className="text-on-surface-variant text-sm leading-relaxed">{t("Khartoum's premier car wash. Professional care, loyalty rewards, easy online booking.", 'أفضل غسيل سيارات في الخرطوم. عناية احترافية ومكافآت ولاء وحجز سهل.')}</p>
           </div>
 
           {/* Link columns */}
           <div className="flex gap-14 md:gap-20 text-sm flex-wrap">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-on-surface mb-4">{t('Services', 'الخدمات')}</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-on-surface mb-4">{t('Services', 'الخدمات')}</p>
               <div className="flex flex-col gap-3 text-on-surface-variant">
                 <Link to="/book" state={{ service: 'full' }} className="hover:text-secondary-fixed transition-colors">{t('Full Wash', 'غسيل كامل')}</Link>
                 <Link to="/book" state={{ service: 'outside' }} className="hover:text-secondary-fixed transition-colors">{t('Exterior Only', 'خارجي فقط')}</Link>
@@ -205,7 +205,7 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-on-surface mb-4">{t('Account', 'الحساب')}</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-on-surface mb-4">{t('Account', 'الحساب')}</p>
               <div className="flex flex-col gap-3 text-on-surface-variant">
                 <Link to="/register" className="hover:text-secondary-fixed transition-colors">{t('Sign Up', 'إنشاء حساب')}</Link>
                 <Link to="/login" className="hover:text-secondary-fixed transition-colors">{t('Sign In', 'تسجيل دخول')}</Link>
@@ -213,7 +213,7 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-on-surface mb-4">{t('Legal', 'قانوني')}</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-on-surface mb-4">{t('Legal', 'قانوني')}</p>
               <div className="flex flex-col gap-3 text-on-surface-variant">
                 <Link to="/privacy" className="hover:text-secondary-fixed transition-colors">{t('Privacy Policy', 'الخصوصية')}</Link>
                 <Link to="/terms" className="hover:text-secondary-fixed transition-colors">{t('Terms of Service', 'الشروط')}</Link>

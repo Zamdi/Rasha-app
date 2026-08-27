@@ -82,7 +82,7 @@ export default function Wallet() {
               <div className="rounded-2xl p-7" style={{ background: 'linear-gradient(135deg, #1d6b75 0%, #0e383e 100%)' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="material-symbols-outlined text-white/60 text-base">account_balance_wallet</span>
-                  <p className="text-white/70 text-xs font-semibold uppercase tracking-widest">{t('Available Balance', 'الرصيد المتاح')}</p>
+                  <p className="text-white/70 text-xs font-semibold uppercase tracking-wide">{t('Available Balance', 'الرصيد المتاح')}</p>
                 </div>
                 <p className="text-white font-display font-bold mb-5" style={{ fontSize: 'clamp(32px,5vw,48px)' }}>
                   {balance.toLocaleString('en')}<span className="text-xl font-semibold text-white/70 ms-2">SDG</span>
