@@ -49,25 +49,6 @@ export default function Home() {
             userSelect: 'none',
           }}
         />
-        {/* Mustang — mobile: full-width, anchored to bottom */}
-        <img
-          src="/hero-mustang.png"
-          alt=""
-          aria-hidden="true"
-          className="absolute block md:hidden"
-          style={{
-            bottom: 0,
-            left: '-5%',
-            width: '110%',
-            filter: isDark
-              ? 'brightness(1.1) contrast(1.05) drop-shadow(-8px 0 30px rgba(126,206,202,0.2))'
-              : 'brightness(1.0) contrast(1.05) drop-shadow(-8px 0 24px rgba(21,80,88,0.4))',
-            transform: isAr ? 'scaleX(-1)' : 'none',
-            zIndex: 1,
-            pointerEvents: 'none',
-            userSelect: 'none',
-          }}
-        />
 
         {/* Bottom fade into page bg — the hero's gradient runs at 105deg (nearly
             horizontal), so its dark stops persist across most of the width even
@@ -80,7 +61,9 @@ export default function Home() {
 
         {/* Content */}
         <div className="relative w-full max-w-7xl mx-auto px-5 pt-20 pb-16 md:py-24" style={{ zIndex: 3 }}>
-          <div className="max-w-xl space-y-5 animate-fade-in">
+          {/* Mobile: side-by-side text + car; Desktop: text only (car is absolute) */}
+          <div className="flex items-center gap-0 md:block">
+          <div className="flex-1 space-y-5 animate-fade-in md:max-w-xl">
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight font-display">
               {t('Drive Clean.', 'اقد نظيفاً.')}<br />
@@ -110,6 +93,28 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Mobile car — right column, only on mobile */}
+          <div className="block md:hidden flex-shrink-0 self-stretch overflow-hidden" style={{ width: '48%', marginRight: '-20px' }}>
+            <img
+              src="/hero-mustang.png"
+              alt=""
+              aria-hidden="true"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: isAr ? 'right center' : 'left center',
+                filter: isDark
+                  ? 'brightness(1.1) contrast(1.05) drop-shadow(-6px 0 20px rgba(126,206,202,0.2))'
+                  : 'brightness(1.0) contrast(1.05) drop-shadow(-6px 0 16px rgba(21,80,88,0.4))',
+                transform: isAr ? 'scaleX(-1)' : 'none',
+                pointerEvents: 'none',
+                userSelect: 'none',
+              }}
+            />
+          </div>
           </div>
         </div>
       </section>
