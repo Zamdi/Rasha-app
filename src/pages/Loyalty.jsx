@@ -10,11 +10,10 @@ export default function Loyalty() {
   const { t, token, lang, logout } = useApp()
   const navigate = useNavigate()
   const [data, setData] = useState(null)
-  const [history, setHistory] = useState([])
-  const [nextBooking, setNextBooking] = useState(null)
+  const [upcomingBookings, setUpcomingBookings] = useState([])
+  const [qrExpanded, setQrExpanded] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [qrExpanded, setQrExpanded] = useState(false)
 
   useEffect(() => {
     if (!token) { navigate('/login'); return }
@@ -25,16 +24,11 @@ export default function Loyalty() {
     setLoading(true)
     setError(null)
     try {
-      // 60s rather than the default 20s: this is the request most likely to be
-      // the one that wakes a sleeping instance, and giving up before the cold
-      // start finishes would turn a slow load into a failed one.
       const auth = { headers: { Authorization: 'Bearer ' + token }, timeout: 60000 }
-      const [loyRes, histRes, bkRes] = await Promise.all([
+      const [loyRes, bkRes] = await Promise.all([
         fetchWithTimeout(`${API}/api/loyalty`, auth),
-        fetchWithTimeout(`${API}/api/loyalty/history`, auth),
         fetchWithTimeout(`${API}/api/bookings/my`, auth),
       ])
-      // Token expired or invalid — log out cleanly
       if (loyRes.status === 401) {
         logout()
         navigate('/login')
@@ -46,23 +40,15 @@ export default function Loyalty() {
         return
       }
       const loy = await loyRes.json()
-      const hist = histRes.ok ? await histRes.json() : { visits: [] }
       const bk = bkRes.ok ? await bkRes.json() : { bookings: [] }
       setData(loy)
-      setHistory(hist.visits || [])
-      const today = new Date().toISOString().split('T')[0]
-      const relevant = (bk.bookings || [])
-        // Upcoming confirmed bookings, plus any booking still dated today — so a
-        // booking that was scanned on arrival stays visible with its green
-        // "Scanned" badge instead of vanishing the moment attendance is marked.
+      const upcoming = (bk.bookings || [])
         .filter(b => {
-          const day = String(b.booking_date).slice(0, 10)
-          if (b.status === 'cancelled') return false
-          if (b.status === 'confirmed' && day >= today) return true
-          return day === today
+          const st = bookingStatus(b).key
+          return st !== 'cancelled' && st !== 'noshow' && st !== 'scanned'
         })
         .sort((a, b) => String(a.booking_date).localeCompare(String(b.booking_date)) || a.booking_time.localeCompare(b.booking_time))
-      setNextBooking(relevant[0] || null)
+      setUpcomingBookings(upcoming)
     } catch (e) {
       setError(isTimeout(e)
         ? t('The server is taking longer than usual to wake up. Please try again.',
@@ -106,19 +92,6 @@ export default function Loyalty() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Mobile-only: quick QR access */}
-          <div className="lg:hidden glass p-4 rounded-2xl flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-secondary-fixed uppercase tracking-wider">{t('Member Pass', 'بطاقة العضوية')}</p>
-              <p className="text-on-surface text-sm font-bold mt-0.5" dir="ltr" style={{unicodeBidi:"embed"}}>{customerId}</p>
-            </div>
-            <button
-              onClick={() => setQrExpanded(true)}
-              className="hydro-gradient px-4 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-2 teal-glow">
-              <span className="material-symbols-outlined text-base">qr_code</span>
-              {t('Show QR', 'عرض QR')}
-            </button>
-          </div>
           {/* Left */}
           <div className="lg:col-span-2 space-y-6">
             {/* Stamp Card */}
@@ -156,63 +129,68 @@ export default function Loyalty() {
               </div>
             </div>
 
-            {/* History */}
+            {/* Upcoming Bookings */}
             <div className="glass rounded-2xl overflow-hidden">
-              <div className="p-4 border-b border-outline-variant/20">
-                <h3 className="font-bold text-on-surface">{t('Recent Activity', 'النشاط الأخير')}</h3>
+              <div className="p-4 border-b border-outline-variant/20 flex items-center justify-between">
+                <h3 className="font-bold text-on-surface">{t('Upcoming Bookings', 'الحجوزات القادمة')}</h3>
+                <Link to="/bookings" className="text-xs font-bold text-secondary-fixed hover:opacity-70 transition-opacity">
+                  {t('View all', 'عرض الكل')}
+                </Link>
               </div>
-              {history.length === 0 ? (
-                /* An empty state that only states the emptiness leaves the
-                   customer nowhere to go — give it the action it implies. */
+              {upcomingBookings.length === 0 ? (
                 <div className="p-8 flex flex-col items-center gap-3 text-center">
-                  <span className="material-symbols-outlined text-on-surface-variant text-4xl" aria-hidden="true">local_car_wash</span>
-                  <p className="text-sm font-semibold text-on-surface">{t('No washes yet', 'لا توجد غسيلات بعد')}</p>
+                  <span className="material-symbols-outlined text-on-surface-variant text-4xl" aria-hidden="true">calendar_today</span>
+                  <p className="text-sm font-semibold text-on-surface">{t('No upcoming bookings', 'لا توجد حجوزات قادمة')}</p>
                   <p className="text-xs text-on-surface-variant max-w-xs">
-                    {t('Every wash earns a stamp. Collect enough and your next one is on us.',
-                       'كل غسيل يمنحك طابعاً. اجمع ما يكفي والغسيل التالي على حسابنا.')}
+                    {t('Book your next wash and it will appear here.', 'احجز غسيلك القادم وسيظهر هنا.')}
                   </p>
                   <Link to="/book" className="btn-primary px-5 py-2.5 rounded-xl text-sm mt-1">
-                    {t('Book your first wash', 'احجز أول غسيل')}
+                    {t('Book a wash', 'احجز غسيل')}
                   </Link>
                 </div>
               ) : (
                 <ul className="divide-y divide-outline-variant/10">
-                  {history.slice(0, 10).map((v, i) => (
-                    <li key={i} className="flex items-center justify-between p-4 gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${v.is_free_wash ? 'bg-secondary-fixed/20 border border-secondary-fixed/40' : 'bg-surface-container-high'}`}>
-                          <span className={`material-symbols-outlined text-base ${v.is_free_wash ? 'fill-icon text-secondary-fixed' : 'text-on-surface-variant'}`}
-                            aria-hidden="true">
-                            {v.is_free_wash ? 'redeem' : 'water_drop'}
-                          </span>
-                        </span>
-                        <div className="min-w-0">
-                          <p className="text-sm text-on-surface font-semibold truncate">
-                            {v.is_free_wash ? t('Free Wash', 'غسيل مجاني') : t('Wash', 'غسيل')}
-                          </p>
-                          <p className="text-xs text-on-surface-variant">
-                            {new Date(v.visited_at).toLocaleDateString(t('en-US','ar-EG'),{year:'numeric',month:'short',day:'numeric'})}
+                  {upcomingBookings.slice(0, 5).map((b, i) => {
+                    const s = bookingStatus(b)
+                    return (
+                      <li key={b.id ?? i} className="flex items-center gap-3 p-4">
+                        <div className="bg-secondary-fixed/10 p-2 rounded-lg shrink-0">
+                          <span className="material-symbols-outlined text-secondary-fixed text-base">calendar_month</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-semibold text-on-surface text-sm truncate">
+                              {b.service_type === 'full' ? t('Full Wash', 'غسيل كامل') : t('Exterior Only', 'خارجي فقط')}
+                            </p>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+                              style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.color }}>
+                              {bookingStatusLabel(s.key, t)}
+                            </span>
+                          </div>
+                          {b.booking_uid && (
+                            <p className="text-[11px] font-bold text-secondary-fixed" dir="ltr" style={{ unicodeBidi: 'embed' }}>
+                              #{b.booking_uid.replace('BK-', 'RSH-')}
+                            </p>
+                          )}
+                          <p className="text-xs text-on-surface-variant mt-0.5">
+                            {new Date(String(b.booking_date).slice(0, 10) + 'T12:00:00').toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            {' · '}
+                            <span dir="ltr" style={{ unicodeBidi: 'embed' }}>{formatTime(b.booking_time, lang)}</span>
                           </p>
                         </div>
-                      </div>
-                      <span className="text-xs text-secondary-fixed font-bold shrink-0" dir="ltr"
-                        style={{ unicodeBidi: 'embed', fontVariantNumeric: 'tabular-nums' }}>
-                        {v.stamps_before} → {v.stamps_after}
-                      </span>
-                    </li>
-                  ))}
+                      </li>
+                    )
+                  })}
                 </ul>
               )}
             </div>
           </div>
 
-          {/* Right */}
+          {/* Right — Member Pass */}
           <div className="space-y-6">
-            {/* Member Pass */}
             <div className="glass p-6 rounded-2xl text-center">
               <p className="text-xs font-bold text-secondary-fixed uppercase tracking-wide mb-4">{t('Member Pass', 'بطاقة العضوية')}</p>
 
-              {/* QR — tap to expand */}
               <button
                 onClick={() => setQrExpanded(true)}
                 className="relative mx-auto block group"
@@ -222,7 +200,6 @@ export default function Loyalty() {
                   style={{ width: 170, height: 170, background: '#ffffff' }}>
                   {customerId && <QRCodeCanvas value={customerId} size={146} level="M" fgColor="#000000" bgColor="#ffffff" style={{ display: 'block' }} />}
                 </div>
-                {/* Expand hint */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"
                   style={{ background: 'rgba(0,0,0,0.45)' }}>
                   <span className="material-symbols-outlined text-white text-3xl">zoom_in</span>
@@ -240,41 +217,6 @@ export default function Loyalty() {
                 {t('Book a Wash', 'احجز غسيل')}
               </Link>
             </div>
-
-            {/* Next booking */}
-            {nextBooking && (
-              <div className="glass p-4 rounded-2xl">
-                <p className="text-xs font-bold text-on-surface-variant uppercase mb-3">{t('Upcoming Booking', 'الحجز القادم')}</p>
-                <div className="flex items-center gap-3">
-                  <div className="bg-secondary-fixed/10 p-2 rounded-lg">
-                    <span className="material-symbols-outlined text-secondary-fixed text-base">calendar_month</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold text-on-surface text-sm">
-                        {nextBooking.service_type === 'full' ? t('Full Wash', 'غسيل كامل') : t('Exterior Only', 'خارجي فقط')}
-                      </p>
-                      {(() => { const s = bookingStatus(nextBooking); return (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
-                          style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.color }}>
-                          {bookingStatusLabel(s.key, t)}
-                        </span>
-                      )})()}
-                    </div>
-                    {nextBooking.booking_uid && (
-                      <span className="text-[11px] font-bold text-secondary-fixed" dir="ltr">
-                        #{nextBooking.booking_uid.replace('BK-', 'RSH-')}
-                      </span>
-                    )}
-                    <p className="text-xs text-on-surface-variant mt-0.5">
-                      <span>{new Date(nextBooking.booking_date.slice(0,10) + 'T12:00:00').toLocaleDateString(t('en-US','ar-EG'),{month:'short',day:'numeric'})}</span>
-                      {' | '}
-                      <span dir="ltr" style={{unicodeBidi:'embed'}}>{formatTime(nextBooking.booking_time, lang)}</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>
@@ -287,7 +229,6 @@ export default function Loyalty() {
           onClick={() => setQrExpanded(false)}
         >
           <div className="flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
-            {/* Large QR */}
             <div className="p-5 rounded-3xl shadow-2xl"
               style={{ background: '#ffffff', boxShadow: '0 0 60px rgba(var(--color-secondary-fixed-rgb), 0.3)' }}>
               {customerId && <QRCodeCanvas value={customerId} size={260} level="M" fgColor="#000000" bgColor="#ffffff" style={{ display: 'block' }} />}
