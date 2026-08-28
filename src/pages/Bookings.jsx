@@ -40,7 +40,11 @@ export default function Bookings() {
     return bookings.filter(b => {
       const ref = b.booking_uid?.replace('BK-', '#RSH-') ?? ''
       if (q && !ref.toLowerCase().includes(q)) return false
-      if (svcFilter !== 'all' && b.service_type !== svcFilter) return false
+      if (svcFilter !== 'all') {
+        const svc = b.service_type
+        const matchExterior = svcFilter === 'exterior' && (svc === 'exterior' || svc === 'outside')
+        if (!matchExterior && svc !== svcFilter) return false
+      }
       if (stFilter !== 'all' && bookingStatus(b).key !== stFilter) return false
       return true
     }).sort((a, b) => String(b.booking_date).localeCompare(String(a.booking_date)) || b.booking_time?.localeCompare(a.booking_time))
@@ -74,7 +78,7 @@ export default function Bookings() {
 
   const svcLabel = svc =>
     svc === 'full' ? t('Full Wash', 'غسيل كامل')
-    : svc === 'exterior' ? t('Exterior Only', 'خارجي فقط')
+    : (svc === 'exterior' || svc === 'outside') ? t('Exterior Only', 'خارجي فقط')
     : t('Unknown', 'غير معروف')
 
   const formattedDate = raw =>
