@@ -213,9 +213,6 @@ export default function Loyalty() {
               <h4 className="font-bold text-on-surface font-display">{name.toUpperCase()}</h4>
               <p className="text-xs text-secondary-fixed mt-1 font-bold" dir="ltr" style={{unicodeBidi:"embed"}}>{customerId}</p>
               {memberSince && <p className="text-xs text-on-surface-variant mt-1">{t('Member since', 'عضو منذ')} {new Date(memberSince).toLocaleDateString(t('en-US','ar-EG'),{year:'numeric',month:'long'})}</p>}
-              <Link to="/book" className="btn-primary mt-4 w-full py-3 rounded-xl text-xs uppercase tracking-wide">
-                {t('Book a Wash', 'احجز غسيل')}
-              </Link>
             </div>
           </div>
         </div>
