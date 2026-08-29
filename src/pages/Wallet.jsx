@@ -107,6 +107,9 @@ export default function Wallet() {
   // Normalize what the user typed before hitting the API
   const normalizeQuery = raw => {
     const s = raw.trim()
+    // "RW-42" or "rw-42" or "RW42" → extract number and pad
+    const rwMatch = s.match(/^rw-?(\d+)$/i)
+    if (rwMatch) return `RW-${rwMatch[1].padStart(5, '0')}`
     // Pure digits ≤6 → Member ID number e.g. "42" → "RW-00042"
     if (/^\d{1,6}$/.test(s)) return `RW-${s.padStart(5, '0')}`
     // Phone starting with 0 (Sudan local format) → +249...
@@ -356,7 +359,7 @@ export default function Wallet() {
             </label>
             <div style={{ position: 'relative' }}>
               <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
-                placeholder={t('e.g. 42, or 0912345678', 'مثلاً 42 أو 0912345678')}
+                placeholder={t('Member ID or Phone', 'رقم العضوية أو الهاتف')}
                 inputMode="numeric" pattern="[0-9]*"
                 autoFocus
                 style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
@@ -424,7 +427,7 @@ export default function Wallet() {
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
-                    placeholder={t('Member no. e.g. 42, or phone e.g. 0912345678', 'رقم العضو مثلاً 42 أو رقم الهاتف 0912345678')}
+                    placeholder={t('Member ID or Phone', 'رقم العضوية أو الهاتف')}
                     inputMode="numeric" pattern="[0-9]*"
                     style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
                   {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
