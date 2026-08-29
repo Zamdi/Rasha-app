@@ -4,49 +4,49 @@
 
 /* ══════════════════════════════════════════════════════════════
    RASHA CUSTOMER PORTAL — LIGHT GLASSMORPHISM DESIGN SYSTEM
-   Background: fluid blue/teal gradient image
+   Background: fluid blue gradient image
    Cards: white frosted glass
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Light mode tokens (default) ────────────────────────────── */
 :root {
-  --color-background:                #f8fffe;
+  --color-background:                #F6F1F1;
   --color-surface:                   #ffffff;
   --color-surface-container:         #ffffff;
-  --color-surface-container-high:    #f0fafa;
-  --color-surface-container-highest: #e4f4f4;
-  --color-surface-variant:           #e4f4f4;
+  --color-surface-container-high:    #EBF4F9;
+  --color-surface-container-highest: #D6EAF5;
+  --color-surface-variant:           #D6EAF5;
   --color-on-surface:                #0d1825;
-  --color-on-surface-variant:        #2d5a5e;
-  --color-outline:                   rgba(21,80,88,0.15);
-  --color-outline-variant:           rgba(21,80,88,0.12);
-  --color-primary:                   #155058;
+  --color-on-surface-variant:        #1a5878;
+  --color-outline:                   rgba(20,108,148,0.15);
+  --color-outline-variant:           rgba(20,108,148,0.12);
+  --color-primary:                   #146C94;
   --color-on-primary:                #ffffff;
-  --color-primary-container:         #155058;
-  --color-secondary-fixed:           #155058;
-  --color-secondary-fixed-rgb:       21,80,88;
-  --color-secondary-fixed-dim:       #0e383e;
+  --color-primary-container:         #146C94;
+  --color-secondary-fixed:           #146C94;
+  --color-secondary-fixed-rgb:       20,108,148;
+  --color-secondary-fixed-dim:       #0f5070;
   --color-error:                     #c0392b;
   --color-error-container:           rgba(192,57,43,0.10);
   --color-on-background:             #0d1825;
 
-  /* Glass tokens — opaque white cards on off-white bg */
+  /* Glass tokens — opaque white cards on cream bg */
   --glass-bg:           #ffffff;
   --glass-bg-hover:     #f7f7f7;
   --glass-high-bg:      #ffffff;
-  --glass-border:       rgba(21,80,88,0.10);
-  --glass-high-border:  rgba(21,80,88,0.16);
-  --glass-shadow:       0 4px 24px rgba(21,80,88,0.10), 0 1px 3px rgba(0,0,0,0.06);
-  --glass-shadow-lg:    0 12px 48px rgba(21,80,88,0.14), 0 2px 8px rgba(0,0,0,0.07);
-  --glass-shadow-card:  0 2px 12px rgba(21,80,88,0.09), 0 1px 3px rgba(0,0,0,0.05);
+  --glass-border:       rgba(20,108,148,0.10);
+  --glass-high-border:  rgba(20,108,148,0.16);
+  --glass-shadow:       0 4px 24px rgba(20,108,148,0.10), 0 1px 3px rgba(0,0,0,0.06);
+  --glass-shadow-lg:    0 12px 48px rgba(20,108,148,0.14), 0 2px 8px rgba(0,0,0,0.07);
+  --glass-shadow-card:  0 2px 12px rgba(20,108,148,0.09), 0 1px 3px rgba(0,0,0,0.05);
 
   /* Inputs */
-  --input-bg:           #f0fafa;
-  --input-border:       rgba(21,80,88,0.18);
-  --input-focus:        rgba(21,80,88,0.15);
+  --input-bg:           #EBF4F9;
+  --input-border:       rgba(20,108,148,0.18);
+  --input-focus:        rgba(20,108,148,0.15);
 
   /* Navbar */
-  --navbar-bg:          rgba(248,255,254,0.92);
+  --navbar-bg:          rgba(246,241,241,0.92);
 }
 
 /* ── Dark mode tokens ────────────────────────────────────────── */
@@ -58,15 +58,15 @@ html.dark {
   --color-surface-container-highest: rgba(8,20,44,0.75);
   --color-surface-variant:           rgba(8,20,44,0.50);
   --color-on-surface:                #ffffff;
-  --color-on-surface-variant:        #8ab4d8;
-  --color-outline:                   rgba(126,206,202,0.1);
-  --color-outline-variant:           rgba(126,206,202,0.06);
-  --color-primary:                   #7ececa;
-  --color-on-primary:                #003640;
-  --color-primary-container:         #155058;
-  --color-secondary-fixed:           #7ececa;
-  --color-secondary-fixed-rgb:       126,206,202;
-  --color-secondary-fixed-dim:       #5aadaa;
+  --color-on-surface-variant:        #AFD3E2;
+  --color-outline:                   rgba(25,167,206,0.1);
+  --color-outline-variant:           rgba(25,167,206,0.06);
+  --color-primary:                   #AFD3E2;
+  --color-on-primary:                #0f3d55;
+  --color-primary-container:         #146C94;
+  --color-secondary-fixed:           #AFD3E2;
+  --color-secondary-fixed-rgb:       175,211,226;
+  --color-secondary-fixed-dim:       #19A7CE;
   --color-error:                     #ff6b6b;
   --color-error-container:           rgba(255,107,107,0.15);
   --color-on-background:             #e8f0fe;
@@ -74,28 +74,19 @@ html.dark {
   --glass-bg:           rgba(8,20,44,0.58);
   --glass-bg-hover:     rgba(8,20,44,0.70);
   --glass-high-bg:      rgba(8,20,44,0.88);
-  --glass-border:       rgba(126,206,202,0.22);
-  --glass-high-border:  rgba(126,206,202,0.35);
-  --glass-shadow:       0 8px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(126,206,202,0.08) inset;
-  --glass-shadow-lg:    0 20px 60px rgba(0,0,0,0.6), 0 1px 0 rgba(126,206,202,0.10) inset;
-  --glass-shadow-card:  0 4px 24px rgba(0,0,0,0.45), 0 1px 0 rgba(126,206,202,0.06) inset;
+  --glass-border:       rgba(175,211,226,0.22);
+  --glass-high-border:  rgba(175,211,226,0.35);
+  --glass-shadow:       0 8px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(175,211,226,0.08) inset;
+  --glass-shadow-lg:    0 20px 60px rgba(0,0,0,0.6), 0 1px 0 rgba(175,211,226,0.10) inset;
+  --glass-shadow-card:  0 4px 24px rgba(0,0,0,0.45), 0 1px 0 rgba(175,211,226,0.06) inset;
 
   --input-bg:           rgba(255,255,255,0.08);
-  --input-border:       rgba(126,206,202,0.25);
-  --input-focus:        rgba(126,206,202,0.25);
+  --input-border:       rgba(175,211,226,0.25);
+  --input-focus:        rgba(175,211,226,0.25);
   --navbar-bg:          rgba(10,22,40,0.85);
 }
 
 /* ── Full-page background ────────────────────────────────────── */
-/* One source of truth for the page ground: the token, which already flips
-   with the theme. Previously html, main.jsx and AppContext each hardcoded a
-   different value (#f2f5f9 / #f8fffe / transparent in light, #070d1a /
-   #080c14 / #0a1628 in dark), so whichever won painted a slightly different
-   colour from the page content — visible as a band below short pages and
-   under the safe area.
-
-   html's background is what the browser propagates to the canvas, so setting
-   it here is what covers the full viewport and any overscroll. */
 html {
   min-height: 100%;
   background: var(--color-background);
@@ -111,10 +102,6 @@ body {
 
 /* ══════════════════════════════════════════════════════════════
    TOAST NOTIFICATIONS
-   Port of seyitahmettanriver/jquery-toast-plugin (MIT) — same pill
-   shape, per-type icon and title colours, and close button. Rewritten
-   without jQuery, which the app doesn't otherwise load, and dropped
-   from the top rather than the original bottom-right.
    ══════════════════════════════════════════════════════════════ */
 .toast-container {
   position: fixed;
@@ -132,7 +119,6 @@ body {
 
 .toast {
   opacity: 0;
-  /* Drops in from above the viewport. */
   transform: translateY(-140%);
   transition: opacity 0.3s, transform 0.3s cubic-bezier(0.34, 1.15, 0.64, 1);
   width: 330px;
@@ -151,7 +137,6 @@ body {
 .toast .toast-icon {
   display: flex;
   align-items: center;
-  /* Logical property so the layout mirrors in Arabic. */
   margin-inline-end: 10px;
   flex-shrink: 0;
 }
@@ -164,7 +149,6 @@ body {
   font-weight: 400;
   color: #111215;
   line-height: 1.35;
-  /* The wallet warning carries two formatted amounts — it has to wrap. */
   overflow-wrap: anywhere;
 }
 
@@ -203,7 +187,7 @@ body {
 @layer base {
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(21,80,88,0.3); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb { background: rgba(20,108,148,0.3); border-radius: 10px; }
 }
 
 /* ── Components ──────────────────────────────────────────────── */
@@ -231,12 +215,12 @@ body {
   /* Glass popup */
   .glass-popup {
     background: #ffffff;
-    border: 1px solid rgba(0,60,130,0.12);
-    box-shadow: 0 24px 64px rgba(0,50,120,0.18), 0 2px 8px rgba(0,0,0,0.07);
+    border: 1px solid rgba(20,108,148,0.12);
+    box-shadow: 0 24px 64px rgba(20,108,148,0.18), 0 2px 8px rgba(0,0,0,0.07);
   }
   html.dark .glass-popup {
     background: rgba(14,28,50,0.92);
-    border: 1px solid rgba(126,206,202,0.15);
+    border: 1px solid rgba(175,211,226,0.15);
     box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06) inset;
   }
   .glass-popup-backdrop {
@@ -248,11 +232,11 @@ body {
 
   /* Gradient button */
   .hydro-gradient {
-    background: linear-gradient(135deg, #1d6b75 0%, #155058 50%, #0e383e 100%);
+    background: linear-gradient(135deg, #19A7CE 0%, #146C94 50%, #0f5070 100%);
     transition: all 0.2s;
   }
   .hydro-gradient:hover {
-    background: linear-gradient(135deg, #227f8a 0%, #1a6570 50%, #124045 100%);
+    background: linear-gradient(135deg, #1cbfe8 0%, #19A7CE 50%, #146C94 100%);
   }
 
   .teal-glow { }
@@ -271,12 +255,6 @@ body {
   }
   .rasha-input::placeholder { color: var(--color-on-surface-variant); opacity: 0.7; }
 
-  /* Invalid field — pairs with the message FieldError renders underneath.
-     Authored here rather than composed from Tailwind utilities: the class is
-     applied from a runtime expression, which the JIT scanner never sees, so a
-     utility would simply never be generated. !important overrides both the
-     `border` shorthand on .rasha-input and its :focus rule, so the field keeps
-     reading as invalid while the customer is typing the correction. */
   .field-invalid,
   .field-invalid:focus {
     border-color: var(--color-error) !important;
@@ -333,7 +311,7 @@ body {
   color: var(--color-primary);
 }
 .slot-selected {
-  background: #155058;
+  background: #146C94;
   border: 1px solid rgba(255,255,255,0.3);
   color: #ffffff;
 }
@@ -346,12 +324,12 @@ body {
 }
 html.dark .slot-available {
   background: rgba(255,255,255,0.06);
-  border-color: rgba(126,206,202,0.12);
+  border-color: rgba(175,211,226,0.12);
   color: #e8f0fe;
 }
 html.dark .slot-available:hover {
-  border-color: #7ececa;
-  color: #7ececa;
+  border-color: #AFD3E2;
+  color: #AFD3E2;
 }
 
 /* ── Animations ──────────────────────────────────────────────── */
@@ -376,7 +354,7 @@ html.dark .slot-available:hover {
 /* ── Loader ──────────────────────────────────────────────────── */
 .loader {
   width: 22px; height: 22px;
-  border: 2.5px solid rgba(21,80,88,0.15);
+  border: 2.5px solid rgba(20,108,148,0.15);
   border-top: 2.5px solid var(--color-primary);
   border-radius: 50%;
   animation: spin 0.75s linear infinite;
@@ -435,15 +413,7 @@ html.dark label {
 
 /* ══════════════════════════════════════════════════════════════
    LIQUID GLASS MOBILE NAV
-   A self-contained floating bar. The iridescence comes from blobs
-   drifting *inside* the pill, so the effect holds on any page
-   background rather than depending on what happens to sit behind it.
    ══════════════════════════════════════════════════════════════ */
-
-/* Light glass in light mode, smoked in dark. The glyphs invert with the
-   theme, so the bar has to move the opposite way to keep contrast — and on
-   light pages the rim and drop shadow are what keep the bar's edge visible,
-   since the fill itself is nearly the same value as the page. */
 .liquid-nav {
   position: relative;
   display: flex;
@@ -452,22 +422,19 @@ html.dark label {
   padding: 6px;
   border-radius: 9999px;
   isolation: isolate;
-  /* Light: warm cream-tinted glass — near-opaque so the bar reads clearly
-     on top of any page content, no matter how busy the background is. */
-  background: linear-gradient(135deg, rgba(249,246,239,0.98), rgba(255,255,255,0.96));
+  background: linear-gradient(135deg, rgba(246,241,241,0.98), rgba(255,255,255,0.96));
   backdrop-filter: blur(32px) saturate(180%);
   -webkit-backdrop-filter: blur(32px) saturate(180%);
-  border: 1px solid rgba(18,69,75,0.15);
+  border: 1px solid rgba(20,108,148,0.15);
   box-shadow:
-    0 14px 44px rgba(18,69,75,0.20),
-    0 3px 12px rgba(18,69,75,0.10),
-    0 0 0 1px rgba(18,69,75,0.05),
+    0 14px 44px rgba(20,108,148,0.20),
+    0 3px 12px rgba(20,108,148,0.10),
+    0 0 0 1px rgba(20,108,148,0.05),
     inset 0 1px 0 rgba(255,255,255,0.98),
-    inset 0 -1px 0 rgba(18,69,75,0.06);
+    inset 0 -1px 0 rgba(20,108,148,0.06);
 }
 html.dark .liquid-nav {
-  /* Dark: deep teal-black glass, near-opaque for the same reason as light. */
-  background: linear-gradient(135deg, rgba(18,69,75,0.95), rgba(5,18,21,0.97));
+  background: linear-gradient(135deg, rgba(14,50,74,0.95), rgba(5,15,28,0.97));
   backdrop-filter: blur(32px) saturate(160%);
   -webkit-backdrop-filter: blur(32px) saturate(160%);
   border: 1px solid rgba(255,255,255,0.18);
@@ -478,7 +445,6 @@ html.dark .liquid-nav {
     inset 0 -1px 0 rgba(0,0,0,0.28);
 }
 
-/* Everything decorative lives behind the buttons and is clipped to the pill. */
 .liquid-layer {
   position: absolute;
   inset: 0;
@@ -488,8 +454,6 @@ html.dark .liquid-nav {
   z-index: -1;
 }
 
-
-/* Specular highlight tracking the pointer. */
 .liquid-glare {
   position: absolute;
   top: 0; bottom: 0;
@@ -504,9 +468,6 @@ html.dark .liquid-glare {
   background: radial-gradient(circle at center, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 70%);
 }
 
-/* Active-tab sliding pill.
-   Light: near-opaque white — clearly reads as selected.
-   Dark:  near-opaque deep teal-black — same clear selected state. */
 .liquid-pill {
   position: absolute;
   border-radius: 9999px;
@@ -515,14 +476,14 @@ html.dark .liquid-glare {
   -webkit-backdrop-filter: blur(12px) saturate(0.8);
   border: 1px solid rgba(255,255,255,0.96);
   box-shadow:
-    0 2px 14px rgba(18,69,75,0.14),
-    0 0 0 1px rgba(18,69,75,0.04),
+    0 2px 14px rgba(20,108,148,0.14),
+    0 0 0 1px rgba(20,108,148,0.04),
     inset 0 1px 0 rgba(255,255,255,1);
   pointer-events: none;
   z-index: 0;
 }
 html.dark .liquid-pill {
-  background: rgba(4,16,19,0.88);
+  background: rgba(4,16,28,0.88);
   backdrop-filter: blur(12px) saturate(0.6);
   -webkit-backdrop-filter: blur(12px) saturate(0.6);
   border: 1px solid rgba(255,255,255,0.20);
@@ -535,7 +496,7 @@ html.dark .liquid-pill {
   width: 1px;
   height: 22px;
   margin: 0 4px;
-  background: rgba(18,69,75,0.20);
+  background: rgba(20,108,148,0.20);
   flex-shrink: 0;
 }
 html.dark .liquid-divider { background: rgba(255,255,255,0.15); }
