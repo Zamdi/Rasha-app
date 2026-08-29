@@ -115,7 +115,7 @@ export default function MobileNav() {
       {/* Center elevated button — QR code shortcut */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '-28px', position: 'relative', zIndex: 30 }}>
         <button
-          onClick={() => navigate(customer ? '/wallet' : '/login')}
+          onClick={() => navigate(customer ? '/wallet?qr=1' : '/login')}
           aria-label={t('My QR code', 'رمز QR الخاص بي')}
           style={{
             width: '56px', height: '56px',

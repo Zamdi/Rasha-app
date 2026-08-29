@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { useApp, API } from '../context/AppContext'
 import { fetchWithTimeout } from '../utils/fetchWithTimeout'
@@ -8,6 +8,7 @@ import QrScannerModal from '../components/QrScannerModal'
 export default function Wallet() {
   const { t, lang, customer, login, token, isDark } = useApp()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [balance, setBalance]           = useState(Number(customer?.wallet_balance || 0))
   const [transactions, setTransactions] = useState([])
@@ -31,6 +32,15 @@ export default function Wallet() {
   const lookupTimer = useRef(null)
 
   useEffect(() => { try { localStorage.removeItem('rasha_saved_card') } catch {} }, [])
+
+  // Auto-open QR modal when nav bar QR button taps
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (params.get('qr') === '1') {
+      setShowMyQr(true)
+      navigate('/wallet', { replace: true })
+    }
+  }, [location.search])
 
   useEffect(() => {
     if (!token) return
@@ -129,7 +139,7 @@ export default function Wallet() {
   const avatarColors = ['#146C94','#19A7CE','#0e3d52','#1a6650']
 
   return (
-    <div style={{ minHeight: '100dvh', background: bg, display: 'flex', flexDirection: 'column', paddingTop: 'calc(env(safe-area-inset-top) + 20px)', paddingBottom: '90px' }}>
+    <div style={{ minHeight: '100dvh', background: bg, display: 'flex', flexDirection: 'column', paddingTop: 'calc(env(safe-area-inset-top) + 48px)', paddingBottom: '90px' }}>
 
       {/* ── Top bar ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px 8px' }}>
@@ -159,7 +169,7 @@ export default function Wallet() {
         }}>
           {/* Rasha R logo watermark */}
           <img src="/rasha-logo.png" alt="" aria-hidden="true"
-            style={{ position: 'absolute', bottom: -20, right: -20, width: 140, height: 140, objectFit: 'contain', opacity: 0.06, pointerEvents: 'none', userSelect: 'none' }} />
+            style={{ position: 'absolute', top: '50%', right: -10, transform: 'translateY(-50%)', width: 160, height: 160, objectFit: 'contain', opacity: 0.08, pointerEvents: 'none', userSelect: 'none', filter: 'brightness(10)' }} />
           {/* Decorative circles */}
           <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
 
