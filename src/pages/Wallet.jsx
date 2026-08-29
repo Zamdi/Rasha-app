@@ -25,7 +25,6 @@ export default function Wallet() {
   const [lookupLoading, setLookupLoading] = useState(false)
   const [lookupError, setLookupError]   = useState('')
   const [sendAmount, setSendAmount]     = useState('')
-  const [sendNote, setSendNote]         = useState('')
   const [sendLoading, setSendLoading]   = useState(false)
   const [sendError, setSendError]       = useState('')
   const [sendSuccess, setSendSuccess]   = useState(false)
@@ -87,6 +86,18 @@ export default function Wallet() {
     return { icon: 'swap_horiz', color: '#146C94', bg: 'rgba(20,108,148,0.09)' }
   }
 
+  // Normalize what the user typed before hitting the API
+  const normalizeQuery = raw => {
+    const s = raw.trim()
+    // Pure digits ≤6 → Member ID number e.g. "42" → "RW-00042"
+    if (/^\d{1,6}$/.test(s)) return `RW-${s.padStart(5, '0')}`
+    // Phone starting with 0 (Sudan local format) → +249...
+    if (/^0\d{9}$/.test(s)) return `+249${s.slice(1)}`
+    // Already has country code without +
+    if (/^249\d{9}$/.test(s)) return `+${s}`
+    return s
+  }
+
   // Lookup
   const handleSearchChange = val => {
     setSearchQuery(val); setRecipient(null); setLookupError('')
@@ -96,8 +107,9 @@ export default function Wallet() {
   }
   const doLookup = async q => {
     setLookupLoading(true); setLookupError('')
+    const normalized = normalizeQuery(q)
     try {
-      const res  = await fetch(`${API}/api/wallet/lookup?q=${encodeURIComponent(q)}`, { headers: { Authorization: 'Bearer ' + token } })
+      const res  = await fetch(`${API}/api/wallet/lookup?q=${encodeURIComponent(normalized)}`, { headers: { Authorization: 'Bearer ' + token } })
       const data = await res.json()
       if (!res.ok) return setLookupError(data.error || t('Lookup failed', 'فشل البحث'))
       if (!data.found) return setLookupError(t('No member found', 'لا يوجد عضو بهذا الرقم'))
@@ -119,13 +131,13 @@ export default function Wallet() {
       const res  = await fetch(`${API}/api/wallet/transfer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-        body: JSON.stringify({ to_uid: recipient.uid, amount: amt, note: sendNote.trim() || undefined }),
+        body: JSON.stringify({ to_uid: recipient.uid, amount: amt }),
       })
       const data = await res.json()
       if (!res.ok) return setSendError(data.error || t('Transfer failed', 'فشل التحويل'))
       setBalance(data.balance !== undefined ? data.balance : balance - amt)
       setSendSuccess(true)
-      setRecipient(null); setSearchQuery(''); setSendAmount(''); setSendNote('')
+      setRecipient(null); setSearchQuery(''); setSendAmount('')
       loadTransactions()
     } catch { setSendError(t('Connection error', 'خطأ في الاتصال')) }
     finally { setSendLoading(false) }
@@ -351,7 +363,7 @@ export default function Wallet() {
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
-                    placeholder={t('e.g. 0912345678 or RW-00001', 'مثال: 0912345678 أو RW-00001')}
+                    placeholder={t('Member no. e.g. 42, or phone e.g. 0912345678', 'رقم العضو مثلاً 42 أو رقم الهاتف 0912345678')}
                     style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
                   {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
                   {recipient && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#19A7CE' }}>check_circle</span>}
@@ -376,13 +388,6 @@ export default function Wallet() {
                   placeholder="0"
                   style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
                 <p style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.3)' : '#aaa', marginTop: '4px' }}>{t('Balance:', 'رصيدك:')} {balance.toLocaleString('en')} SDG</p>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.55)' : '#146C94', display: 'block', marginBottom: '6px' }}>{t('Note (optional)', 'ملاحظة (اختياري)')}</label>
-                <input value={sendNote} onChange={e => setSendNote(e.target.value)}
-                  placeholder={t('e.g. for coffee', 'مثال: للقهوة')}
-                  style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
               </div>
 
               {sendError && <p style={{ fontSize: '13px', color: '#c0392b', fontWeight: 600 }}>{sendError}</p>}
