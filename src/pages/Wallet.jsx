@@ -110,8 +110,8 @@ export default function Wallet() {
     // "RW-42" or "rw-42" or "RW42" → extract number and pad
     const rwMatch = s.match(/^rw-?(\d+)$/i)
     if (rwMatch) return `RW-${rwMatch[1].padStart(5, '0')}`
-    // Pure digits ≤6 → Member ID number e.g. "42" → "RW-00042"
-    if (/^\d{1,6}$/.test(s)) return `RW-${s.padStart(5, '0')}`
+    // Pure digits (not a full phone number) → Member ID e.g. "42" → "RW-00042"
+    if (/^\d{1,9}$/.test(s)) return `RW-${s.padStart(5, '0')}`
     // Phone starting with 0 (Sudan local format) → +249...
     if (/^0\d{9}$/.test(s)) return `+249${s.slice(1)}`
     // Already has country code without +
