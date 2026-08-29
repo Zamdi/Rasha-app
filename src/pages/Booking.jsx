@@ -8,9 +8,9 @@ import { apiError, isSlotConflict, isRateLimited, isSessionDead } from '../utils
 import { fetchWithTimeout } from '../utils/fetchWithTimeout'
 
 const today = () => {
-  // Use Khartoum local time (UTC+3) so the minimum date is never yesterday
-  const d = new Date(Date.now() + 3 * 60 * 60 * 1000)
-  return d.toISOString().slice(0, 10)
+  // Use the device's own local date — correct for any timezone worldwide
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 export default function Booking() {

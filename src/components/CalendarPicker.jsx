@@ -7,7 +7,8 @@ export default function CalendarPicker({ value, onChange, minDate, lang = 'en' }
   const [open, setOpen] = useState(false)
   const wrapRef = useRef(null)
   const days = lang === 'ar' ? DAYS_AR : DAYS_EN
-  const min = minDate || new Date().toISOString().slice(0, 10)
+  const localToday = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
+  const min = minDate || localToday()
 
   const [view, setView] = useState(() => {
     const d = value ? new Date(value + 'T12:00:00') : new Date()
