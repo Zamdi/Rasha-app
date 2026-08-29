@@ -62,6 +62,11 @@ export default defineConfig({
             type: 'image/png',
             purpose: 'any maskable',
           },
+          {
+            src: '/icons/icon-1024x1024.png',
+            sizes: '1024x1024',
+            type: 'image/png',
+          },
         ],
       },
       workbox: {
