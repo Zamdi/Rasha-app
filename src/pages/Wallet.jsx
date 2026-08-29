@@ -118,6 +118,7 @@ export default function Wallet() {
 
   // Lookup
   const handleSearchChange = val => {
+    val = val.replace(/\D/g, '')  // digits only
     setSearchQuery(val); setRecipient(null); setLookupError('')
     clearTimeout(lookupTimer.current)
     if (!val.trim()) return
@@ -356,6 +357,7 @@ export default function Wallet() {
             <div style={{ position: 'relative' }}>
               <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
                 placeholder={t('e.g. 42, or 0912345678', 'مثلاً 42 أو 0912345678')}
+                inputMode="numeric" pattern="[0-9]*"
                 autoFocus
                 style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
               {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
@@ -423,6 +425,7 @@ export default function Wallet() {
                 <div style={{ position: 'relative' }}>
                   <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
                     placeholder={t('Member no. e.g. 42, or phone e.g. 0912345678', 'رقم العضو مثلاً 42 أو رقم الهاتف 0912345678')}
+                    inputMode="numeric" pattern="[0-9]*"
                     style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
                   {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
                   {recipient && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#19A7CE' }}>check_circle</span>}
