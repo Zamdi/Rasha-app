@@ -17,17 +17,17 @@ export default function MobileNav() {
   const hidden = HIDDEN_PAGES.some(p => pathname.startsWith(p))
 
   const loggedInItems = [
-    { to: '/loyalty',   icon: 'home',                   label: t('Home', 'الرئيسية') },
-    { to: '/wallet',    icon: 'credit_card',             label: t('Card', 'بطاقتي') },
+    { to: '/loyalty',   icon: 'home',         label: t('Home', 'الرئيسية') },
+    { to: '/wallet',    icon: 'credit_card',  label: t('Wallet', 'محفظتي') },
     // center button at index 2 — handled separately
-    { to: '/bookings',  icon: 'bar_chart',               label: t('Report', 'تقارير') },
-    { to: '/settings',  icon: 'settings',                label: t('Setting', 'إعدادات') },
+    { to: '/bookings',  icon: 'calendar_month', label: t('Bookings', 'حجوزات') },
+    { to: '/settings',  icon: 'settings',     label: t('Setting', 'إعدادات') },
   ]
   const guestItems = [
     { to: '/',        icon: 'home',           label: t('Home', 'الرئيسية') },
-    { to: '/book',    icon: 'credit_card',    label: t('Card', 'بطاقتي') },
+    { to: '/book',    icon: 'credit_card',    label: t('Wallet', 'محفظتي') },
     // center
-    { to: '/login',   icon: 'bar_chart',      label: t('Report', 'تقارير') },
+    { to: '/login',   icon: 'calendar_month', label: t('Bookings', 'حجوزات') },
     { to: '/contact', icon: 'settings',       label: t('Setting', 'إعدادات') },
   ]
 
@@ -112,11 +112,11 @@ export default function MobileNav() {
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-20"
       style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)', paddingLeft: '16px', paddingRight: '16px' }}>
 
-      {/* Center elevated button — sits above the bar */}
+      {/* Center elevated button — QR code shortcut */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '-28px', position: 'relative', zIndex: 30 }}>
         <button
-          onClick={() => navigate(customer ? '/book' : '/login')}
-          aria-label={t('Book a wash', 'احجز غسيل')}
+          onClick={() => navigate(customer ? '/wallet' : '/login')}
+          aria-label={t('My QR code', 'رمز QR الخاص بي')}
           style={{
             width: '56px', height: '56px',
             borderRadius: '50%',
@@ -131,7 +131,7 @@ export default function MobileNav() {
           onPointerUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
           onPointerLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}>
           <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#ffffff', lineHeight: 1 }}>
-            local_car_wash
+            qr_code_2
           </span>
         </button>
       </div>

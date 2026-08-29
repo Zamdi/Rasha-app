@@ -129,10 +129,10 @@ export default function Wallet() {
   const avatarColors = ['#146C94','#19A7CE','#0e3d52','#1a6650']
 
   return (
-    <div style={{ minHeight: '100dvh', background: bg, display: 'flex', flexDirection: 'column', paddingTop: 'env(safe-area-inset-top)', paddingBottom: '90px' }}>
+    <div style={{ minHeight: '100dvh', background: bg, display: 'flex', flexDirection: 'column', paddingTop: 'calc(env(safe-area-inset-top) + 20px)', paddingBottom: '90px' }}>
 
       {/* ── Top bar ── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px 8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {customer.avatar_url
             ? <img src={customer.avatar_url} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
@@ -145,10 +145,6 @@ export default function Wallet() {
             <p style={{ fontSize: '14px', fontWeight: 700, color: isDark ? '#e0e3e5' : '#0d1825', margin: 0 }}>{firstName}</p>
           </div>
         </div>
-        <button onClick={() => setShowMyQr(true)}
-          style={{ width: 38, height: 38, borderRadius: '50%', background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '20px', color: isDark ? 'rgba(255,255,255,0.6)' : '#555' }}>notifications</span>
-        </button>
       </div>
 
       {/* ── Teal wallet card ── */}
@@ -161,9 +157,11 @@ export default function Wallet() {
           overflow: 'hidden',
           boxShadow: '0 8px 32px rgba(20,108,148,0.30)',
         }}>
+          {/* Rasha R logo watermark */}
+          <img src="/rasha-logo.png" alt="" aria-hidden="true"
+            style={{ position: 'absolute', bottom: -20, right: -20, width: 140, height: 140, objectFit: 'contain', opacity: 0.06, pointerEvents: 'none', userSelect: 'none' }} />
           {/* Decorative circles */}
-          <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-          <div style={{ position: 'absolute', bottom: -30, left: -20, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+          <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
 
           {/* Currency pill */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
@@ -187,11 +185,7 @@ export default function Wallet() {
           {/* Card details row */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', margin: '0 0 2px', letterSpacing: '0.05em' }}>ID</p>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.85)', margin: 0, fontFamily: 'monospace', letterSpacing: '0.12em' }}>•••• {cardLast4}</p>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', margin: '0 0 2px', letterSpacing: '0.05em' }}>{t('Member', 'عضو')}</p>
+              <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', margin: '0 0 2px', letterSpacing: '0.05em' }}>{t('Member ID', 'رقم العضوية')}</p>
               <p style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.85)', margin: 0, fontFamily: 'monospace' }}>{customer.customer_uid}</p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
