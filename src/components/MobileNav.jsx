@@ -25,7 +25,6 @@ export default function MobileNav() {
   ]
   const guestItems = [
     { to: '/',        icon: 'home',             label: t('Home', 'الرئيسية') },
-    { to: '/book',    icon: 'local_car_wash',   label: t('Book', 'احجز') },
     { to: '/login',   icon: 'login',            label: t('Sign In', 'تسجيل الدخول') },
     { to: '/contact', icon: 'support_agent',    label: t('Contact', 'تواصل') },
   ]

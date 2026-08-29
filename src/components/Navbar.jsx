@@ -11,10 +11,10 @@ function DesktopNavPill({ pathname, customer, t, lang }) {
 
   const navItems = [
     ...(!customer ? [{ to: '/', label: t('Home', 'الرئيسية') }] : []),
-    { to: '/book', label: t('Book a Wash', 'احجز غسيل') },
     ...(customer ? [
+      { to: '/book',    label: t('Book a Wash', 'احجز غسيل') },
       { to: '/loyalty', label: t('My Card', 'بطاقتي') },
-      { to: '/wallet', label: t('Wallet', 'المحفظة') },
+      { to: '/wallet',  label: t('Wallet', 'المحفظة') },
     ] : [
       { to: '/contact', label: t('Support', 'الدعم') },
     ]),
