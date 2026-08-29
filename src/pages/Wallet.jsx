@@ -53,6 +53,7 @@ export default function Wallet() {
   const [sendLoading, setSendLoading]   = useState(false)
   const [sendError, setSendError]       = useState('')
   const [sendSuccess, setSendSuccess]   = useState(false)
+  const [sendConfirm, setSendConfirm]   = useState(false)
   const lookupTimer = useRef(null)
 
   useEffect(() => { try { localStorage.removeItem('rasha_saved_card') } catch {} }, [])
@@ -168,13 +169,17 @@ export default function Wallet() {
   const handleQrScan = text => {
     setShowScanner(false); setSearchQuery(text.trim()); doLookup(text.trim()); setShowSend(true)
   }
-  const handleSend = async e => {
-    e.preventDefault(); setSendError(''); setSendSuccess(false)
+  const handleSend = e => {
+    e.preventDefault(); setSendError('')
     if (!recipient) return setSendError(t('Find a recipient first', 'ابحث عن مستلم أولاً'))
     const amt = Number(sendAmount)
     if (!amt || amt <= 0) return setSendError(t('Enter a valid amount', 'أدخل مبلغاً صحيحاً'))
     if (amt > balance) return setSendError(t('Insufficient balance', 'رصيد غير كافٍ'))
-    setSendLoading(true)
+    setSendConfirm(true)
+  }
+  const confirmSend = async () => {
+    const amt = Number(sendAmount)
+    setSendLoading(true); setSendError('')
     try {
       const res  = await fetch(`${API}/api/wallet/transfer`, {
         method: 'POST',
@@ -182,12 +187,12 @@ export default function Wallet() {
         body: JSON.stringify({ to_uid: recipient.uid, amount: amt }),
       })
       const data = await res.json()
-      if (!res.ok) return setSendError(data.error || t('Transfer failed', 'فشل التحويل'))
+      if (!res.ok) { setSendConfirm(false); return setSendError(data.error || t('Transfer failed', 'فشل التحويل')) }
       setBalance(data.balance !== undefined ? data.balance : balance - amt)
-      setSendSuccess(true)
+      setSendSuccess(true); setSendConfirm(false)
       setRecipient(null); setSearchQuery(''); setSendAmount('')
       loadTransactions()
-    } catch { setSendError(t('Connection error', 'خطأ في الاتصال')) }
+    } catch { setSendConfirm(false); setSendError(t('Connection error', 'خطأ في الاتصال')) }
     finally { setSendLoading(false) }
   }
 
@@ -473,122 +478,156 @@ export default function Wallet() {
       {/* ── Send modal ── */}
       {showSend && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end', paddingBottom: keyboardOffset }}
-          onClick={() => { setShowSend(false); setSendSuccess(false); setSendError('') }}>
+          onClick={() => { setShowSend(false); setSendSuccess(false); setSendError(''); setSendConfirm(false) }}>
           <div style={{ width: '100%', background: isDark ? '#0f1e30' : '#fff', borderRadius: '28px 28px 0 0', padding: '24px 20px calc(40px + env(safe-area-inset-bottom))', maxHeight: '90vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}>
             <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 20px' }} />
 
             <p style={{ fontSize: '18px', fontWeight: 800, color: isDark ? '#e0e3e5' : '#0d1825', marginBottom: '20px' }}>{t('Quick Send', 'إرسال سريع')}</p>
 
+            {/* ── Success banner ── */}
             {sendSuccess && (
-              <div style={{ background: 'rgba(39,174,96,0.1)', border: '1px solid rgba(39,174,96,0.2)', borderRadius: '14px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span className="material-symbols-outlined" style={{ color: '#27ae60', fontSize: '20px' }}>check_circle</span>
-                <p style={{ fontSize: '13px', fontWeight: 600, color: '#27ae60' }}>{t('Transfer sent successfully!', 'تم إرسال التحويل بنجاح!')}</p>
+              <div style={{ background: 'rgba(39,174,96,0.1)', border: '1px solid rgba(39,174,96,0.2)', borderRadius: '14px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span className="material-symbols-outlined" style={{ color: '#27ae60', fontSize: '24px' }}>check_circle</span>
+                <p style={{ fontSize: '14px', fontWeight: 700, color: '#27ae60', margin: 0 }}>{t('Transfer sent successfully!', 'تم إرسال التحويل بنجاح!')}</p>
               </div>
             )}
 
-            {/* Scan button */}
-            <button onClick={() => { setShowSend(false); setShowScanner(true) }}
-              style={{ width: '100%', padding: '12px', borderRadius: '14px', border: '2px dashed rgba(20,108,148,0.25)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', marginBottom: '16px' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#146C94' }}>qr_code_scanner</span>
-              <span style={{ fontSize: '14px', fontWeight: 700, color: '#146C94' }}>{t('Scan Recipient QR', 'مسح رمز المستلم')}</span>
-            </button>
+            {!sendSuccess && (<>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <div style={{ flex: 1, height: 1, background: 'rgba(20,108,148,0.12)' }} />
-              <span style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.35)' : '#aaa', fontWeight: 600 }}>{t('or enter manually', 'أو أدخل يدوياً')}</span>
-              <div style={{ flex: 1, height: 1, background: 'rgba(20,108,148,0.12)' }} />
-            </div>
+              {/* ── Search UI: only when no recipient yet ── */}
+              {!recipient && (<>
+                <button onClick={() => { setShowSend(false); setShowScanner(true) }}
+                  style={{ width: '100%', padding: '12px', borderRadius: '14px', border: '2px dashed rgba(20,108,148,0.25)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', marginBottom: '16px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#146C94' }}>qr_code_scanner</span>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#146C94' }}>{t('Scan Recipient QR', 'مسح رمز المستلم')}</span>
+                </button>
 
-            <form onSubmit={handleSend} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                {/* Search mode toggle */}
-                <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
-                  {[['id', t('Member ID', 'رقم العضو')], ['phone', t('Phone', 'رقم الهاتف')]].map(([mode, label]) => (
-                    <button key={mode} type="button"
-                      onClick={() => { setSearchMode(mode); setSearchQuery(''); setRecipient(null); setLookupError('') }}
-                      style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: 'none', background: searchMode === mode ? '#146C94' : isDark ? 'rgba(255,255,255,0.07)' : 'rgba(20,108,148,0.08)', color: searchMode === mode ? '#fff' : isDark ? 'rgba(255,255,255,0.6)' : '#146C94' }}>
-                      {label}
-                    </button>
-                  ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(20,108,148,0.12)' }} />
+                  <span style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.35)' : '#aaa', fontWeight: 600 }}>{t('or enter manually', 'أو أدخل يدوياً')}</span>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(20,108,148,0.12)' }} />
                 </div>
-                <div style={{ position: 'relative' }} ref={dialPickerRef}>
-                  {searchMode === 'phone' ? (
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button type="button" onClick={() => setDialPickerOpen(o => !o)}
-                        style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px', padding: '0 10px', borderRadius: '12px', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: isDark ? '#e0e3e5' : '#0d1825', whiteSpace: 'nowrap' }}>
-                        <span style={{ fontSize: '18px' }}>{COUNTRIES.find(c => c.dial === searchDialCode)?.flag}</span>
-                        <span>{searchDialCode}</span>
-                        <span className="material-symbols-outlined" style={{ fontSize: '14px', color: isDark ? 'rgba(255,255,255,0.4)' : '#888' }}>{dialPickerOpen ? 'expand_less' : 'expand_more'}</span>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+                    {[['id', t('Member ID', 'رقم العضو')], ['phone', t('Phone', 'رقم الهاتف')]].map(([mode, label]) => (
+                      <button key={mode} type="button"
+                        onClick={() => { setSearchMode(mode); setSearchQuery(''); setRecipient(null); setLookupError('') }}
+                        style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: 'none', background: searchMode === mode ? '#146C94' : isDark ? 'rgba(255,255,255,0.07)' : 'rgba(20,108,148,0.08)', color: searchMode === mode ? '#fff' : isDark ? 'rgba(255,255,255,0.6)' : '#146C94' }}>
+                        {label}
                       </button>
-                      <div style={{ flex: 1, position: 'relative' }}>
-                        <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
-                          placeholder={t('Phone number', 'رقم الهاتف')}
-                          inputMode="numeric" pattern="[0-9]*"
-                          style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
-                        {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
-                        {recipient && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#19A7CE' }}>check_circle</span>}
-                      </div>
-                    </div>
-                  ) : (
-                    <div style={{ position: 'relative' }}>
-                      <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
-                        placeholder={t('Member ID (e.g. 42)', 'رقم العضو (مثال: 42)')}
-                        inputMode="numeric" pattern="[0-9]*"
-                        style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
-                      {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
-                      {recipient && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#19A7CE' }}>check_circle</span>}
-                    </div>
-                  )}
-                  {dialPickerOpen && searchMode === 'phone' && (
-                    <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 60, width: '240px', borderRadius: '14px', overflow: 'hidden', background: isDark ? '#0f1e30' : '#fff', boxShadow: '0 12px 40px rgba(0,0,0,0.25)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}` }}>
-                      <div style={{ padding: '8px' }}>
-                        <input autoFocus value={dialSearch} onChange={e => setDialSearch(e.target.value)} placeholder="Search country…"
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e0e0e0'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f5f5f5', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '12px', outline: 'none' }} />
-                      </div>
-                      <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                        {COUNTRIES.filter(c => !dialSearch || c.name.toLowerCase().includes(dialSearch.toLowerCase()) || c.dial.includes(dialSearch)).map(c => (
-                          <button key={c.code} type="button"
-                            onClick={() => { setSearchDialCode(c.dial); setDialPickerOpen(false); setDialSearch(''); setRecipient(null); setLookupError('') }}
-                            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: c.dial === searchDialCode ? 'rgba(20,108,148,0.1)' : 'transparent', border: 'none', cursor: 'pointer', color: isDark ? '#e0e3e5' : '#0d1825', textAlign: 'left' }}>
-                            <span style={{ fontSize: '16px' }}>{c.flag}</span>
-                            <span style={{ flex: 1, fontSize: '12px', fontWeight: 500 }}>{c.name}</span>
-                            <span style={{ fontSize: '12px', fontWeight: 700, color: '#146C94' }}>{c.dial}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {recipient && (
-                  <div style={{ marginTop: '8px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(25,167,206,0.08)', border: '1px solid rgba(25,167,206,0.2)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#146C94', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>{recipient.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
-                    </div>
-                    <div>
-                      <p style={{ fontSize: '13px', fontWeight: 700, color: isDark ? '#e0e3e5' : '#0d1825', margin: 0 }}>{recipient.name}</p>
-                      <p style={{ fontSize: '11px', color: '#19A7CE', fontFamily: 'monospace', margin: 0 }}>{recipient.uid}</p>
-                    </div>
+                    ))}
                   </div>
-                )}
-                {lookupError && <p style={{ fontSize: '12px', color: '#c0392b', marginTop: '6px', fontWeight: 600 }}>{lookupError}</p>}
-              </div>
+                  <div style={{ position: 'relative' }} ref={dialPickerRef}>
+                    {searchMode === 'phone' ? (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button type="button" onClick={() => setDialPickerOpen(o => !o)}
+                          style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px', padding: '0 10px', borderRadius: '12px', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: isDark ? '#e0e3e5' : '#0d1825', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: '18px' }}>{COUNTRIES.find(c => c.dial === searchDialCode)?.flag}</span>
+                          <span>{searchDialCode}</span>
+                          <span className="material-symbols-outlined" style={{ fontSize: '14px', color: isDark ? 'rgba(255,255,255,0.4)' : '#888' }}>{dialPickerOpen ? 'expand_less' : 'expand_more'}</span>
+                        </button>
+                        <div style={{ flex: 1, position: 'relative' }}>
+                          <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
+                            placeholder={t('Phone number', 'رقم الهاتف')}
+                            inputMode="numeric" pattern="[0-9]*"
+                            style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                          {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ position: 'relative' }}>
+                        <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
+                          placeholder={t('Member ID (e.g. 42)', 'رقم العضو (مثال: 42)')}
+                          inputMode="numeric" pattern="[0-9]*"
+                          style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                        {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
+                      </div>
+                    )}
+                    {dialPickerOpen && searchMode === 'phone' && (
+                      <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 60, width: '240px', borderRadius: '14px', overflow: 'hidden', background: isDark ? '#0f1e30' : '#fff', boxShadow: '0 12px 40px rgba(0,0,0,0.25)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}` }}>
+                        <div style={{ padding: '8px' }}>
+                          <input autoFocus value={dialSearch} onChange={e => setDialSearch(e.target.value)} placeholder="Search country…"
+                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e0e0e0'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f5f5f5', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '12px', outline: 'none' }} />
+                        </div>
+                        <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                          {COUNTRIES.filter(c => !dialSearch || c.name.toLowerCase().includes(dialSearch.toLowerCase()) || c.dial.includes(dialSearch)).map(c => (
+                            <button key={c.code} type="button"
+                              onClick={() => { setSearchDialCode(c.dial); setDialPickerOpen(false); setDialSearch(''); setRecipient(null); setLookupError('') }}
+                              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: c.dial === searchDialCode ? 'rgba(20,108,148,0.1)' : 'transparent', border: 'none', cursor: 'pointer', color: isDark ? '#e0e3e5' : '#0d1825', textAlign: 'left' }}>
+                              <span style={{ fontSize: '16px' }}>{c.flag}</span>
+                              <span style={{ flex: 1, fontSize: '12px', fontWeight: 500 }}>{c.name}</span>
+                              <span style={{ fontSize: '12px', fontWeight: 700, color: '#146C94' }}>{c.dial}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {lookupError && <p style={{ fontSize: '12px', color: '#c0392b', marginTop: '6px', fontWeight: 600 }}>{lookupError}</p>}
+                </div>
+              </>)}
 
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.55)' : '#146C94', display: 'block', marginBottom: '6px' }}>{t('Amount (SDG)', 'المبلغ (جنيه)')}</label>
-                <input type="number" min="1" value={sendAmount} onChange={e => { setSendAmount(e.target.value); setSendError('') }}
-                  placeholder="0"
-                  style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
-                <p style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.3)' : '#aaa', marginTop: '4px' }}>{t('Balance:', 'رصيدك:')} {balance.toLocaleString('en')} SDG</p>
-              </div>
+              {/* ── Recipient card (always visible once found) ── */}
+              {recipient && (
+                <div style={{ padding: '14px 16px', borderRadius: '14px', background: 'rgba(20,108,148,0.07)', border: '1px solid rgba(20,108,148,0.18)', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#146C94', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>{recipient.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: '15px', fontWeight: 800, color: isDark ? '#e0e3e5' : '#0d1825', margin: 0 }}>{recipient.name}</p>
+                    <p style={{ fontSize: '12px', color: '#19A7CE', fontFamily: 'monospace', margin: 0 }}>{recipient.uid}</p>
+                  </div>
+                </div>
+              )}
 
-              {sendError && <p style={{ fontSize: '13px', color: '#c0392b', fontWeight: 600 }}>{sendError}</p>}
+              {/* ── Amount + Send / Confirmation ── */}
+              {recipient && !sendConfirm && (
+                <form onSubmit={handleSend} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.55)' : '#146C94', display: 'block', marginBottom: '6px' }}>{t('Amount (SDG)', 'المبلغ (جنيه)')}</label>
+                    <input type="number" min="1" value={sendAmount} onChange={e => { setSendAmount(e.target.value); setSendError('') }}
+                      placeholder="0" autoFocus
+                      style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '18px', fontWeight: 700, outline: 'none', boxSizing: 'border-box' }} />
+                    <p style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.3)' : '#aaa', marginTop: '4px' }}>{t('Balance:', 'رصيدك:')} {balance.toLocaleString('en')} SDG</p>
+                  </div>
+                  {sendError && <p style={{ fontSize: '13px', color: '#c0392b', fontWeight: 600 }}>{sendError}</p>}
+                  <button type="submit"
+                    style={{ padding: '14px', borderRadius: '14px', background: '#146C94', color: '#fff', fontSize: '15px', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>send</span>
+                    {t('Send Money', 'إرسال المبلغ')}
+                  </button>
+                </form>
+              )}
 
-              <button type="submit" disabled={sendLoading || !recipient}
-                style={{ padding: '14px', borderRadius: '14px', background: (!recipient || sendLoading) ? '#c0d8e4' : '#146C94', color: '#fff', fontSize: '15px', fontWeight: 700, border: 'none', cursor: (!recipient || sendLoading) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                {sendLoading ? t('Sending…', 'جاري الإرسال…') : <><span className="material-symbols-outlined" style={{ fontSize: '18px' }}>send</span>{t('Send Money', 'إرسال المبلغ')}</>}
-              </button>
-            </form>
+              {/* ── Confirmation step ── */}
+              {recipient && sendConfirm && (
+                <div style={{ borderRadius: '16px', border: `1.5px solid ${isDark ? 'rgba(255,165,0,0.3)' : 'rgba(230,126,34,0.3)'}`, background: isDark ? 'rgba(255,165,0,0.06)' : 'rgba(230,126,34,0.05)', padding: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#e67e22' }}>warning</span>
+                    <p style={{ fontSize: '14px', fontWeight: 800, color: isDark ? '#e0e3e5' : '#0d1825', margin: 0 }}>{t('Confirm Transfer', 'تأكيد التحويل')}</p>
+                  </div>
+                  <p style={{ fontSize: '13px', color: isDark ? 'rgba(255,255,255,0.7)' : '#555', marginBottom: '16px', lineHeight: 1.5 }}>
+                    {t(`Send`, 'إرسال')} <strong>{Number(sendAmount).toLocaleString('en')} SDG</strong> {t('to', 'إلى')} <strong>{recipient.name}</strong> ({recipient.uid})?
+                  </p>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button type="button" onClick={() => setSendConfirm(false)}
+                      style={{ flex: 1, padding: '12px', borderRadius: '12px', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`, background: 'transparent', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
+                      {t('No, Cancel', 'لا، إلغاء')}
+                    </button>
+                    <button type="button" onClick={confirmSend} disabled={sendLoading}
+                      style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: sendLoading ? '#c0d8e4' : '#146C94', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: sendLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                      {sendLoading
+                        ? t('Sending…', 'جاري الإرسال…')
+                        : <><span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>{t('Yes, Send', 'نعم، أرسل')}</>}
+                    </button>
+                  </div>
+                  {sendError && <p style={{ fontSize: '12px', color: '#c0392b', marginTop: '10px', fontWeight: 600 }}>{sendError}</p>}
+                </div>
+              )}
+
+            </>)}
           </div>
         </div>
       )}
