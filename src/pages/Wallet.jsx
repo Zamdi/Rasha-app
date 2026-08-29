@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { useApp, API } from '../context/AppContext'
 import { fetchWithTimeout } from '../utils/fetchWithTimeout'
 import QrScannerModal from '../components/QrScannerModal'
+import { COUNTRIES } from '../components/PhoneInput'
 
 export default function Wallet() {
   const { t, lang, customer, login, token, isDark } = useApp()
@@ -39,6 +40,10 @@ export default function Wallet() {
 
   // Quick Send search (shared by Add modal and Send modal)
   const [searchQuery, setSearchQuery]   = useState('')
+  const [searchDialCode, setSearchDialCode] = useState('+249')
+  const [dialPickerOpen, setDialPickerOpen] = useState(false)
+  const [dialSearch, setDialSearch]     = useState('')
+  const dialPickerRef = useRef(null)
   const [recipient, setRecipient]       = useState(null)
   const [lookupLoading, setLookupLoading] = useState(false)
   const [lookupError, setLookupError]   = useState('')
@@ -104,18 +109,34 @@ export default function Wallet() {
     return { icon: 'swap_horiz', color: '#146C94', bg: 'rgba(20,108,148,0.09)' }
   }
 
+  // Close dial picker on outside click
+  useEffect(() => {
+    const close = e => { if (dialPickerRef.current && !dialPickerRef.current.contains(e.target)) { setDialPickerOpen(false); setDialSearch('') } }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+
   // Normalize what the user typed before hitting the API
   const normalizeQuery = raw => {
     const s = raw.trim()
-    // "RW-42" or "rw-42" or "RW42" → extract number and pad
+    // "RW-42" or "rw42" → extract number and pad (handles QR scan output)
     const rwMatch = s.match(/^rw-?(\d+)$/i)
     if (rwMatch) return `RW-${rwMatch[1].padStart(5, '0')}`
-    // Pure digits (not a full phone number) → Member ID e.g. "42" → "RW-00042"
+    // Number starting with 0 → strip leading 0 and prepend selected dial code
+    if (/^0\d{6,12}$/.test(s)) {
+      const country = COUNTRIES.find(c => c.dial === searchDialCode)
+      const dialDigits = searchDialCode.replace('+', '')
+      return `+${dialDigits}${s.slice(1)}`
+    }
+    // Already has + prefix (e.g. from QR scan)
+    if (s.startsWith('+')) return s
+    // Digits without dial code but long enough to be a phone → prepend selected dial code
+    const country = COUNTRIES.find(c => c.dial === searchDialCode)
+    if (country && s.length >= country.len.min && s.length <= country.len.max) {
+      return `${searchDialCode}${s}`
+    }
+    // Short digits → Member ID e.g. "42" → "RW-00042"
     if (/^\d{1,9}$/.test(s)) return `RW-${s.padStart(5, '0')}`
-    // Phone starting with 0 (Sudan local format) → +249...
-    if (/^0\d{9}$/.test(s)) return `+249${s.slice(1)}`
-    // Already has country code without +
-    if (/^249\d{9}$/.test(s)) return `+${s}`
     return s
   }
 
@@ -357,14 +378,44 @@ export default function Wallet() {
             <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.55)' : '#146C94', display: 'block', marginBottom: '6px' }}>
               {t('Phone or Member number', 'رقم الهاتف أو رقم العضو')}
             </label>
-            <div style={{ position: 'relative' }}>
-              <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
-                placeholder={t('Member ID or Phone', 'رقم العضوية أو الهاتف')}
-                inputMode="numeric" pattern="[0-9]*"
-                autoFocus
-                style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
-              {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
-              {recipient && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#19A7CE' }}>check_circle</span>}
+            <div style={{ display: 'flex', gap: '8px', position: 'relative' }} ref={dialPickerRef}>
+              {/* Country dial picker */}
+              <button type="button" onClick={() => setDialPickerOpen(o => !o)}
+                style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px', padding: '0 10px', borderRadius: '12px', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: isDark ? '#e0e3e5' : '#0d1825', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: '18px' }}>{COUNTRIES.find(c => c.dial === searchDialCode)?.flag}</span>
+                <span>{searchDialCode}</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '14px', color: isDark ? 'rgba(255,255,255,0.4)' : '#888' }}>{dialPickerOpen ? 'expand_less' : 'expand_more'}</span>
+              </button>
+              {/* Dropdown */}
+              {dialPickerOpen && (
+                <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 60, width: '240px', borderRadius: '14px', overflow: 'hidden', background: isDark ? '#0f1e30' : '#fff', boxShadow: '0 12px 40px rgba(0,0,0,0.25)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}` }}>
+                  <div style={{ padding: '8px' }}>
+                    <input autoFocus value={dialSearch} onChange={e => setDialSearch(e.target.value)} placeholder="Search country…"
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e0e0e0'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f5f5f5', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '12px', outline: 'none' }} />
+                  </div>
+                  <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                    {COUNTRIES.filter(c => !dialSearch || c.name.toLowerCase().includes(dialSearch.toLowerCase()) || c.dial.includes(dialSearch)).map(c => (
+                      <button key={c.code} type="button"
+                        onClick={() => { setSearchDialCode(c.dial); setDialPickerOpen(false); setDialSearch(''); setRecipient(null); setLookupError('') }}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: c.dial === searchDialCode ? 'rgba(20,108,148,0.1)' : 'transparent', border: 'none', cursor: 'pointer', color: isDark ? '#e0e3e5' : '#0d1825', textAlign: 'left' }}>
+                        <span style={{ fontSize: '16px' }}>{c.flag}</span>
+                        <span style={{ flex: 1, fontSize: '12px', fontWeight: 500 }}>{c.name}</span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#146C94' }}>{c.dial}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Number input */}
+              <div style={{ flex: 1, position: 'relative' }}>
+                <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
+                  placeholder={t('Member ID or Phone', 'رقم العضوية أو الهاتف')}
+                  inputMode="numeric" pattern="[0-9]*"
+                  autoFocus
+                  style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
+                {recipient && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#19A7CE' }}>check_circle</span>}
+              </div>
             </div>
             {lookupError && <p style={{ fontSize: '12px', color: '#c0392b', marginTop: '6px', fontWeight: 600 }}>{lookupError}</p>}
 
@@ -425,13 +476,21 @@ export default function Wallet() {
                 <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.55)' : '#146C94', display: 'block', marginBottom: '6px' }}>
                   {t('Phone or Member ID', 'رقم الجوال أو رقم العضوية')}
                 </label>
-                <div style={{ position: 'relative' }}>
-                  <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
-                    placeholder={t('Member ID or Phone', 'رقم العضوية أو الهاتف')}
-                    inputMode="numeric" pattern="[0-9]*"
-                    style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
-                  {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
-                  {recipient && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#19A7CE' }}>check_circle</span>}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button type="button" onClick={() => setDialPickerOpen(o => !o)}
+                    style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px', padding: '0 10px', borderRadius: '12px', border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: isDark ? '#e0e3e5' : '#0d1825', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '18px' }}>{COUNTRIES.find(c => c.dial === searchDialCode)?.flag}</span>
+                    <span>{searchDialCode}</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px', color: isDark ? 'rgba(255,255,255,0.4)' : '#888' }}>expand_more</span>
+                  </button>
+                  <div style={{ flex: 1, position: 'relative' }}>
+                    <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
+                      placeholder={t('Member ID or Phone', 'رقم العضوية أو الهاتف')}
+                      inputMode="numeric" pattern="[0-9]*"
+                      style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                    {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
+                    {recipient && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#19A7CE' }}>check_circle</span>}
+                  </div>
                 </div>
                 {recipient && (
                   <div style={{ marginTop: '8px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(25,167,206,0.08)', border: '1px solid rgba(25,167,206,0.2)', display: 'flex', alignItems: 'center', gap: '10px' }}>
