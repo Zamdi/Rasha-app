@@ -17,18 +17,17 @@ export default function MobileNav() {
   const hidden = HIDDEN_PAGES.some(p => pathname.startsWith(p))
 
   const loggedInItems = [
-    { to: '/loyalty',   icon: 'home',         label: t('Home', 'الرئيسية') },
-    { to: '/wallet',    icon: 'credit_card',  label: t('Wallet', 'محفظتي') },
+    { to: '/loyalty',   icon: 'home',           label: t('Home', 'الرئيسية') },
+    { to: '/wallet',    icon: 'credit_card',    label: t('Wallet', 'محفظتي') },
     // center button at index 2 — handled separately
     { to: '/bookings',  icon: 'calendar_month', label: t('Bookings', 'حجوزات') },
-    { to: '/settings',  icon: 'settings',     label: t('Setting', 'إعدادات') },
+    { to: '/settings',  icon: 'settings',       label: t('Setting', 'إعدادات') },
   ]
   const guestItems = [
-    { to: '/',        icon: 'home',           label: t('Home', 'الرئيسية') },
-    { to: '/book',    icon: 'credit_card',    label: t('Wallet', 'محفظتي') },
-    // center
-    { to: '/login',   icon: 'calendar_month', label: t('Bookings', 'حجوزات') },
-    { to: '/contact', icon: 'settings',       label: t('Setting', 'إعدادات') },
+    { to: '/',        icon: 'home',             label: t('Home', 'الرئيسية') },
+    { to: '/book',    icon: 'local_car_wash',   label: t('Book', 'احجز') },
+    { to: '/login',   icon: 'login',            label: t('Sign In', 'تسجيل الدخول') },
+    { to: '/contact', icon: 'support_agent',    label: t('Contact', 'تواصل') },
   ]
 
   const items = customer ? loggedInItems : guestItems
@@ -112,29 +111,31 @@ export default function MobileNav() {
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-20"
       style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)', paddingLeft: '16px', paddingRight: '16px' }}>
 
-      {/* Center elevated button — QR code shortcut */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '-28px', position: 'relative', zIndex: 30 }}>
-        <button
-          onClick={() => navigate(customer ? '/wallet?qr=1' : '/login')}
-          aria-label={t('My QR code', 'رمز QR الخاص بي')}
-          style={{
-            width: '56px', height: '56px',
-            borderRadius: '50%',
-            background: '#12454B',
-            border: `4px solid ${isDark ? '#0b1424' : '#f1ede6'}`,
-            boxShadow: '0 6px 20px rgba(10,20,30,0.35)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer',
-            flexShrink: 0,
-          }}
-          onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.92)'; e.currentTarget.style.transition = 'transform 0.12s' }}
-          onPointerUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
-          onPointerLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#ffffff', lineHeight: 1 }}>
-            qr_code_2
-          </span>
-        </button>
-      </div>
+      {/* Center elevated button — QR code shortcut (logged-in only) */}
+      {customer && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '-28px', position: 'relative', zIndex: 30 }}>
+          <button
+            onClick={() => navigate('/wallet?qr=1')}
+            aria-label={t('My QR code', 'رمز QR الخاص بي')}
+            style={{
+              width: '56px', height: '56px',
+              borderRadius: '50%',
+              background: '#12454B',
+              border: `4px solid ${isDark ? '#0b1424' : '#f1ede6'}`,
+              boxShadow: '0 6px 20px rgba(10,20,30,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+            onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.92)'; e.currentTarget.style.transition = 'transform 0.12s' }}
+            onPointerUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
+            onPointerLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#ffffff', lineHeight: 1 }}>
+              qr_code_2
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* The floating pill bar */}
       <nav ref={navRef}
@@ -173,8 +174,8 @@ export default function MobileNav() {
         {/* Left two tabs */}
         {leftItems.map((item, i) => renderTab(item, i))}
 
-        {/* Spacer where the center button overlaps */}
-        <div style={{ flex: '0 0 64px' }} />
+        {/* Spacer where the center button overlaps — only when logged in */}
+        {customer && <div style={{ flex: '0 0 64px' }} />}
 
         {/* Right two tabs */}
         {rightItems.map((item, i) => renderTab(item, i + 2))}

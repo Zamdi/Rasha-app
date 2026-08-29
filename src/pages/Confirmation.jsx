@@ -47,7 +47,11 @@ export default function Confirmation() {
   const svcLabel = service === 'full' ? t('Full Wash', 'غسيل كامل') : t('Exterior Only', 'خارجي فقط')
   const formattedDate = date ? new Date(date.slice(0,10) + 'T12:00:00').toLocaleDateString(t('en-US', 'ar-EG'), { year: 'numeric', month: 'long', day: 'numeric' }) : ''
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
+    const logoB64 = await fetch('/rasha-logo.png')
+      .then(r => r.blob())
+      .then(b => new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(b) }))
+      .catch(() => '')
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
     const svcDesc = service === 'full' ? 'Interior &amp; Exterior Detailed Cleaning' : 'Exterior Body Wash &amp; Rinse'
     const payLabel = paidFromWallet ? 'Paid via Wallet' : 'Pay at Location (Cash)'
@@ -69,7 +73,7 @@ export default function Confirmation() {
     .doc { background: #fff; width: 100%; max-width: 820px; margin: 0 auto; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.18); }
     .top-bar { height: 6px; background: #003f87; }
     .inner { padding: 32px; position: relative; }
-    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); opacity: 0.03; pointer-events: none; color: #003f87; font-size: 400px; line-height: 1; }
+    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); opacity: 0.07; pointer-events: none; width: 420px; height: 420px; object-fit: contain; }
     .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; margin-bottom: 20px; border-bottom: 1px solid #c2c6d4; position: relative; z-index: 1; }
     .brand-name { font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 700; color: #003f87; letter-spacing: -0.02em; }
     .brand-sub { font-size: 10px; font-weight: 600; color: #00677d; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 5px; }
@@ -131,7 +135,7 @@ export default function Confirmation() {
 <div class="doc">
   <div class="top-bar"></div>
   <div class="inner">
-    <div class="watermark"><span class="msi msi-f">water_drop</span></div>
+    ${logoB64 ? `<img class="watermark" src="${logoB64}" alt=""/>` : ''}
     <div class="header">
       <div>
         <div class="brand-name">Rasha</div>
