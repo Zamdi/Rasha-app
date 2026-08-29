@@ -169,7 +169,7 @@ export default function Wallet() {
         }}>
           {/* Rasha R logo watermark — centered */}
           <img src="/rasha-logo.png" alt="" aria-hidden="true"
-            style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 180, height: 180, objectFit: 'contain', opacity: 0.10, pointerEvents: 'none', userSelect: 'none', filter: 'brightness(10)' }} />
+            style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 190, height: 190, objectFit: 'contain', opacity: 0.18, pointerEvents: 'none', userSelect: 'none', mixBlendMode: 'screen' }} />
 
           {/* Spacer replacing removed currency pill */}
           <div style={{ marginBottom: '16px' }} />
