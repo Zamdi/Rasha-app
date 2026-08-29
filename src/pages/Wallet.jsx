@@ -167,20 +167,12 @@ export default function Wallet() {
           overflow: 'hidden',
           boxShadow: '0 8px 32px rgba(20,108,148,0.30)',
         }}>
-          {/* Rasha R logo watermark */}
+          {/* Rasha R logo watermark — centered */}
           <img src="/rasha-logo.png" alt="" aria-hidden="true"
-            style={{ position: 'absolute', top: '50%', right: -10, transform: 'translateY(-50%)', width: 160, height: 160, objectFit: 'contain', opacity: 0.08, pointerEvents: 'none', userSelect: 'none', filter: 'brightness(10)' }} />
-          {/* Decorative circles */}
-          <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+            style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 180, height: 180, objectFit: 'contain', opacity: 0.10, pointerEvents: 'none', userSelect: 'none', filter: 'brightness(10)' }} />
 
-          {/* Currency pill */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', borderRadius: '20px', padding: '5px 12px' }}>
-              <span style={{ fontSize: '13px' }}>🇸🇩</span>
-              <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>SDG</span>
-              <span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>expand_more</span>
-            </div>
-          </div>
+          {/* Spacer replacing removed currency pill */}
+          <div style={{ marginBottom: '16px' }} />
 
           {/* Balance */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
