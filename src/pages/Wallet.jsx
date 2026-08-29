@@ -17,9 +17,27 @@ export default function Wallet() {
   const [showMyQr, setShowMyQr]         = useState(false)
   const [showScanner, setShowScanner]   = useState(false)
   const [showSend, setShowSend]         = useState(false)
+  const [showAddContact, setShowAddContact] = useState(false)
   const [balanceVisible, setBalanceVisible] = useState(true)
 
-  // Quick Send
+  // Saved Quick Send contacts (localStorage)
+  const CONTACTS_KEY = `rasha_qs_${customer?.customer_uid}`
+  const [contacts, setContacts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(`rasha_qs_${customer?.customer_uid}`) || '[]') } catch { return [] }
+  })
+  const saveContact = c => {
+    if (contacts.find(x => x.uid === c.uid)) return
+    const updated = [c, ...contacts].slice(0, 8)
+    setContacts(updated)
+    try { localStorage.setItem(CONTACTS_KEY, JSON.stringify(updated)) } catch {}
+  }
+  const removeContact = uid => {
+    const updated = contacts.filter(c => c.uid !== uid)
+    setContacts(updated)
+    try { localStorage.setItem(CONTACTS_KEY, JSON.stringify(updated)) } catch {}
+  }
+
+  // Quick Send search (shared by Add modal and Send modal)
   const [searchQuery, setSearchQuery]   = useState('')
   const [recipient, setRecipient]       = useState(null)
   const [lookupLoading, setLookupLoading] = useState(false)
@@ -146,8 +164,6 @@ export default function Wallet() {
   const bg   = isDark ? '#0b1220' : '#f2efe9'
   const card_text = '#ffffff'
 
-  // Recent transfer-out recipients for quick send strip
-  const recentRecipients = transactions.filter(tx => tx.type === 'transfer_out').slice(0, 4)
   const avatarColors = ['#146C94','#19A7CE','#0e3d52','#1a6650']
 
   return (
@@ -214,31 +230,30 @@ export default function Wallet() {
       <div style={{ padding: '24px 20px 0' }}>
         <p style={{ fontSize: '15px', fontWeight: 700, color: isDark ? '#e0e3e5' : '#0d1825', margin: '0 0 14px' }}>{t('Quick send', 'إرسال سريع')}</p>
         <div style={{ display: 'flex', gap: '18px', overflowX: 'auto', paddingBottom: '4px' }}>
-          {/* Add */}
+          {/* Add contact */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', flexShrink: 0, cursor: 'pointer' }}
-            onClick={() => setShowSend(true)}>
+            onClick={() => { setSearchQuery(''); setRecipient(null); setLookupError(''); setShowAddContact(true) }}>
             <div style={{ width: 48, height: 48, borderRadius: '50%', border: '2px dashed rgba(20,108,148,0.3)', background: isDark ? 'rgba(20,108,148,0.08)' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#146C94' }}>add</span>
             </div>
             <span style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.4)' : '#8aabb8', fontWeight: 500 }}>{t('Add', 'أضف')}</span>
           </div>
-          {/* Scan */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', flexShrink: 0, cursor: 'pointer' }}
-            onClick={() => setShowScanner(true)}>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', background: isDark ? 'rgba(20,108,148,0.15)' : 'rgba(20,108,148,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#146C94' }}>qr_code_scanner</span>
-            </div>
-            <span style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.4)' : '#8aabb8', fontWeight: 500 }}>{t('Scan', 'مسح')}</span>
-          </div>
-          {/* Recent recipients */}
-          {recentRecipients.map((tx, i) => {
-            const label = (tx.note || '??').slice(0, 2).toUpperCase()
+          {/* Saved contacts */}
+          {contacts.map((c, i) => {
+            const initials2 = c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+            const firstName2 = c.name.split(' ')[0]
             return (
-              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                <div style={{ width: 48, height: 48, borderRadius: '50%', background: avatarColors[i % avatarColors.length], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{label}</span>
+              <div key={c.uid} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', flexShrink: 0, position: 'relative' }}>
+                <div onClick={() => { setRecipient(c); setSearchQuery(c.uid); setSendAmount(''); setSendError(''); setSendSuccess(false); setShowSend(true) }}
+                  style={{ width: 48, height: 48, borderRadius: '50%', background: avatarColors[i % avatarColors.length], display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{initials2}</span>
                 </div>
-                <span style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.4)' : '#8aabb8', fontWeight: 500, maxWidth: 48, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.note || '—'}</span>
+                {/* Remove button */}
+                <button onClick={() => removeContact(c.uid)}
+                  style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#c0392b', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '10px', color: '#fff', lineHeight: 1 }}>close</span>
+                </button>
+                <span style={{ fontSize: '11px', color: isDark ? 'rgba(255,255,255,0.4)' : '#8aabb8', fontWeight: 500, maxWidth: 48, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>{firstName2}</span>
               </div>
             )
           })}
@@ -322,6 +337,50 @@ export default function Wallet() {
               style={{ width: '100%', padding: '14px', borderRadius: '14px', background: '#146C94', color: '#fff', fontSize: '15px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
               {t('Done', 'تم')}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Add Contact modal ── */}
+      {showAddContact && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end' }}
+          onClick={() => { setShowAddContact(false); setRecipient(null); setSearchQuery(''); setLookupError('') }}>
+          <div style={{ width: '100%', background: isDark ? '#0f1e30' : '#fff', borderRadius: '28px 28px 0 0', padding: '24px 20px calc(40px + env(safe-area-inset-bottom))' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 20px' }} />
+            <p style={{ fontSize: '18px', fontWeight: 800, color: isDark ? '#e0e3e5' : '#0d1825', marginBottom: '20px' }}>{t('Add to Quick Send', 'أضف لإرسال سريع')}</p>
+
+            <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.55)' : '#146C94', display: 'block', marginBottom: '6px' }}>
+              {t('Phone or Member number', 'رقم الهاتف أو رقم العضو')}
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
+                placeholder={t('e.g. 42, or 0912345678', 'مثلاً 42 أو 0912345678')}
+                autoFocus
+                style={{ width: '100%', padding: '12px 40px 12px 14px', borderRadius: '12px', border: `1.5px solid ${recipient ? '#19A7CE' : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(20,108,148,0.18)'}`, background: isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9', color: isDark ? '#e0e3e5' : '#0d1825', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+              {lookupLoading && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#146C94' }}>progress_activity</span>}
+              {recipient && <span className="material-symbols-outlined" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#19A7CE' }}>check_circle</span>}
+            </div>
+            {lookupError && <p style={{ fontSize: '12px', color: '#c0392b', marginTop: '6px', fontWeight: 600 }}>{lookupError}</p>}
+
+            {recipient && (
+              <div style={{ marginTop: '12px', padding: '12px 14px', borderRadius: '12px', background: 'rgba(25,167,206,0.08)', border: '1px solid rgba(25,167,206,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#146C94', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{recipient.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '14px', fontWeight: 700, color: isDark ? '#e0e3e5' : '#0d1825', margin: 0 }}>{recipient.name}</p>
+                    <p style={{ fontSize: '11px', color: '#19A7CE', fontFamily: 'monospace', margin: 0 }}>{recipient.uid}</p>
+                  </div>
+                </div>
+                <button onClick={() => { saveContact(recipient); setShowAddContact(false); setRecipient(null); setSearchQuery('') }}
+                  style={{ padding: '8px 16px', borderRadius: '10px', background: '#146C94', color: '#fff', fontSize: '13px', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>person_add</span>
+                  {t('Add', 'أضف')}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
