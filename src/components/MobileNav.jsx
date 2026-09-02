@@ -21,7 +21,7 @@ export default function MobileNav() {
     { to: '/wallet',    icon: 'credit_card',    label: t('Wallet', 'محفظتي') },
     // center button at index 2 — handled separately
     { to: '/bookings',  icon: 'calendar_month', label: t('Bookings', 'حجوزات') },
-    { to: '/settings',  icon: 'settings',       label: t('Setting', 'إعدادات') },
+    { to: '/settings',  icon: 'account_circle',  label: t('Profile', 'حسابي') },
   ]
   const guestItems = [
     { to: '/',        icon: 'home',             label: t('Home', 'الرئيسية') },
