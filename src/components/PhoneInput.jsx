@@ -322,11 +322,12 @@ export default function PhoneInput({ value, onChange, dialCode, onDialChange }) 
         value={value}
         onChange={e => {
           let v = e.target.value.replace(/\D/g, '')
-          if (v.startsWith('0')) v = v.slice(1)
-          // Stop accepting digits once the selected country's number is full,
-          // rather than letting extra digits pile up and only rejecting them
-          // at submit time.
-          v = v.slice(0, selected.len.max)
+          // Let the customer type the number the way they say it, leading
+          // trunk 0 included — stripping it as they type made the digit
+          // visibly vanish and read as "the app won't accept 0". The 0 is
+          // dropped later, when buildE164() builds the actual E.164 value.
+          const maxLen = v.startsWith('0') ? selected.len.max + 1 : selected.len.max
+          v = v.slice(0, maxLen)
           onChange(v)
         }}
       />

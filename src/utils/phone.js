@@ -49,6 +49,8 @@ export function countryFor(dialCode) {
  */
 export function isPlausibleLength(dialCode, nationalDigits) {
   const { min, max } = countryFor(dialCode).len
-  const n = String(nationalDigits || '').replace(/\D/g, '').length
+  let digits = String(nationalDigits || '').replace(/\D/g, '')
+  if (digits.startsWith('0')) digits = digits.slice(1)
+  const n = digits.length
   return n >= min && n <= max
 }
