@@ -104,6 +104,11 @@ export default function Wallet() {
     if (tx.type === 'transfer_in')  return tx.note || t('Transfer Received', 'تحويل مُستلَم')
     return tx.note || tx.type
   }
+  const txStatusLabel = tx => {
+    if (tx.type === 'transfer_out') return t('Sent', 'مُرسَل')
+    if (tx.type === 'transfer_in')  return t('Received', 'مُستلَم')
+    return t('Paid', 'مدفوع')
+  }
   const txIcon = tx => {
     if (tx.type === 'topup')        return { icon: 'savings',        color: '#19A7CE', bg: 'rgba(25,167,206,0.1)' }
     if (tx.type === 'payment')      return { icon: 'local_car_wash', color: '#146C94', bg: 'rgba(20,108,148,0.09)' }
@@ -345,7 +350,7 @@ export default function Wallet() {
                   {credit ? '+' : '−'}{Math.abs(tx.amount).toLocaleString('en', { minimumFractionDigits: 2 })}
                 </p>
                 <span style={{ fontSize: '10px', fontWeight: 700, color: '#27ae60', background: 'rgba(39,174,96,0.1)', borderRadius: '6px', padding: '2px 6px' }}>
-                  {t('Paid', 'مدفوع')}
+                  {txStatusLabel(tx)}
                 </span>
               </div>
             </div>

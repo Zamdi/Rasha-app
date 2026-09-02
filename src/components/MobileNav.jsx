@@ -88,15 +88,15 @@ export default function MobileNav() {
         ref={el => { tabRefs.current[realIdx] = el }}
         aria-current={isActive ? 'page' : undefined}
         className="relative z-10 flex flex-col items-center justify-center gap-0.5"
-        style={{ flex: 1, padding: '10px 6px', textDecoration: 'none', minWidth: 0 }}>
+        style={{ flex: 1, padding: '7px 6px', textDecoration: 'none', minWidth: 0 }}>
         <span className="material-symbols-outlined" style={{
-          fontSize: '22px', lineHeight: 1,
+          fontSize: '19px', lineHeight: 1,
           color: isActive ? activeColor : inactiveColor,
           fontVariationSettings: isActive ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400",
           transition: 'color 0.25s',
         }}>{item.icon}</span>
         <span style={{
-          fontSize: '10px', fontWeight: 600,
+          fontSize: '9px', fontWeight: 600,
           color: isActive ? activeColor : inactiveColor,
           whiteSpace: 'nowrap',
           transition: 'color 0.25s',
@@ -108,19 +108,19 @@ export default function MobileNav() {
   return (
     /* Outer wrapper — positions everything above the bottom edge */
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-20"
-      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)', paddingLeft: '16px', paddingRight: '16px' }}>
+      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)', paddingLeft: '28px', paddingRight: '28px' }}>
 
       {/* Center elevated button — QR code shortcut (logged-in only) */}
       {customer && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '-28px', position: 'relative', zIndex: 30 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '-22px', position: 'relative', zIndex: 30 }}>
           <button
             onClick={() => navigate('/wallet?qr=1')}
             aria-label={t('My QR code', 'رمز QR الخاص بي')}
             style={{
-              width: '56px', height: '56px',
+              width: '48px', height: '48px',
               borderRadius: '50%',
               background: '#12454B',
-              border: `4px solid ${isDark ? '#0b1424' : '#f1ede6'}`,
+              border: `3px solid ${isDark ? '#0b1424' : '#f1ede6'}`,
               boxShadow: '0 6px 20px rgba(10,20,30,0.35)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer',
@@ -129,7 +129,7 @@ export default function MobileNav() {
             onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.92)'; e.currentTarget.style.transition = 'transform 0.12s' }}
             onPointerUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
             onPointerLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#ffffff', lineHeight: 1 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '21px', color: '#ffffff', lineHeight: 1 }}>
               qr_code_2
             </span>
           </button>
@@ -148,8 +148,8 @@ export default function MobileNav() {
           overflow: 'hidden',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          paddingTop: '4px',
-          paddingBottom: '4px',
+          paddingTop: '2px',
+          paddingBottom: '2px',
         }}>
 
         {/* Sliding active pill */}
@@ -174,7 +174,7 @@ export default function MobileNav() {
         {leftItems.map((item, i) => renderTab(item, i))}
 
         {/* Spacer where the center button overlaps — only when logged in */}
-        {customer && <div style={{ flex: '0 0 64px' }} />}
+        {customer && <div style={{ flex: '0 0 54px' }} />}
 
         {/* Right two tabs */}
         {rightItems.map((item, i) => renderTab(item, i + 2))}
