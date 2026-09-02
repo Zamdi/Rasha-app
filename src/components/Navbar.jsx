@@ -190,16 +190,6 @@ export default function Navbar() {
                     <p className="text-xs font-bold text-on-surface">{customer.first_name} {customer.last_name}</p>
                     <p className="text-xs text-on-surface-variant truncate">{customer.email}</p>
                   </div>
-                  <Link to="/bookings" onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-on-surface hover:text-secondary-fixed transition-colors w-full">
-                    <span className="material-symbols-outlined text-base">receipt_long</span>
-                    {t('Bookings', 'الحجوزات')}
-                  </Link>
-                  <Link to="/settings" onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-on-surface hover:text-secondary-fixed transition-colors w-full">
-                    <span className="material-symbols-outlined text-base">settings</span>
-                    {t('Settings', 'الإعدادات')}
-                  </Link>
                   <Link to="/contact" onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-on-surface hover:text-secondary-fixed transition-colors w-full">
                     <span className="material-symbols-outlined text-base">support_agent</span>

@@ -42,7 +42,11 @@ export default function MobileNav() {
       if (!tab) { setPillStyle(p => p.opacity === 0 ? p : { ...p, opacity: 0 }); return }
       const nr = nav.getBoundingClientRect()
       const tr = tab.getBoundingClientRect()
-      const next = { left: tr.left - nr.left, top: tr.top - nr.top, width: tr.width, height: tr.height, opacity: 1 }
+      // Inset a few px on each side so the pill sits comfortably inside the
+      // tab instead of touching the bar's own rounded edge on Home/Profile,
+      // the first and last tabs.
+      const INSET = 6
+      const next = { left: tr.left - nr.left + INSET, top: tr.top - nr.top, width: tr.width - INSET * 2, height: tr.height, opacity: 1 }
       setPillStyle(p =>
         Math.abs(p.left - next.left) < 0.5 && Math.abs(p.top - next.top) < 0.5 &&
         Math.abs(p.width - next.width) < 0.5 && Math.abs(p.height - next.height) < 0.5 &&
